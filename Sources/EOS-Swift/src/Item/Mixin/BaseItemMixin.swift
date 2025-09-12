@@ -40,7 +40,7 @@ protocol BaseItemMixinProtocol: AnyObject, Hashable {
   var attributes: [Int64: Double] { get set } // will be a custom dictionary type
   
   var _state: State { get set }
-  var modifierDomain: ModDomain { get set }
+  var modifierDomain: ModDomain? { get set }
   var ownerModifiable: Bool { get set }
   var solsysCarrier: Any? { get set }
   var fit: Fit? { get }

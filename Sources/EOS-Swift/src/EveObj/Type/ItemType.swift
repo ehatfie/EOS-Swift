@@ -13,6 +13,7 @@ public class ItemType {
   let effects: [EffectId: Effect]
   let defaultEffect: Effect?
   let abilitiesData: [Int64: (Double, Int)]
+  let requiredSkills: [Int64]
 
   init(
     typeId: Int64,
@@ -21,7 +22,8 @@ public class ItemType {
     attributes: [AttrId: Double],
     effects: [EffectId: Effect],
     defaultEffect: Effect?,
-    abilitiesData: [Int64: (Double, Int)]
+    abilitiesData: [Int64: (Double, Int)],
+    requiredSkills: [Int64] = []
   ) {
     self.typeId = typeId
     self.groupId = groupId
@@ -30,6 +32,7 @@ public class ItemType {
     self.effects = effects
     self.defaultEffect = defaultEffect
     self.abilitiesData = abilitiesData
+    self.requiredSkills = requiredSkills
   }
   
   

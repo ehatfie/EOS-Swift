@@ -18,10 +18,6 @@ struct RepairerData: Hashable {
     hasher.combine(self)
   }
   
-//  static func == (lhs: RepairerData, rhs: RepairerData) -> Bool {
-//    return lhs.item == rhs.item && lhs.effect == rhs.effect
-//  }
-  
   let item: any BaseItemMixinProtocol
   let effect: BaseRepairEffect
 }

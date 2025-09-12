@@ -20,7 +20,12 @@ class CalculationService: BaseSubscriber {
   weak var solarSystem: SolarSystem?
   var affections: Any? = nil // AffectionRegister
   var projections: Any? = nil // ProjectionRegister
+  // Format: {projector: {modifiers}}
+  var warfareBuffs = KeyedStorage()
   
+  // Container with affector specs which will receive messages
+  // Format: {message type: set(affector specs)}
+  var subscribedAffectors = KeyedStorage()
   
   init(solarSystem: SolarSystem) {
     self.solarSystem = solarSystem
