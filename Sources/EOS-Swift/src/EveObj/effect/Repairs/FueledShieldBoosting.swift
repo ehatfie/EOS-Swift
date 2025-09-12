@@ -6,11 +6,11 @@
 //
 
 class FueledShieldBoosting: LocalShieldRepairEffect {
-  override func getCyclesUntilReload(item: BaseItemMixin) -> Double? {
+  func getCyclesUntilReload(item: BaseItemMixin) -> Double? {
     return getCyclesUntilReloadGeneric(item: item)
   }
   
-  override func getRepAmount(item: BaseItemMixin) -> Double? {
+  func getRepAmount(item: BaseItemMixin) -> Double? {
     return item.attributes[AttrId.shield_bonus.rawValue, default: 0]
   }
 }

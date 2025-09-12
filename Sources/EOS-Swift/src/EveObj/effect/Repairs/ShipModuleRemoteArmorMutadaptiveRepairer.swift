@@ -7,7 +7,7 @@
 
 
 class ShipModuleRemoteArmorMutadaptiveRepairer: RemoteArmorRepairEffect {
-  override func getRepAmount(item: BaseItemMixin) -> Double? {
+  func getRepAmount(item: BaseItemMixin) -> Double? {
     let repAmmount = item.attributes[AttrId.armor_dmg_amount.rawValue, default: 0]
     let spoolMult: Double
     if let spoolBonus = item.attributes[AttrId.repair_mult_bonus_max.rawValue] {

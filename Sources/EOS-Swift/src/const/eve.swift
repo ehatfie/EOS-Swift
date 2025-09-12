@@ -243,7 +243,7 @@ enum TypeCategoryId: Int64, CaseIterable {
 }
 
 // MARK: - effectId
-enum EffectId: Int {
+enum EffectId: Int, Codable {
   case adaptive_armor_hardener = 4928
   case armor_repair = 27
   case bomb_launching = 2971

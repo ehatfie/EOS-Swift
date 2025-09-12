@@ -16,6 +16,6 @@ class BaseTargetableMixin: BaseTargetableMixinProtocol {
   }
 }
 
-protocol SingleTargetableMixinProtocol: BaseTargetableMixin {
+protocol SingleTargetableMixinProtocol: BaseTargetableMixinProtocol {
   var target: Any? { get }
 }

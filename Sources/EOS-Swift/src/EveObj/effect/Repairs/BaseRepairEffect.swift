@@ -6,11 +6,11 @@
 //
 
 class BaseRepairEffect: Effect {
-  open func getRepAmount(item: BaseItemMixin) -> Double? {
+  open func getRepAmount(item: any BaseItemMixinProtocol) -> Double? {
     return nil
   }
   
-  func getRps(item: BaseItemMixin, relad: Bool) -> Double {
+  func getRps(item: any BaseItemMixinProtocol, relad: Bool) -> Double {
     let averageCycleTime: Double = 1.0
     let repAmount = self.getRepAmount(item: item) ?? 0.0
     

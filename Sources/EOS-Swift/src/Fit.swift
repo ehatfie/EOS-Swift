@@ -5,13 +5,7 @@
 //  Created by Erik Hatfield on 9/5/25.
 //
 
-protocol SolarSystemProtocol {
-  
-}
 
-class MockSolarSystem: SolarSystemProtocol {
-  
-}
 
 class MockFleet {
   
@@ -21,22 +15,22 @@ class Fit: FitMessageBroker<MockSubscriber> {
   
   weak var solarSystem: MockSolarSystem?
   weak var fleet: MockFleet?
+  var ship: Ship? // Access point for ship.
+  var stance: Stance? // Access point for ship stance, also known as tactical mode.
   
-  var ship: String? // Access point for ship.
-  var stance: String? // Access point for ship stance, also known as tactical mode.
-  var subsystems: String? // Set for subsystems.
   //var modules.high: // List for high-slot modules.
   //var modules.mid: // List for medium-slot modules.
   //var modules.low: // List for low-slot modules.
-  var rigs: String? //  Set for rigs.
+  var rigs: ItemSet<Rig>? //  Set for rigs.
   var drones: String? // Set for drones.
   var fighters: String? // Set for fighter squads.
   var character: String? // Access point for character.
-  var skills: String? // Keyed set for skills.
-  var implants: String? // Set for implants.
-  var boosters: String?  // Set for boosters.
+  var skills: TypeUniqueSet<Skill>? // Keyed set for skills.
+  var implants: ItemSet<Implant>? // Set for implants.
+  var boosters: ItemSet<Booster>?  // Set for boosters.
+  var subsystems: ItemSet<Subsystem>? // Set for subsystems.
   var effect_beacon: String?// Access point for effect beacons (e.g. wormhole effects).
-  var stats: String? //  All aggregated stats for fit are accessible via this access
+  var stats: StatService? //  All aggregated stats for fit are accessible via this access
   //  point.
   var defaultIncomingDamage: DamageProfile? {
     set {
@@ -51,8 +45,16 @@ class Fit: FitMessageBroker<MockSubscriber> {
   init(solarSystem: MockSolarSystem?, fleet: MockFleet?) {
     self.solarSystem =  solarSystem
     self.fleet = fleet
-    
     super.init()
+    self.skills = TypeUniqueSet(parent: self) //<Skill>(parent: self, containerOverride: nil)
+    self.implants = ItemSet<Implant>(parent: self, containerOverride: nil)
+    self.boosters = ItemSet<Booster>(parent: self, containerOverride: nil)
+    self.subsystems = ItemSet<Subsystem>(parent: self, containerOverride: nil)
+    // modules
+    
+    self.rigs = ItemSet<Rig>(parent: self, containerOverride: nil)
+    self.stats = StatService(fit: self)
+    //super.init()
   }
   
   func setDefaultIncomingDamage(value: Any) {
@@ -62,6 +64,11 @@ class Fit: FitMessageBroker<MockSubscriber> {
   func setRAHIncomingDamage(value: Any) {
     
   }
+  
+  override var fit: Fit {
+    return self
+  }
+  
 }
 
 /*

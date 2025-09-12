@@ -9,5 +9,5 @@
 
 protocol DataSource {
   // might want to return a model?
-  func getAttribute(typeId: Int64) -> MockAttribute?
+  func getAttribute(typeId: AttrId) -> MockAttribute?
 }

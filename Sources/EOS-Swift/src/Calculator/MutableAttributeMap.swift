@@ -144,7 +144,7 @@ extension MutableAttributeMap {
   /// - Throws:
   ///   - `AttrMetadataError`: If metadata of attribute being calculated cannot be fetched.
   ///   - `BaseValueError`: If base value for attribute being calculated cannot be found.
-  func calculate(attributeId: Int64) throws -> MockAttribute {
+  func calculate(attributeId: AttrId) throws -> MockAttribute {
     /*
     
      */
@@ -163,7 +163,7 @@ extension MutableAttributeMap {
       // throw
       return .empty
     }
-    guard let value = item?.typeAttributes[attributeId, default: attribute.defaultValue] else {
+    guard let value = item?.typeAttributes[attributeId, default: Double(attribute.defaultValue)] else {
       return .empty
     }
     

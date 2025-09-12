@@ -7,11 +7,11 @@
 
 
 class DamageDealerEffect: Effect {
-  open func getVolley(for item: BaseItemMixin) -> DamageStats {
+  open func getVolley(for item: any BaseItemMixinProtocol) -> DamageStats {
     return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
   
-  func getDps(item: BaseItemMixin, reload: Bool) -> DamageStats {
+  func getDps(item: any BaseItemMixinProtocol, reload: Bool) -> DamageStats {
     guard let cycleParameters = self.getCycleParameters(item: item, reload: reload) else {
       return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
     }
@@ -27,11 +27,11 @@ class DamageDealerEffect: Effect {
     )!
   }
   
-  open func getAppliedVolley(item: BaseItemMixin, targetData: [String: Any], reload: Bool) -> DamageStats? {
+  open func getAppliedVolley(item: any BaseItemMixinProtocol, targetData: [String: Any], reload: Bool) -> DamageStats? {
     return nil
   }
   
-  open func getAppliedDps(item: BaseItemMixin, targetData: [String: Any], reload: Bool) -> DamageStats? {
+  open func getAppliedDps(item: any BaseItemMixinProtocol, targetData: [String: Any], reload: Bool) -> DamageStats? {
     return nil
   }
 }

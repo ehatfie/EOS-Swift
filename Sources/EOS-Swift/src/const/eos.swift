@@ -10,7 +10,7 @@
 This file holds IDs of multiple Eos-specific entities.
 */
 
-public enum State: Int, Codable {
+public enum State: Int, Codable, CaseIterable {
   /*
    Contains possible item states.
   
@@ -33,7 +33,7 @@ extension State: Comparable {
   }
 }
 
-enum EffectMode: Int {
+public enum EffectMode: Int {
   /*
    Contains possible effect run modes.
   
@@ -84,7 +84,7 @@ enum ModAffecteeFilter: Int {
   case owner_skillrq = 5
 }
 
-enum ModDomain: Int {
+public enum ModDomain: Int {
   /*
    Contains possible modifier domains.
   

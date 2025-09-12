@@ -7,7 +7,15 @@
 
 import Foundation
 
-public class Effect: Codable {
+public class Effect: Codable, Hashable {
+  public static func == (lhs: Effect, rhs: Effect) -> Bool {
+    return lhs.attributeId == rhs.attributeId
+  }
+  
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   /*
    Represents single eve effect.
   
@@ -53,7 +61,7 @@ public class Effect: Codable {
   let rangeAttributeID: Int64
   let falloffAttributeID: Int64
   let trackingSpeedAttributeID: Int64
-  let fittingUseUsageChanceAttributeID: Int64
+  let fittingUseUsageChanceAttributeID: Int64?
   let buildStatus: String  //EffectBuildStatus
   var modifiers: [String]  // Modifier
 
@@ -67,7 +75,7 @@ public class Effect: Codable {
     rangeAttributeID: Int64,
     falloffAttributeID: Int64,
     trackingSpeedAttributeID: Int64,
-    fittingUseUsageChanceAttributeID: Int64,
+    fittingUseUsageChanceAttributeID: Int64?,
     buildStatus: String,
     modifiers: [String]
   ) {
@@ -131,11 +139,12 @@ public class Effect: Codable {
   
 
   // TODO: After model definitions
-  func getCharge(item: BaseItemMixin) {
+  func getCharge(item: any BaseItemMixinProtocol) {
     if let autoChargeTypeId = self.getAutoChargeTypeId(item: item) {
       //item.autocharges.get(self.id)
     } else {
-      return item.charge
+      // check if item has Module?
+      //return item.charge
     }
     /*
      # Getters for charge-related entities
@@ -150,11 +159,14 @@ public class Effect: Codable {
      */
   }
   
-  open func getCyclesUntilReload(item: BaseItemMixin) -> Double? {
+  func getCyclesUntilReload(item: any BaseItemMixinProtocol) -> Double? {
     return .infinity
   }
   
-  open func getReloadTime(item: Any) -> Double? {
+
+  
+ func getReloadTime(item: any BaseItemMixinProtocol) -> Double? {
+   print("TODO getReloadTime")
   // item.state.subtractingReportingOverflow(1
     return nil
   }
@@ -163,7 +175,7 @@ public class Effect: Codable {
   /// Autocharges are automatically loaded charges which are defined by
   /// effects. If None is returned, it means this effect defines no
   /// autocharge.
-  open func getAutoChargeTypeId(item: BaseItemMixin) -> Int64? {
+  func getAutoChargeTypeId(item: any BaseItemMixinProtocol) -> Int64? {
     return nil
   }
   /*
@@ -179,40 +191,111 @@ public class Effect: Codable {
 }
 
 extension Effect {
-  func getDuration(item: BaseItemMixin) -> Double? {
+  func getDuration(item: any BaseItemMixinProtocol) -> Double {
     let timeMS = Effect.safeGetAttributeValue(item: item, attributeID: self.durationAttributeID)
     return timeMS / 1000
   }
   
-  func getCapUse(item: BaseItemMixin) -> Double? {
+  func getCapUse(item: any BaseItemMixinProtocol) -> Double? {
     return Effect.safeGetAttributeValue(item: item, attributeID: self.dischargeAttributeID)
   }
   
-  func getOptimalRange(item: BaseItemMixin) -> Double? {
+  func getOptimalRange(item: any BaseItemMixinProtocol) -> Double? {
     return Effect.safeGetAttributeValue(item: item, attributeID: self.rangeAttributeID)
   }
   
-  func getFalloffRange(item: BaseItemMixin) -> Double? {
+  func getFalloffRange(item: any BaseItemMixinProtocol) -> Double? {
     return Effect.safeGetAttributeValue(item: item, attributeID: self.falloffAttributeID)
   }
   
-  func getFittingUsageChance(item: BaseItemMixin) -> Double? {
-    return Effect.safeGetAttributeValue(item: item, attributeID: self.fittingUseUsageChanceAttributeID)
+  func getFittingUsageChance(item: any BaseItemMixinProtocol) -> Double? {
+    guard let fittingUseUsageChanceAttributeID else { return nil }
+    return Effect.safeGetAttributeValue(item: item, attributeID: fittingUseUsageChanceAttributeID)
   }
   
-  static func safeGetAttributeValue(item: BaseItemMixin, attributeID: Int64) -> Double {
+  static func safeGetAttributeValue(item: any BaseItemMixinProtocol, attributeID: Int64) -> Double {
     return item.attributes[attributeID, default: 0]
   }
   
-  func getForcedInactiveTime(item: BaseItemMixin) -> Double {
+  func getForcedInactiveTime(item: any BaseItemMixinProtocol) -> Double {
     let timeMS = item.attributes[self.dischargeAttributeID, default: 0]
     return timeMS / 1000
   }
   
   // TODO
-  func getCycleParameters(item: BaseItemMixin, reload: Bool) -> Any? {
+  func getCycleParameters(item: any BaseItemMixinProtocol, reload: Bool) -> Any? {
     //let cyclesUntilReload = self.getCyclesUntilReload(item: )
+    let cyclesUntilReload = self.getCyclesUntilReload(item: item) ?? 0
+    guard cyclesUntilReload > 0 else { return nil }
+    let activeTime = self.getDuration(item: item)
+    let forcedInactiveTime = getForcedInactiveTime(item: item)
+    let reloadTime = self.getReloadTime(item: item)
+    if reloadTime == nil && cyclesUntilReload < .infinity {
+      let finalCycles: Double = 1
+      
+      let earlyCycles = cyclesUntilReload - finalCycles
+      if earlyCycles == 0 {
+        return CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: 1)
+      }
+      
+      if forcedInactiveTime == 0 {
+        return CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: cyclesUntilReload)
+      }
+      
+      return CycleSequence(sequence: [
+        CycleInfo(activeTime: activeTime, inactiveTime: forcedInactiveTime, quantity: earlyCycles),
+        CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: finalCycles)
+        ], quantity: finalCycles
+      )
+    }
+      /*
+       return CycleSequence((
+       CycleInfo(active_time, forced_inactive_time, early_cycles),
+       CycleInfo(active_time, 0, final_cycles)
+       ), 1)
+       */
+      /*
+       # Module cycles the same way all the time in 3 cases:
+       # 1) caller doesn't want to take into account reload time
+       # 2) effect does not have to reload anything to keep running
+       # 3) effect has enough time to reload during inactivity periods
+       if (
+       not reload or
+       cycles_until_reload == math.inf or
+       forced_inactive_time >= reload_time
+       ):
+       return CycleInfo(active_time, forced_inactive_time, math.inf)
+       */
+      if !reload || cyclesUntilReload == .infinity {
+        // return CycleInfo(active_time, forced_inactive_time, math.inf)
+      } else if let reloadTime = reloadTime, forcedInactiveTime >=  reloadTime {
+        // return CycleInfo(active_time, forced_inactive_time, math.inf)
+      } else {
+        let finalCycles: Double = 1.0
+        let earlyCycles = cyclesUntilReload - finalCycles
+        if earlyCycles == 0 {
+          // return CycleInfo(active_time, reload_time, math.inf)
+        } else {
+          /*
+           return CycleSequence((
+               CycleInfo(active_time, forced_inactive_time, early_cycles),
+               CycleInfo(active_time, reload_time, final_cycles)
+           ), math.inf)
+           */
+        }
+      }
+    
     return nil
+  }
+  
+  func getTrackingSpeed(item: any BaseItemMixinProtocol) -> Double? {
+    //         return self.__safe_get_attr_value(
+    // item, self.tracking_speed_attr_id)
+    return Effect.safeGetAttributeValue(item: item, attributeID: self.trackingSpeedAttributeID)
+  }
+
+  func getCapUse(item: any BaseItemMixinProtocol) -> Double {
+    return Effect.safeGetAttributeValue(item: item, attributeID: self.dischargeAttributeID)
   }
 }
 
@@ -276,16 +359,6 @@ struct EffectState {
 
      def get_cap_use(self, item):
          return self.__safe_get_attr_value(item, self.discharge_attr_id)
-
-     def get_optimal_range(self, item):
-         return self.__safe_get_attr_value(item, self.range_attr_id)
-
-     def get_falloff_range(self, item):
-         return self.__safe_get_attr_value(item, self.falloff_attr_id)
-
-     def get_tracking_speed(self, item):
-         return self.__safe_get_attr_value(
-             item, self.tracking_speed_attr_id)
 
      def get_fitting_usage_chance(self, item):
          return self.__safe_get_attr_value(

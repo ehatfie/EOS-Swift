@@ -20,6 +20,22 @@
          return ctps
 
  */
+protocol CapTransmitMixinProtocol: BaseItemMixinProtocol {
+  func getCapTransmitPerSecond(reload: Bool) -> Double
+}
+
+extension CapTransmitMixinProtocol {
+  func getCapTransmitPerSecond(reload: Bool = false) -> Double {
+    var ctps: Double = 0
+    let foo = self.typeEffects.values
+    for effect in foo {
+      if let foo = effect as? BaseCapTransmitEffect, self.runningEffectIds.contains(EffectId(rawValue: Int(foo.attributeId))!) {
+        ctps += foo.getCapTransmitPerSecond(item: self, reload: reload)
+      }
+    }
+    return ctps
+  }
+}
 
 class CapTransmitMixin: BaseItemMixin {
   
@@ -27,7 +43,7 @@ class CapTransmitMixin: BaseItemMixin {
     var ctps: Double = 0
     let foo = self.typeEffects.values
     for effect in foo {
-      if let foo = effect as? BaseCapTransmitEffect, self.runningEffectIds.contains(foo.attributeId) {
+      if let foo = effect as? BaseCapTransmitEffect, self.runningEffectIds.contains(EffectId(rawValue: Int(foo.attributeId))!) {
         ctps += foo.getCapTransmitPerSecond(item: self, reload: reload)
       }
     }

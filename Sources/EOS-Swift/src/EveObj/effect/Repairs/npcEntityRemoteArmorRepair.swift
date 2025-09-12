@@ -7,7 +7,7 @@
 
 
 class NpcEntityRemoteArmorRepairer: RemoteArmorRepairEffect {
-  override func getRepAmount(item: BaseItemMixin) -> Double? {
+  func getRepAmount(item: BaseItemMixin) -> Double? {
     return item.attributes[AttrId.armor_dmg_amount.rawValue, default: 0]
   }
 }

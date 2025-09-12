@@ -6,16 +6,30 @@
 //
 
 protocol BaseCapTransmitEffectProtocol: Effect {
-  func getCapTransmitAmount(item: BaseItemMixin) -> Double
+  func getCapTransmitAmount(item: any BaseItemMixinProtocol) -> Double
+  func getCapTransmitPerSecond(item: any BaseItemMixinProtocol, reload: Bool) -> Double
+}
+
+extension BaseCapTransmitEffectProtocol {
+  func getCapTransmitAmount(item: any BaseItemMixinProtocol) -> Double {
+    // TODO
+    return 0.0
+  }
+  
+  func getCapTransmitPerSecond(item: any BaseItemMixinProtocol, reload: Bool) -> Double {
+    //let cycleParameters = self.getCycleParameters(item, reload: reload)
+    // TODO
+    return 0.0
+  }
 }
 
 class BaseCapTransmitEffect: Effect, BaseCapTransmitEffectProtocol {
-  func getCapTransmitAmount(item: BaseItemMixin) -> Double {
+  func getCapTransmitAmount(item: any BaseItemMixinProtocol) -> Double {
     
     return 0.0
   }
   
-  func getCapTransmitPerSecond(item: BaseItemMixin, reload: Bool) -> Double {
+  func getCapTransmitPerSecond(item: any BaseItemMixinProtocol, reload: Bool) -> Double {
     //let cycleParameters = self.getCycleParameters(item, reload: reload)
     return 0.0
   }

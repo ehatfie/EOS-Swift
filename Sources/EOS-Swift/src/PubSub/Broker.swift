@@ -22,25 +22,54 @@ class MockSubscriber: MockSubscriberProtocol, Equatable {
 
 }
 
+enum MessageTypeEnum {
+  case AttributeValueChanged
+  case AttributeValueChangedMasked
+  
+  case DefaultIncomingDamageChanged
+  case RAHIncomingDamageChanged
+  
+  case FleetFitAdded
+  case FleetFitRemoved
+  
+  case ItemLoaded
+  case ItemUnloaded
+  case StatesActivatedLoaded
+  case StatesDeactivatedLoaded
+  case EffectsStarted
+  case EffectsStopped
+  case EffectsApplied
+  case EffectsUnapplied
+  
+  case ItemAdded
+  case ItemRemoved
+  case StatesActivated
+  case StatesDeactivated
+}
+
 extension MockSubscriber: Hashable {
-  static func == (lhs: MockSubscriber, rhs: MockSubscriber) -> Bool {
+  public static func == (lhs: MockSubscriber, rhs: MockSubscriber) -> Bool {
     return lhs.thing == rhs.thing
   }
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
 }
-
+/// I think this needs to be a protocol and implementations in an extension
 /// Manages message subscriptions and dispatch messages to recipients.
-class FitMessageBroker<SubscriberType: MockSubscriberProtocol> {
-  var subscribers: [AnyHashable: Set<SubscriberType>] = [:]
+class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
+  var fit: Fit {
+    self as! Fit
+  }
+  
+  var subscribers: [MessageTypeEnum: Set<SubscriberType>] = [:]
 
   init() {
     self.subscribers = [:]
   }
 
   /// Register subscriber for passed message types.
-  func subscribe(subscriber: SubscriberType, for messageTypes: [AnyHashable]) {
+  func subscribe(subscriber: SubscriberType, for messageTypes: [MessageTypeEnum]) {
     for messageType in messageTypes {
       var set = subscribers[messageType, default: Set<SubscriberType>()]
       set.insert(subscriber)
@@ -49,9 +78,9 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol> {
   }
 
   /// Unregister subscriber from passed message types
-  func unsubscribe(subscriber: SubscriberType, from messageTypes: [AnyHashable])
+  func unsubscribe(subscriber: SubscriberType, from messageTypes: [MessageTypeEnum])
   {
-    var messageTypesToRemove: Set<AnyHashable> = []
+    var messageTypesToRemove: Set<MessageTypeEnum> = []
 
     for messageType in messageTypes {
       var set = subscribers[messageType, default: Set<SubscriberType>()]
@@ -70,14 +99,27 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol> {
     }
   }
 
-  func publish<MessageType: Message>(_ message: MessageType) -> Bool {
+  func publish<MessageType: Message>(_ message: MessageType) {
     var set: Set<SubscriberType> = []
 
-    if let subscribersForType = subscribers[message.messageId] {
-
+    if let subscribersForType = subscribers[message.messageType] {
+      for subscriber in subscribersForType {
+        subscriber.notify(message: message)
+      }
     }
 
-    return !set.isEmpty
+    //return !set.isEmpty
+  }
+  
+  func publish(messages: [any Message]) {
+    for message in messages {
+      var m = message
+      for subscriber in self.subscribers[message.messageType] ?? [] {
+        subscriber.notify(message: message)
+      }
+      //m.fit = self
+      
+    }
   }
 
 }

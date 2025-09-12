@@ -6,33 +6,56 @@
 //
 //
 
-protocol StateMixinProtocol: BaseItemMixinProtocol {
-  
+protocol MutableStateMixinProtocol: BaseItemMixinProtocol {
+  var state: State { get set }
+}
+
+extension MutableStateMixinProtocol {
+  var state: State {
+    return _state
+  }
+}
+
+
+protocol ImmutableStateMixinProtocol: BaseItemMixinProtocol {
+  var state: State { get }
+}
+
+extension ImmutableStateMixinProtocol {
+  var state: State {
+    get {
+      return _state
+    }
+    set {
+      return
+    }
+    
+  }
 }
 
 class ImmutableStateMixin: BaseItemMixin {
-  override var state: State {
+  override var _state: State {
     set {
       return
     }
     get {
-      return super.state
+      return super._state
     }
   }
 }
 
 class MutableStateMixin: BaseItemMixin {
-  override var state: State {
+  override var _state: State {
     get {
-      super.state
+      super._state
     }
     set {
-      let oldState = self.state
+      let oldState = self._state
       if newValue == oldState {
         return
       }
       
-      super.state = newValue
+      super._state = newValue
       if let fit = super.fit {
         // update via messages?
         /*
@@ -56,7 +79,7 @@ class MutableStateMixin: BaseItemMixin {
 
 /// Items based on this class inherit state from item which contains them.
 class ContainerStateMixin: BaseItemMixin {
-  override var state: State {
+  override var _state: State {
     set {
       return
     }

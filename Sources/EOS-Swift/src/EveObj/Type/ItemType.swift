@@ -5,12 +5,12 @@
 //  Created by Erik Hatfield on 9/6/25.
 //
 
-class ItemType {
+public class ItemType {
   let typeId: Int64
   let groupId: Int64
   let categoryId: Int64
-  let attributes: [Int64: Double]
-  let effects: [Int64: Effect]
+  let attributes: [AttrId: Double]
+  let effects: [EffectId: Effect]
   let defaultEffect: Effect?
   let abilitiesData: [Int64: (Double, Int)]
 
@@ -18,8 +18,8 @@ class ItemType {
     typeId: Int64,
     groupId: Int64,
     categoryId: Int64,
-    attributes: [Int64: Double],
-    effects: [Int64: Effect],
+    attributes: [AttrId: Double],
+    effects: [EffectId: Effect],
     defaultEffect: Effect?,
     abilitiesData: [Int64: (Double, Int)]
   ) {
