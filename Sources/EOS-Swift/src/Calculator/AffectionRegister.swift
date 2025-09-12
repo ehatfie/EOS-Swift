@@ -46,13 +46,24 @@ struct AffecteeDomain: Hashable {
  }
  */
 
-struct AffectorSpec {
+struct AffectorSpec: Hashable {
   var modifier: AffectorModifier
+  var itemType: any BaseItemMixinProtocol
+  
+  static func == (lhs: AffectorSpec, rhs: AffectorSpec) -> Bool {
+    return lhs.modifier == rhs.modifier
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(self)
+  }
 }
 
-struct AffectorModifier {
+struct AffectorModifier: Hashable {
   let affecteeFilter: ModAffecteeFilter
   let modDomain: ModDomain
+  let affecteeFilterExtraArg: Int64
+  let affecteeDomain: ModDomain
 }
 
 class AffectionRegister {
@@ -81,7 +92,7 @@ class AffectionRegister {
        ModDomain.other: __get_local_affectees_other}
    */
   
-  func getLocalAffecteeItems(affectorSpec: Any) {
+  func getLocalAffecteeItems(affectorSpec: AffectorSpec) {
     /*
      """Get iterable with items influenced by passed local affector spec."""
      try:
@@ -204,21 +215,22 @@ class AffectionRegister {
     self.activateSpecialAffectorSpecs(affecteeFit: affecteeFit, affecteeItem: affecteeItem)
   }
   
-  func unregisterAffecteeItem(affecteeItem: Any) {
-    /*
-     """Remove passed affectee item from the register."""
-             self.__affectees.remove(affectee_item)
-             affectee_fit = affectee_item._fit
-             for key, storage in self.__get_affectee_storages(
-                 affectee_fit, affectee_item
-             ):
-                 storage.rm_data_entry(key, affectee_item)
-             # Deactivate all special affector specs for item being unregistered
-             self.__deactivate_special_affector_specs(affectee_fit, affectee_item)
-     */
+  /// Remove passed affectee item from the register.
+  func unregisterAffecteeItem(affecteeItem: BaseItemMixin) {
+    self.affectees.remove(affecteeItem)
+    guard let affecteeFit = affecteeItem.fit else {
+      print("Unregister no fit")
+      return
+    }
+    for (key, storage) in self.getAffecteeStorages(affecteeFit: affecteeFit, affecteeItem: affecteeItem) {
+      storage.removeDataEntry(key: key, data: affecteeItem)
+    }
+    // Deactivate all special affector specs for item being unregistered/
+    self.deactivateSpecialAffectorSpecs(affecteeFit: affecteeFit, affecteeItem: affecteeItem)
+
   }
   
-  func registerLocalAffectorSpec(affectorSpec: Any) {
+  func registerLocalAffectorSpec(affectorSpec: AffectorSpec) {
     /*
      """Make the register aware of the local affector spec.
 
@@ -235,7 +247,7 @@ class AffectionRegister {
      */
   }
   
-  func unregisterLocalAffectorSpec(affectorSpec: Any) {
+  func unregisterLocalAffectorSpec(affectorSpec: AffectorSpec) {
     /*
      """Remove local affector spec from the register.
 
@@ -251,7 +263,7 @@ class AffectionRegister {
      */
   }
   
-  func registerProjectedAffectorSpec(affectorSpec: Any, targetItems: Any) {
+  func registerProjectedAffectorSpec(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) {
     /*
      """Make register aware that projected affector spec affects items.
 
@@ -270,7 +282,7 @@ class AffectionRegister {
   }
   
   
-  func unregisterProjectedAffector(affectorSpec: Any, targetItems: Any) {
+  func unregisterProjectedAffector(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) {
     /*
      """Remove effect of affector spec from items.
 
@@ -288,11 +300,11 @@ class AffectionRegister {
      */
   }
   
-  func getLocalAffecteesSelf(affectorSpec: Any) {
+  func getLocalAffecteesSelf(affectorSpec: AffectorSpec) {
     //return affector_spec.item
   }
   
-  func getLocalAffecteesCharacter(affectorSpec: Any) {
+  func getLocalAffecteesCharacter(affectorSpec: AffectorSpec) {
     /*
      affectee_fit = affector_spec.item._fit
      affectee_character = affectee_fit.character
@@ -303,7 +315,7 @@ class AffectionRegister {
      */
   }
   
-  func getLocalAffecteesShip(affectorSpec: Any) {
+  func getLocalAffecteesShip(affectorSpec: AffectorSpec) {
     /*
      affectee_fit = affector_spec.item._fit
      affectee_ship = affectee_fit.ship
@@ -314,7 +326,7 @@ class AffectionRegister {
      */
   }
   
-  func getLocalAffecteesOther(affectorSpec: Any) {
+  func getLocalAffecteesOther(affectorSpec: AffectorSpec) {
     // return [i for i in affector_spec.item._others if i in self.__affectees]
   }
   
@@ -326,7 +338,7 @@ class AffectionRegister {
        ModDomain.other: __get_local_affectees_other}
    */
 
-  func getAffecteesDomain(affecteeDomain: AffecteeDomain, affecteeFits: Any) {
+  func getAffecteesDomain(affecteeDomain: AffecteeDomain, affecteeFits: [Fit]) {
     var affecteeItems: Set<AnyHashable> = []
     let storage = self.affecteesDomain
     
@@ -340,7 +352,7 @@ class AffectionRegister {
      */
   }
   
-  func getAffecteesDomainGroup(affectorSpec: Any, affecteeDomain: AffecteeDomain, affecteeFits: Any) {
+  func getAffecteesDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: AffecteeDomain, affecteeFits: [Fit]) {
     /*
      affectee_group_id = affector_spec.modifier.affectee_filter_extra_arg
      affectee_items = set()
@@ -353,35 +365,44 @@ class AffectionRegister {
   }
   
   func getAffecteesDomainSkillRequirement(
-    affectorSpec: Any,
-    affecteeDomain: Any,
-    affecteeFits: Any
-  ) {
-    /*
-     affectee_srq_type_id = affector_spec.modifier.affectee_filter_extra_arg
-             if affectee_srq_type_id == EosTypeId.current_self:
-                 affectee_srq_type_id = affector_spec.item._type_id
-             affectee_items = set()
-             storage = self.__affectees_domain_skillrq
-             for affectee_fit in affectee_fits:
-                 key = (affectee_fit, affectee_domain, affectee_srq_type_id)
-                 affectee_items.update(storage.get(key, ()))
-             return affectee_items
-     */
+    affectorSpec: AffectorSpec,
+    affecteeDomain: AffecteeDomain,
+    affecteeFits: [Fit]
+  ) -> Set<AnyHashable> {
+    var affecteeSourceRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
+    if affecteeSourceRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
+      // check this
+      affecteeSourceRequirementTypeId = affectorSpec.itemType.typeId
+    }
+    var affecteeItems: Set<AnyHashable> = []
+    let storage = self.affecteesDomainSkillRequirement
+    
+    for affecteeFit in affecteeFits {
+      let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSourceRequirementTypeId) as! AnyHashable
+      affecteeItems.insert(storage.dictionary[key, default: []])
+    }
+    return affecteeItems
   }
   
-  func getAffecteesOwnerSkillRequirement(affectorSpec: Any, affecteeDomain: AffecteeDomain?, affecteeFits: Any) {
-    /*
-     affectee_srq_type_id = affector_spec.modifier.affectee_filter_extra_arg
-             if affectee_srq_type_id == EosTypeId.current_self:
-                 affectee_srq_type_id = affector_spec.item._type_id
-             affectee_items = set()
-             storage = self.__affectees_owner_skillrq
-             for affectee_fit in affectee_fits:
-                 key = (affectee_fit, affectee_srq_type_id)
-                 affectee_items.update(storage.get(key, ()))
-             return affectee_items
-     */
+  func getAffecteesOwnerSkillRequirement(
+    affectorSpec: AffectorSpec,
+    affecteeDomain: AffecteeDomain?,
+    affecteeFits: [Fit]
+  ) -> Set<AnyHashable> {
+    var affecteeSourceRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
+    if affecteeSourceRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
+      // check this
+      affecteeSourceRequirementTypeId = affectorSpec.itemType.typeId
+    }
+    
+    var affecteeItems: Set<AnyHashable> = []
+    let storage = self.affecteesOwnerSkillRequirement
+    
+    for affecteeFit in affecteeFits {
+      let key: AnyHashable = (affecteeFit, affecteeSourceRequirementTypeId) as! AnyHashable
+      affecteeItems.insert(storage.dictionary[key, default: []])
+    }
+    return affecteeItems
   }
   
   /*
@@ -409,7 +430,7 @@ class AffectionRegister {
     storages.append((key, storage))
     
     // Domain and group
-    var affecteeGroupId = affecteeItem.itemType?.groupId
+    let affecteeGroupId = affecteeItem.itemType?.groupId
     if let affecteeGroupId {
       key = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
       storage = self.affecteesDomainGroup
@@ -434,75 +455,68 @@ class AffectionRegister {
 
   }
   
+  /// Activate special affector specs which should affect passed item.
   func activateSpecialAffectorSpecs(affecteeFit: Fit, affecteeItem: any BaseItemMixinProtocol) {
-    /*
-     """Activate special affector specs which should affect passed item."""
-      awaiting_to_activate = set()
-      for affector_spec in self.__affectors_item_awaiting.get(
-          affectee_fit, ()
-      ):
-          affectee_domain = affector_spec.modifier.affectee_domain
-          # Ship
-          if (
-              affectee_domain == ModDomain.ship and
-              isinstance(affectee_item, Ship)
-          ):
-              awaiting_to_activate.add(affector_spec)
-          # Character
-          elif (
-              affectee_domain == ModDomain.character and
-              isinstance(affectee_item, Character)
-          ):
-              awaiting_to_activate.add(affector_spec)
-          # Self
-          elif (
-              affectee_domain == ModDomain.self and
-              affectee_item is affector_spec.item
-          ):
-              awaiting_to_activate.add(affector_spec)
-      # Move awaiting affector specs from awaiting storage to active storage
-      if awaiting_to_activate:
-          self.__affectors_item_awaiting.rm_data_set(
-              affectee_fit, awaiting_to_activate)
-          self.__affectors_item_active.add_data_set(
-              affectee_item, awaiting_to_activate)
-      # Other
-      other_to_activate = set()
-      for affector_item, affector_specs in (
-          self.__affectors_item_other.items()
-      ):
-          if affectee_item in affector_item._others:
-              other_to_activate.update(affector_specs)
-      # Just add affector specs to active storage, 'other' affector specs
-      # should never be removed from 'other'-specific storage
-      if other_to_activate:
-          self.__affectors_item_active.add_data_set(
-              affectee_item, other_to_activate)
-     */
+    var awaitingToActivate: Set<AffectorSpec> = []
+    let key = affecteeFit as! AnyHashable
+    for affectorSpec in self.affectorsItemAwaiting.dictionary[affecteeFit as! AnyHashable, default: []]
+      .compactMap({ $0 as? AffectorSpec })
+    {
+      let affecteeDomain = affectorSpec.modifier.affecteeDomain
+      if affecteeDomain == ModDomain.ship, affecteeItem is Ship {
+        awaitingToActivate.insert(affectorSpec)
+      } else if affecteeDomain == ModDomain.character, affecteeItem is Character {
+        awaitingToActivate.insert(affectorSpec)
+      } else if affecteeDomain == ModDomain.me {
+        print("++ CHECK HERE MAYBE ISSUE")
+        awaitingToActivate.insert(affectorSpec)
+      }
+    }
+    
+    if !awaitingToActivate.isEmpty {
+      
+      self.affectorsItemAwaiting.removeDataSet(key: key, dataSet: awaitingToActivate.map { $0 as AnyHashable})
+      self.affectorsItemActive.addDataSet(key: key, dataSet: awaitingToActivate.map { $0 as AnyHashable})
+    }
+    
+    // Other
+    var otherToActivate: Set<AffectorSpec> = []
+    
+    for (affectorItem, affectorSpecs) in self.affectorsItemOther.dictionary {
+      if let foo = affectorItem as? BaseItemMixin {
+        if foo.others.contains(where: { $0 === affecteeItem }) {
+          for value in affectorSpecs.compactMap({ $0 as? AffectorSpec }) {
+            otherToActivate.insert(value)
+          }
+          
+        }
+      }
+    }
+    if !otherToActivate.isEmpty {
+      self.affectorsItemActive.addDataSet(key: key, dataSet: otherToActivate.map { $0 as AnyHashable })
+    }
   }
   
-  func deactivateSpecialAffectorSpecs(affecteeFit: Any, affecteeItem: Any) {
-    /*
-     """Deactivate special affector specs which affect passed item."""
-     if affectee_item not in self.__affectors_item_active:
-         return
-     awaitable_to_deactivate = set()
-     for affector_spec in (
-         self.__affectors_item_active.get(affectee_item, ())
-     ):
-         if affector_spec.modifier.affectee_domain in (
-             ModDomain.ship, ModDomain.character, ModDomain.self
-         ):
-             awaitable_to_deactivate.add(affector_spec)
-     # Remove all affector specs influencing this item directly, including
-     # 'other' affectors
-     del self.__affectors_item_active[affectee_item]
-     # And make sure awaitable affectors become awaiting - moved to
-     # appropriate container for future use
-     if awaitable_to_deactivate:
-         self.__affectors_item_awaiting.add_data_set(
-             affectee_fit, awaitable_to_deactivate)
-     */
+  /// Deactivate special affector specs which affect passed item.
+  func deactivateSpecialAffectorSpecs(affecteeFit: Fit, affecteeItem: BaseItemMixin) {
+    if self.affectorsItemActive.dictionary[affecteeItem] == nil {
+      return
+    }
+    var awaitableToDeactivate: Set<AffectorSpec> = []
+    
+    for affectorSpec in self.affectorsItemActive.dictionary[affecteeItem, default: []]
+      .compactMap({ $0 as? AffectorSpec })
+    {
+      if [ModDomain.ship, ModDomain.character, ModDomain.me].contains(affectorSpec.modifier.affecteeDomain) {
+        awaitableToDeactivate.insert(affectorSpec)
+      }
+    }
+    
+    self.affectorsItemActive.dictionary.removeValue(forKey: affecteeItem)
+    
+    if !awaitableToDeactivate.isEmpty {
+      self.affectorsItemAwaiting.addDataSet(key: affecteeFit as! AnyHashable, dataSet: Array(awaitableToDeactivate))
+    }
   }
   
   func getLocalAffectorStorages(affectorSpec: Any) {
@@ -534,7 +548,7 @@ class AffectionRegister {
      */
   }
   
-  func getProjectedAffectorStorages(affectorSpec: Any, targetItems: Any) {
+  func getProjectedAffectorStorages(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) {
     /*
      """Get places where passed projected affector spec should be stored.
 
@@ -564,7 +578,7 @@ class AffectionRegister {
      */
   }
   
-  func getLocalAffectorStoragesSelf(affectorSpec: Any) {
+  func getLocalAffectorStoragesSelf(affectorSpec: AffectorSpec) {
     /*
      affectee_item = affector_spec.item
      if affectee_item in self.__affectees:
@@ -577,7 +591,7 @@ class AffectionRegister {
      */
   }
   
-  func getLocalAffectorStoragesCharacter(affectorSpec: Any) {
+  func getLocalAffectorStoragesCharacter(affectorSpec: AffectorSpec) {
     /*
      affectee_fit = affector_spec.item._fit
      affectee_character = affectee_fit.character
@@ -591,7 +605,7 @@ class AffectionRegister {
      */
   }
   
-  func getLocalAffectorStoragesShip(affectorSpec: Any) {
+  func getLocalAffectorStoragesShip(affectorSpec: AffectorSpec) {
     /*
      affectee_fit = affector_spec.item._fit
      affectee_ship = affectee_fit.ship
@@ -606,7 +620,7 @@ class AffectionRegister {
      */
   }
   
-  func getLocalAffectorStoragesOther(affectorSpec: Any) {
+  func getLocalAffectorStoragesOther(affectorSpec: AffectorSpec) {
     /*
      # Affectors with 'other' modifiers are always stored in their special
      # place
@@ -631,18 +645,18 @@ class AffectionRegister {
    */
   
   
-  func getAffectorStoragesDomain(affectorSpec: Any?, affecteeDomain: AffecteeDomain, affecteeFits: Any) {
-    /*
-     storages = []
-     storage = self.__affectors_domain
-     for affectee_fit in affectee_fits:
-         key = (affectee_fit, affectee_domain)
-         storages.append((key, storage))
-     return storages
-     */
+  func getAffectorStoragesDomain(affectorSpec: AffectorSpec?, affecteeDomain: AffecteeDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage)] {
+    var storages: [(AnyHashable, KeyedStorage)] = []
+    var storage = self.affectorsDomain
+    
+    for affecteeFit in affecteeFits {
+      let key: AnyHashable = (affecteeFit, affecteeDomain) as! AnyHashable
+      storages.append((key, storage))
+    }
+    return storages
   }
   
-  func getAffectorStoragesDomainGroup(affectorSpec: Any?, affecteeDomain: AffecteeDomain, affecteeFits: Any) {
+  func getAffectorStoragesDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: AffecteeDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage)] {
     /*
      affectee_group_id = affector_spec.modifier.affectee_filter_extra_arg
      storages = []
@@ -652,9 +666,18 @@ class AffectionRegister {
          storages.append((key, storage))
      return storages
      */
+    let affecteeGroupId = affectorSpec.modifier.affecteeFilterExtraArg
+    var storages: [(AnyHashable, KeyedStorage)] = []
+    var storage = self.affectorsDomainGroup
+    
+    for affecteeFit in affecteeFits {
+      let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
+      storages.append((key, storage))
+    }
+    return storages
   }
   
-  func getAFfectorStoragesDomainSkillRequirement(affectorSpec: Any?, affecteeDomain: AffecteeDomain, affecteeFits: Any) {
+  func getAFfectorStoragesDomainSkillRequirement(affectorSpec: AffectorSpec?, affecteeDomain: AffecteeDomain, affecteeFits: [Fit]) {
     /*
      affectee_srq_type_id = affector_spec.modifier.affectee_filter_extra_arg
      if affectee_srq_type_id == EosTypeId.current_self:
@@ -668,7 +691,7 @@ class AffectionRegister {
      */
   }
   
-  func getAffectorStoragesOwnerSkillRequirements(affectorSpec: Any?, affecteeDomain: AffecteeDomain, affecteeFits: Any) {
+  func getAffectorStoragesOwnerSkillRequirements(affectorSpec: AffectorSpec?, affecteeDomain: AffecteeDomain, affecteeFits: [Fit]) {
     /*
      affectee_srq_type_id = affector_spec.modifier.affectee_filter_extra_arg
      if affectee_srq_type_id == EosTypeId.current_self:
@@ -694,7 +717,7 @@ class AffectionRegister {
            __get_affector_storages_owner_skillrq}
    */
   
-  func handleResolveDomain(affectorSpec: Any) {
+  func handleResolveDomain(affectorSpec: AffectorSpec) {
     /*
      """Convert relative domain into absolute for local affector spec.
 
@@ -725,7 +748,7 @@ class AffectionRegister {
      */
   }
   
-  func handleAffectorSpecErrors(error: Any, affectorSpec: Any) {
+  func handleAffectorSpecErrors(error: Any, affectorSpec: AffectorSpec) {
     /*
      """Handles exceptions related to affector spec.
 

@@ -345,7 +345,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     return self.itemType?.defaultEffect?.attributeId
   }
   
-  public var modifierDomain: ModDomain
+  public var modifierDomain: ModDomain?
   
   public var ownerModifiable: Bool
 

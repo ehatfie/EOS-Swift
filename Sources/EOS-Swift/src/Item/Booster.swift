@@ -28,7 +28,7 @@ class Booster: ImmutableStateMixinProtocol {
 
   var _state: State
   var ownerModifiable: Bool
-  var modifierDomain: ModDomain = .character
+  var modifierDomain: ModDomain? = .character
   var solsysCarrier: Any?
 
   var fit: Fit?

@@ -13,7 +13,7 @@ class Ship:
   BufferTankingMixinProtocol,
   SolarSystemMixinProtocol
 {
-  var modifierDomain: ModDomain
+  var modifierDomain: ModDomain?
   
   var ownerModifiable: Bool
   
