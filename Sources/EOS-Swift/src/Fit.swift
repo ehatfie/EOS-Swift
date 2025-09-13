@@ -24,7 +24,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
   var rigs: ItemSet<Rig>? //  Set for rigs.
   var drones: String? // Set for drones.
   var fighters: String? // Set for fighter squads.
-  var character: String? // Access point for character.
+  var character: Character? // Access point for character.
   var skills: TypeUniqueSet<Skill>? // Keyed set for skills.
   var implants: ItemSet<Implant>? // Set for implants.
   var boosters: ItemSet<Booster>?  // Set for boosters.
