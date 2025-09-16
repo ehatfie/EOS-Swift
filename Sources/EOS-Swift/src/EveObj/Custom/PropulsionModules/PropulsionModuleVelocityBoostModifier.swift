@@ -74,3 +74,25 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
   }
 
 }
+
+func makeMassModifier() -> DogmaModifier {
+  return DogmaModifier(
+    affecteeFilter: .item,
+    affecteeDomain: .ship,
+    affecteeAtributeId: .mass,
+    modOperator: .mod_add,
+    aggregateMode: .stack,
+    affectorAttrId: .mass_addition
+  )
+}
+
+func makeSignatureModifier() -> DogmaModifier {
+  return DogmaModifier(
+    affecteeFilter: .item,
+    affecteeDomain: .ship,
+    affecteeAtributeId: .signature_radius,
+    modOperator: .post_percent,
+    aggregateMode: .stack,
+    affectorAttrId: .signature_radius_bonus
+  )
+}
