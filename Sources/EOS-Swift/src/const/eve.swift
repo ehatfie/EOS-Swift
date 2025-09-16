@@ -315,7 +315,7 @@ enum EffectId: Int, Codable {
   case use_missiles = 101
 }
 
-enum EffectCategoryId: Int, Codable {
+enum EffectCategoryId: Int64, Codable {
   case passive = 0
   case active = 1
   case target = 2

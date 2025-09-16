@@ -10,19 +10,27 @@ protocol Message {
   var messageType: MessageTypeEnum { get }
 }
 
-struct ItemLoaded: Message {
+protocol ItemMessage: Message {
+  var item: any BaseItemMixinProtocol { get }
+}
+
+protocol AttributeMessage: Message {
+  var attributeChanges: [BaseItemMixin: [AttrId]] { get }
+}
+
+struct ItemLoaded: ItemMessage {
   var fit: Fit?
   let messageType: MessageTypeEnum = .ItemLoaded
   let item: any BaseItemMixinProtocol
 }
 
-struct ItemUnloaded: Message {
+struct ItemUnloaded: ItemMessage {
   var fit: Fit?
   let messageType: MessageTypeEnum = .ItemUnloaded
   let item: any BaseItemMixinProtocol
 }
 
-struct StatesActivatedLoaded: Message {
+struct StatesActivatedLoaded: ItemMessage {
   var fit: Fit? = nil
   let messageType: MessageTypeEnum = .StatesActivatedLoaded
   let item: any BaseItemMixinProtocol
@@ -30,7 +38,7 @@ struct StatesActivatedLoaded: Message {
   let states: Set<State>
 }
 
-struct StatesDeactivatedLoaded: Message {
+struct StatesDeactivatedLoaded: ItemMessage {
   var fit: Fit? = nil
   let messageType: MessageTypeEnum = .StatesDeactivatedLoaded
   let item: any BaseItemMixinProtocol
@@ -38,7 +46,7 @@ struct StatesDeactivatedLoaded: Message {
   let states: Set<State>
 }
 
-struct EffectsStarted: Message {
+struct EffectsStarted: ItemMessage {
   var fit: Fit? = nil
   let messageType: MessageTypeEnum = .EffectsStarted
   let item: any BaseItemMixinProtocol
@@ -46,7 +54,7 @@ struct EffectsStarted: Message {
   let effectIds: Set<EffectId> // [EffectId]
 }
 
-struct EffectsStopped: Message {
+struct EffectsStopped: ItemMessage {
   var fit: Fit? = nil
   let messageType: MessageTypeEnum = .EffectsStopped
   let item: any BaseItemMixinProtocol
@@ -54,7 +62,7 @@ struct EffectsStopped: Message {
   let effectIds: Set<EffectId>
 }
 
-struct EffectsApplied: Message {
+struct EffectsApplied: ItemMessage {
   var fit: Fit? = nil
   let messageType: MessageTypeEnum = .EffectsApplied
   let item: any BaseItemMixinProtocol
@@ -63,7 +71,7 @@ struct EffectsApplied: Message {
   let targetItems: [any BaseItemMixinProtocol]
 }
 
-struct EffectsUnapplied: Message {
+struct EffectsUnapplied: ItemMessage {
   var fit: Fit? = nil
   let messageType: MessageTypeEnum = .EffectsUnapplied
   let item: any BaseItemMixinProtocol

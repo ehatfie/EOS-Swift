@@ -5,15 +5,18 @@
 //  Created by Erik Hatfield on 9/9/25.
 //
 
-struct AttributesValueChanged: Message {
+struct AttributesValueChanged: AttributeMessage {
+  var item: any BaseItemMixinProtocol
+  
   var fit: Fit?
   let messageType: MessageTypeEnum = .AttributeValueChanged
-  let attributeChanges: [(BaseItemMixin, [AttrId])]
+  let attributeChanges: [BaseItemMixin: [AttrId]] 
 }
 
-
-struct AttributesValueChangedMasked: Message {
+struct AttributesValueChangedMasked: AttributeMessage {
+  var item: any BaseItemMixinProtocol
+  
   var fit: Fit?
   let messageType: MessageTypeEnum = .AttributeValueChangedMasked
-  let attributeChanges: [(BaseItemMixin, [AttrId])]
+  let attributeChanges: [BaseItemMixin: [AttrId]]
 }

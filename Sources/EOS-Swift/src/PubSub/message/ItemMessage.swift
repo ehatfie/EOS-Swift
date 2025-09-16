@@ -5,19 +5,19 @@
 //  Created by Erik Hatfield on 9/9/25.
 //
 
-struct ItemAdded: Message {
+struct ItemAdded: ItemMessage {
   var fit: Fit?
   let messageType: MessageTypeEnum = .ItemAdded
   let item: any BaseItemMixinProtocol
 }
 
-struct ItemRemoved: Message {
+struct ItemRemoved: ItemMessage {
   var fit: Fit?
   let messageType: MessageTypeEnum = .ItemRemoved
   let item: any BaseItemMixinProtocol
 }
 
-struct StatesActivated: Message {
+struct StatesActivated: ItemMessage {
   var fit: Fit?
   let messageType: MessageTypeEnum = .StatesActivated
   let item: any BaseItemMixinProtocol
@@ -25,7 +25,7 @@ struct StatesActivated: Message {
   let states: Set<State>
 }
 
-struct StatesDeactivated: Message {
+struct StatesDeactivated: ItemMessage {
   var fit: Fit?
   let messageType: MessageTypeEnum = .StatesDeactivated
   let item: any BaseItemMixinProtocol

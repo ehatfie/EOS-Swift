@@ -58,7 +58,7 @@ public enum EffectMode: Int {
   case force_stop = 4
 }
 
-enum EffectBuildStatus: Int {
+enum EffectBuildStatus: Int, Codable {
   /*
    Contains possible effect build statuses.
   
@@ -182,7 +182,7 @@ enum EosTypeId: Int {
   case current_self = -1
 }
 
-enum EosEffectId: Int {
+enum EosEffectId: Int64 {
 
   /*Contains Eos-specific effect IDs.
   
