@@ -14,12 +14,7 @@
  attribute map to calculate modified attribute values.
  */
 
-struct ModificationData {
-  let modificationOperator: ModOperator
-  let modificationValue: Double
-  let resistanceValue: Double //??
-  let affectorItem: any BaseItemMixinProtocol
-}
+
 
 class CalculationService: BaseSubscriber {
   var handlerMap: [Int64 : CallbackHandler] = [:]

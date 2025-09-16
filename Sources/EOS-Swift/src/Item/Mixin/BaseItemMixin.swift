@@ -37,7 +37,7 @@ protocol BaseItemMixinProtocol: AnyObject, Hashable {
   var runningEffectIds: Set<EffectId> { get set }
   var effectModeOverrides: [EffectId: EffectMode]? { get set }
   var effectTargets: String? { get set }
-  var attributes: [Int64: Double] { get set } // will be a custom dictionary type
+  var attributes: [AttrId: Double] { get set } // will be a custom dictionary type
   
   var _state: State { get set }
   var modifierDomain: ModDomain? { get set }
@@ -258,7 +258,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   
   open var _state: State
   
-  public var attributes: [Int64: Double] = [:]
+  public var attributes: [AttrId: Double] = [:]
   
   var fit: Fit? {
     if let container = self.container as? MaybeFitHaving {

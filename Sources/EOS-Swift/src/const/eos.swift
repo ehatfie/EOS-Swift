@@ -97,7 +97,7 @@ public enum ModDomain: Int, CaseIterable {
   case other = 5  // Module for charge, charge for module
 }
 
-enum ModOperator: Int {
+enum ModOperator: Int, CaseIterable {
 
   /*
    Contains possible modifier operator types.
@@ -118,7 +118,7 @@ enum ModOperator: Int {
 
 }
 
-enum ModAggregateMode: Int {
+enum ModAggregateMode: Int, CaseIterable {
 
   /*
    Contains possible modifier aggregate modes.
