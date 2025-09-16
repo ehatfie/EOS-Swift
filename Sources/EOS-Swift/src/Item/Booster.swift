@@ -24,7 +24,7 @@ class Booster: ImmutableStateMixinProtocol {
 
   var effectTargets: String?
 
-  var attributes: [Int64: Double] = [:]
+  var attributes: [AttrId: Double] = [:]
 
   var _state: State
   var ownerModifiable: Bool

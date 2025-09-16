@@ -6,6 +6,10 @@
 //
 
 class BasePythonModifier: BasePythonModifierProtocol {
+  func reviseModification(message: Any, affectorItem: any BaseItemMixinProtocol) -> Bool {
+    return false
+  }
+  
   var affecteeFilter: ModAffecteeFilter?
 
   var modDomain: ModDomain?
@@ -140,7 +144,7 @@ extension AncillaryRepAmountModifier {
   static func makePasteEffect() -> FueledArmorRepair {
     return FueledArmorRepair(
       effectId: EosEffectId.ancillary_paste_armor_rep_boost.rawValue,
-      categoryID: EffectCategoryId.passive.rawValue,
+      categoryID: EffectCategoryId.passive,
       isOffensive: false,
       isAssistance: false,
       buildStatus: .custom,

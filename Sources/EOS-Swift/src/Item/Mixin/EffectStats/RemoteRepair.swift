@@ -16,7 +16,7 @@ extension RemoteRepairMixinProtocol {
   func repairEffectIterator(effectClass: Effect.Type) -> AnyIterator<Effect> {
     // only return active effects
     var values: [Effect] = self.typeEffects.values.filter {
-      self.runningEffectIds.contains(EffectId(rawValue: Int($0.attributeId))!)
+      self.runningEffectIds.contains(EffectId(rawValue: Int($0.effectId))!)
     }
     var index: Int = 0
     return AnyIterator {

@@ -7,9 +7,9 @@
 
 import Foundation
 
-public class Effect: Codable, Hashable {
+public class Effect: Hashable {
   public static func == (lhs: Effect, rhs: Effect) -> Bool {
-    return lhs.attributeId == rhs.attributeId
+    return lhs.effectId == rhs.effectId
   }
   
   public func hash(into hasher: inout Hasher) {
@@ -53,7 +53,7 @@ public class Effect: Codable, Hashable {
       */
 
   let effectId: Int64
-  let categoryID: Int64?
+  let categoryID: EffectCategoryId?
   let isOffensive: Bool
   let isAssistance: Bool
   let durationAttributeID: Int64?
@@ -62,12 +62,12 @@ public class Effect: Codable, Hashable {
   let falloffAttributeID: Int64?
   let trackingSpeedAttributeID: Int64?
   let fittingUseUsageChanceAttributeID: Int64?
-  let buildStatus: EffectBuildStatus  //EffectBuildStatus
+  let buildStatus: EffectBuildStatus?  //EffectBuildStatus
   var modifiers: [any BaseModifierProtocol]  // Modifier
 
   init(
     effectId: Int64,
-    categoryID: Int64? = nil,
+    categoryID: EffectCategoryId? = nil,
     isOffensive: Bool = false,
     isAssistance: Bool = false,
     durationAttributeID: Int64? = nil,
@@ -95,7 +95,7 @@ public class Effect: Codable, Hashable {
   }
 
   var isProjectable: Bool {
-    return self.categoryID == EffectCategoryId.target.rawValue
+    return self.categoryID == EffectCategoryId.target
   }
 
   var effectStateMap: [EffectCategoryId: State] = [
@@ -111,7 +111,9 @@ public class Effect: Codable, Hashable {
   /// It means if item takes this state or higher, effect activates.
   /// - Returns `State`
   var state: State {
-    let effectCategory = EffectCategoryId(rawValue: Int(self.categoryID))!
+    guard let effectCategory = self.categoryID else {
+      return .offline
+    }
     
     return self.effectStateMap[effectCategory] ?? .offline
   }
@@ -192,20 +194,32 @@ public class Effect: Codable, Hashable {
 
 extension Effect {
   func getDuration(item: any BaseItemMixinProtocol) -> Double {
-    let timeMS = Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: self.durationAttributeID)!)
+    guard let durationAttributeID else {
+      return 0.0
+    }
+    let timeMS = Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: durationAttributeID)!)
     return timeMS / 1000
   }
   
   func getCapUse(item: any BaseItemMixinProtocol) -> Double? {
-    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: self.dischargeAttributeID)!)
+    guard let dischargeAttributeID else {
+      return nil
+    }
+    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: dischargeAttributeID)!)
   }
   
   func getOptimalRange(item: any BaseItemMixinProtocol) -> Double? {
-    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: self.rangeAttributeID)!)
+    guard let rangeAttributeID else {
+      return nil
+    }
+    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: rangeAttributeID)!)
   }
   
   func getFalloffRange(item: any BaseItemMixinProtocol) -> Double? {
-    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: self.falloffAttributeID)!)
+    guard let falloffAttributeID else {
+      return nil
+    }
+    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: falloffAttributeID)!)
   }
   
   func getFittingUsageChance(item: any BaseItemMixinProtocol) -> Double? {
@@ -218,7 +232,10 @@ extension Effect {
   }
   
   func getForcedInactiveTime(item: any BaseItemMixinProtocol) -> Double {
-    let timeMS = item.attributes[AttrId(rawValue: self.dischargeAttributeID)!, default: 0]
+    guard let dischargeAttributeID else {
+      return 0.0
+    }
+    let timeMS = item.attributes[AttrId(rawValue: dischargeAttributeID)!, default: 0]
     return timeMS / 1000
   }
   
@@ -291,11 +308,17 @@ extension Effect {
   func getTrackingSpeed(item: any BaseItemMixinProtocol) -> Double? {
     //         return self.__safe_get_attr_value(
     // item, self.tracking_speed_attr_id)
-    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: self.trackingSpeedAttributeID)!)
+    guard let trackingSpeedAttributeID else {
+      return nil
+    }
+    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: trackingSpeedAttributeID)!)
   }
 
   func getCapUse(item: any BaseItemMixinProtocol) -> Double {
-    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: self.dischargeAttributeID)!)
+    guard let dischargeAttributeID else {
+      return 0.0
+    }
+    return Effect.safeGetAttributeValue(item: item, attributeID: AttrId(rawValue: dischargeAttributeID)!)
   }
 }
 
@@ -309,7 +332,7 @@ struct EffectState {
   let stateID: Int64
 
   var effectCategory: EffectCategoryId {
-    return EffectCategoryId(rawValue: Int(categoryID))!
+    return EffectCategoryId(rawValue: Int64(Int(categoryID)))!
   }
 
   var effectState: State {

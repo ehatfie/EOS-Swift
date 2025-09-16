@@ -81,7 +81,7 @@ class EffectStatusResolver {
       EffectMode.force_run: EffectStatusResolver.resolveForceRun,
       EffectMode.force_stop: EffectStatusResolver.resolveForceStop,
     ]
-    let effectMode = item.getEffectMode(effectId: EffectId(rawValue: Int(effect.attributeId))!)
+    let effectMode = item.getEffectMode(effectId: EffectId(rawValue: Int(effect.effectId))!)
     let resolver = resolverMap[effectMode]!
     if let resolver = resolver
       as? (any BaseItemMixinProtocol, Effect, Bool, State?) -> Bool
@@ -125,7 +125,7 @@ class EffectStatusResolver {
     case .offline:
       return effect.fittingUseUsageChanceAttributeID == nil
     case .online:
-      if effect.attributeId == EffectId.online.rawValue {
+      if effect.effectId == EffectId.online.rawValue {
         return true
       } else {
         return onlineOrRunning

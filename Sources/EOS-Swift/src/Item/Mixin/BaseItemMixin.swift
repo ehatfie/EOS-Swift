@@ -113,7 +113,7 @@ extension BaseItemMixinProtocol {
   }
   
   var typeDefaultEffectId: Int64? {
-    return self.itemType?.defaultEffect?.attributeId
+    return self.itemType?.defaultEffect?.effectId
   }
   
   var others: Set<BaseItemMixin> {
@@ -344,7 +344,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   var typeDefaultEffectId: Int64? {
-    return self.itemType?.defaultEffect?.attributeId
+    return self.itemType?.defaultEffect?.effectId
   }
   
   public var modifierDomain: ModDomain?

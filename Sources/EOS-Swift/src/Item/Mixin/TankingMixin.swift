@@ -10,7 +10,7 @@ protocol BufferTankingMixinProtocol: BaseItemMixinProtocol {
   var resists: TankingLayers<ResistProfile> { get }
   var worstCaseEHP: ItemHP { get }
   
-  func getResistByAttribute(attributeID: Int64) -> Double
+  func getResistByAttribute(attributeID: AttrId) -> Double
   func getEHP(damageProfile: DamageProfile?) -> ItemHP
   func getLayerEHP(layerHp: Double, layerResists: ResistProfile,damageProfile: DamageProfile) -> Double
   func getTankingEfficiency(damageProfile: DamageProfile, resists: ResistProfile) -> Double
@@ -19,9 +19,9 @@ protocol BufferTankingMixinProtocol: BaseItemMixinProtocol {
 
 extension BufferTankingMixinProtocol {
   var hp: ItemHP {
-    let hull = self.attributes[AttrId.hp.rawValue, default: 0]
-    let armor = self.attributes[AttrId.armor_hp.rawValue, default: 0]
-    let shield = self.attributes[AttrId.shield_capacity.rawValue, default: 0]
+    let hull = self.attributes[AttrId.hp, default: 0]
+    let armor = self.attributes[AttrId.armor_hp, default: 0]
+    let shield = self.attributes[AttrId.shield_capacity, default: 0]
     
     return ItemHP(hull: hull, armor: armor, shield: shield)
   }
@@ -68,10 +68,10 @@ extension BufferTankingMixinProtocol {
   }
   
   func getResistByAttribute(_ attribute: AttrId) -> Double {
-    return getResistByAttribute(attributeID: attribute.rawValue)
+    return getResistByAttribute(attributeID: attribute)
   }
   
-  func getResistByAttribute(attributeID: Int64) -> Double {
+  func getResistByAttribute(attributeID: AttrId) -> Double {
     return 1 - self.attributes[attributeID, default: 1]
   }
   
@@ -171,10 +171,10 @@ class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   }
   
   func getResistByAttribute(_ attribute: AttrId) -> Double {
-    return getResistByAttribute(attributeID: attribute.rawValue)
+    return getResistByAttribute(attributeID: attribute)
   }
   
-  func getResistByAttribute(attributeID: Int64) -> Double {
+  func getResistByAttribute(attributeID: AttrId) -> Double {
     return 1 - self.attributes[attributeID, default: 1]
   }
   
@@ -230,9 +230,9 @@ class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   }
   
   var hp: ItemHP {
-    let hull = self.attributes[AttrId.hp.rawValue, default: 0]
-    let armor = self.attributes[AttrId.armor_hp.rawValue, default: 0]
-    let shield = self.attributes[AttrId.shield_capacity.rawValue, default: 0]
+    let hull = self.attributes[AttrId.hp, default: 0]
+    let armor = self.attributes[AttrId.armor_hp, default: 0]
+    let shield = self.attributes[AttrId.shield_capacity, default: 0]
     
     return ItemHP(hull: hull, armor: armor, shield: shield)
   }

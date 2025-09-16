@@ -29,7 +29,7 @@ extension CapTransmitMixinProtocol {
     var ctps: Double = 0
     let foo = self.typeEffects.values
     for effect in foo {
-      if let foo = effect as? BaseCapTransmitEffect, self.runningEffectIds.contains(EffectId(rawValue: Int(foo.attributeId))!) {
+      if let foo = effect as? BaseCapTransmitEffect, self.runningEffectIds.contains(EffectId(rawValue: Int(foo.effectId))!) {
         ctps += foo.getCapTransmitPerSecond(item: self, reload: reload)
       }
     }
@@ -43,7 +43,7 @@ class CapTransmitMixin: BaseItemMixin {
     var ctps: Double = 0
     let foo = self.typeEffects.values
     for effect in foo {
-      if let foo = effect as? BaseCapTransmitEffect, self.runningEffectIds.contains(EffectId(rawValue: Int(foo.attributeId))!) {
+      if let foo = effect as? BaseCapTransmitEffect, self.runningEffectIds.contains(EffectId(rawValue: Int(foo.effectId))!) {
         ctps += foo.getCapTransmitPerSecond(item: self, reload: reload)
       }
     }

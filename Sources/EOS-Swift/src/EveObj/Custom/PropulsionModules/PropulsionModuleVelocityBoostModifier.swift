@@ -38,7 +38,7 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
     )
   }
   
-  func reviseModification(message: Any, affectorItem: any BaseItemMixinProtocol)
+  override func reviseModification(message: Any, affectorItem: any BaseItemMixinProtocol)
     -> Bool
   {
     guard let message = message as? AttributeMessage else { return false }

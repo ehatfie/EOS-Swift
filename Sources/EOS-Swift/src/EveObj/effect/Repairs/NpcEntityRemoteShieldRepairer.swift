@@ -7,6 +7,6 @@
 
 class NpcEntityRemoteShieldRepairer: RemoteShieldRepairEffect {
   func getRepAmount(item: BaseItemMixin) -> Double? {
-    return item.attributes[AttrId.shield_bonus.rawValue, default: 0]
+    return item.attributes[AttrId.shield_bonus, default: 0]
   }
 }

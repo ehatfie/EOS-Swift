@@ -51,8 +51,8 @@ class Module:
   var chargeQuantity: Double? {
     guard let charge = charge else { return nil }
 
-    guard let containerCapacity = self.attributes[AttrId.capacity.rawValue],
-      let chargeVolume = self.attributes[AttrId.volume.rawValue]
+    guard let containerCapacity = self.attributes[AttrId.capacity],
+      let chargeVolume = self.attributes[AttrId.volume]
     else {
       return nil
     }
@@ -74,7 +74,7 @@ class Module:
   }
 
   var reloadTime: Double? {
-    guard let timeMs = self.attributes[AttrId.reload_time.rawValue] else {
+    guard let timeMs = self.attributes[AttrId.reload_time] else {
       return nil
     }
     return timeMs / 1000
@@ -82,7 +82,7 @@ class Module:
 
   var reactivationDelay: Double? {
     guard
-      let delayMs = self.attributes[AttrId.module_reactivation_delay.rawValue]
+      let delayMs = self.attributes[AttrId.module_reactivation_delay]
     else {
       return nil
     }

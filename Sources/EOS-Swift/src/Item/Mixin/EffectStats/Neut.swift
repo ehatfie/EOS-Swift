@@ -15,7 +15,7 @@ extension NeutMixinProtocol {
     
     for effect in self.typeEffects.values {
       if let foo = effect as? BaseNeutEffect,
-         !self.runningEffectIds.contains(EffectId(rawValue: Int(foo.attributeId))!) {
+         !self.runningEffectIds.contains(EffectId(rawValue: Int(foo.effectId))!) {
         nps += foo.getNeutPerSecond(item: self, reload: reload)
       }
     }
@@ -29,7 +29,7 @@ class NeutMixin: BaseItemMixin {
     
     for effect in self.typeEffects.values {
       if let foo = effect as? BaseNeutEffect,
-         !self.runningEffectIds.contains(EffectId(rawValue: Int(foo.attributeId))!) {
+         !self.runningEffectIds.contains(EffectId(rawValue: Int(foo.effectId))!) {
         nps += foo.getNeutPerSecond(item: self, reload: reload)
       }
     }

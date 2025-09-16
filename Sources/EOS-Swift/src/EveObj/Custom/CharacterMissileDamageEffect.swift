@@ -31,7 +31,7 @@ func makeMissileDamageEffect() -> Effect {
   }
   return Effect(
     effectId: EosEffectId.char_missile_dmg.rawValue,
-    categoryID: EffectCategoryId.passive.rawValue,
+    categoryID: EffectCategoryId.passive,
     isOffensive: false,
     isAssistance: false,
     buildStatus: .custom,
