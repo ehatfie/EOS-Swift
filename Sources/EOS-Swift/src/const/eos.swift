@@ -71,7 +71,7 @@ enum EffectBuildStatus: Int {
   case custom = 5
 }
 
-enum ModAffecteeFilter: Int {
+enum ModAffecteeFilter: Int, CaseIterable {
   /*
   Contains possible modifier target filter types.
   
@@ -84,7 +84,7 @@ enum ModAffecteeFilter: Int {
   case owner_skillrq = 5
 }
 
-public enum ModDomain: Int {
+public enum ModDomain: Int, CaseIterable {
   /*
    Contains possible modifier domains.
   

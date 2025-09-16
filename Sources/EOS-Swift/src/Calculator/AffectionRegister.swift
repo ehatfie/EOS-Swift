@@ -64,6 +64,7 @@ struct AffectorModifier: Hashable {
   let modDomain: ModDomain
   let affecteeFilterExtraArg: Int64
   let affecteeDomain: ModDomain
+  let affecteeAtributeId: AttrId
 }
 
 class AffectionRegister {
