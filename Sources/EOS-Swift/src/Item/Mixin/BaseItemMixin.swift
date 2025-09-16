@@ -42,7 +42,7 @@ protocol BaseItemMixinProtocol: AnyObject, Hashable {
   var _state: State { get set }
   var modifierDomain: ModDomain? { get set }
   var ownerModifiable: Bool { get set }
-  var solsysCarrier: Any? { get set }
+  var solsysCarrier: Ship? { get set }
   var fit: Fit? { get }
   
   func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>?
@@ -267,6 +267,8 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     return nil
   }
   
+  
+  
   init(typeId: Int64, state: State) {
     self.typeId = typeId
     self.itemType = nil
@@ -349,11 +351,11 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   
   public var ownerModifiable: Bool
 
-  public var solsysCarrier: Any?
+  var solsysCarrier: Ship?
   
   var others: Set<BaseItemMixin> {
     var otherItems: Set<BaseItemMixin> = []
-    self.container
+    
     if let container = self.container as? BaseItemMixin {
       otherItems.insert(container)
     }

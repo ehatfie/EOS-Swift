@@ -18,7 +18,7 @@ class CalculationService: BaseSubscriber {
   var handlerMap: [Int64 : CallbackHandler] = [:]
   
   weak var solarSystem: SolarSystem?
-  var affections: Any? = nil // AffectionRegister
+  var affections: AffectionRegister? = nil // AffectionRegister
   var projections: Any? = nil // ProjectionRegister
   // Format: {projector: {modifiers}}
   var warfareBuffs = KeyedStorage()
