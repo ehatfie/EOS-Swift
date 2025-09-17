@@ -1,4 +1,8 @@
 class DamageDealerRegister: BaseStatsRegisterProtocol {
+  static func == (lhs: DamageDealerRegister, rhs: DamageDealerRegister) -> Bool {
+    return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+  }
+  
   typealias MessageType = ItemEffectsMessage
 
   var handlerMap: [Int64 : CallbackHandler] = [:]
@@ -8,7 +12,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
   
   init(fit: Fit) {
     self.fit = fit
-    // fit.subscribe(self.handlerMap.keys)
+    fit.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
   func getVolley(itemFilter: Any?, targetResists: ResistProfile) -> DamageStats {
@@ -32,22 +36,17 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
       defer { index += 1 }
       return values[index]
     }
-//    for (key, value) in self.damageDealers {
-//      // check against itemFilter
-//
-//    }
   }
-  
-  /*
-   def __dd_iter(self, item_filter):
-       for item in self.__dmg_dealers:
-           if item_filter is None or item_filter(item):
-               yield item
-   */
-  
-  
-  func notify(_ message: Any) {
-    
+
+  func notify(message: any Message) {
+    switch message {
+      case let message as EffectsStarted:
+      self.handleEffectsStarted(message: message)
+    case let message as EffectsStopped:
+      self.handleEffectsEnded(message: message)
+    default:
+      break
+    }
   }
   
   func getDps(
@@ -65,8 +64,8 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     return DamageStats.combined(dpsValues) ?? DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
   
-  func handleEffectsStarted(message: MessageType) {
-    let itemEffects = message.itemEffects
+  func handleEffectsStarted(message: EffectsStarted) {
+    let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
         if let foo = message.item as? (any DamageDealerMixinProtocol) {
@@ -76,8 +75,8 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     }
   }
   
-  func handleEffectsEnded(message: MessageType) {
-    let itemEffects = message.itemEffects
+  func handleEffectsEnded(message: EffectsStopped) {
+    let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
         self.damageDealers[Int64(effectId.rawValue)] = nil

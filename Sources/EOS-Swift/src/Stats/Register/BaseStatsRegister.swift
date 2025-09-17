@@ -5,12 +5,12 @@
 //  Created by Erik Hatfield on 9/7/25.
 //
 
-protocol BaseStatsRegisterProtocol: BaseSubscriber {
+protocol BaseStatsRegisterProtocol: BaseSubscriberProtocol {
   var fit: Fit? { get set }
   associatedtype MessageType: Hashable
   
-  func handleEffectsStarted(message: MessageType)
-  func handleEffectsEnded(message: MessageType)
+  func handleEffectsStarted(message: EffectsStarted)
+  func handleEffectsEnded(message: EffectsStopped)
 }
 
 

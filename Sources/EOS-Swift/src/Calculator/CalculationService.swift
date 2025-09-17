@@ -17,6 +17,8 @@
 
 
 class CalculationService: BaseSubscriber {
+
+  
   var handlerMap: [Int64 : CallbackHandler] = [:]
   
   weak var solarSystem: SolarSystem?
@@ -33,7 +35,7 @@ class CalculationService: BaseSubscriber {
     self.solarSystem = solarSystem
   }
   
-  func notify(_ message: Any) {
+  func notify(_ message: any Message) {
     
   }
   

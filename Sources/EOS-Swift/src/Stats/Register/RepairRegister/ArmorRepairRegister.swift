@@ -14,18 +14,14 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
   
   var handlerMap: [Int64 : CallbackHandler] = [:]
   
-  func notify(_ message: Any) {
-    
-  }
-  
   init(fit: Fit) {
     self.fit = fit
     //let set = Set<(any BaseItemMixinProtocol, Effect)>()
-    fit.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
+    fit.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
-  func handleEffectsStarted(message: ItemEffectsMessage) {
-    let itemEffects = message.itemEffects
+  func handleEffectsStarted(message: EffectsStarted) {
+    let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       guard let effect = itemEffects[effectId] else { continue }
       if effect is LocalArmorRepairEffect {
@@ -34,11 +30,29 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
     }
   }
   
-  func handleEffectsEnded(message: ItemEffectsMessage) {
+  func handleEffectsEnded(message: EffectsStopped) {
     
+  }
+  
+  func notify(message: any Message) {
+    switch message {
+    case is EffectsStarted:
+      handleEffectsStarted(message: message as! EffectsStarted)
+    case is EffectsStopped:
+      handleEffectsEnded(message: message as! EffectsStopped)
+    default: break
+    }
   }
 }
 
-extension ArmorRepairerRegister: MockSubscriberProtocol {
+extension ArmorRepairerRegister {
+
+  
+
+  
+  static func == (lhs: ArmorRepairerRegister, rhs: ArmorRepairerRegister) -> Bool {
+    return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+  }
+  
   
 }

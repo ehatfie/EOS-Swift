@@ -29,5 +29,5 @@ protocol BaseSubscriber {
     var handlerMap: [Int64: CallbackHandler] { get }
 
     /// Notifies the subscriber about a message using its handler map.
-    func notify(_ message: Any)
+    func notify(_ message: any Message)
 }

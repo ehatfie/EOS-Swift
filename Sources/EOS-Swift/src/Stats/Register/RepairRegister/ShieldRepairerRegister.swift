@@ -6,6 +6,10 @@
 //
 
 class ShieldRepairerRegister: BaseRepairRegisterProtocol {
+  static func == (lhs: ShieldRepairerRegister, rhs: ShieldRepairerRegister) -> Bool {
+    ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+  }
+  
   typealias MessageType = ItemEffectsMessage
   
   var fit: Fit?
@@ -18,14 +22,20 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   init(fit: Fit? = nil) {
     self.fit = fit
     self.handlerMap = [:]
-    
-    // self.fit?.subscribe(subscriber: <#T##MockSubscriber#>, for: <#T##[MessageTypeEnum]#>)
+    fit?.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
-  func notify(_ message: Any) {
-    
+  func notify(message: any Message) {
+    switch message {
+    case let message as EffectsStarted:
+      self.handleEffectsStarted(message: message)
+    case let message as EffectsStopped:
+      self.handleEffectsEnded(message: message)
+    default: break
+    }
   }
   
+  // TODO
   func getRps(
     item: any BufferTankingMixinProtocol,
     damageProfile: DamageProfile?,
@@ -62,7 +72,7 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
     }
   }
   
-  func handleEffectsStarted(message: ItemEffectsMessage) {
+  func handleEffectsStarted(message: EffectsStarted) {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? LocalShieldRepairEffect {
@@ -70,25 +80,10 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
         self.localRep.insert(repairerData)
       }
     }
-    /*
-     item_effects = msg.item._type_effects
-     for effect_id in msg.effect_ids:
-         effect = item_effects[effect_id]
-         if isinstance(effect, LocalShieldRepairEffect):
-             self.__local_repairers.add((msg.item, effect))
-     */
   }
   
-  func handleEffectsEnded(message: ItemEffectsMessage) {
-    /*
-     item_effects = msg.item._type_effects
-     for effect_id in msg.effect_ids:
-         effect = item_effects[effect_id]
-         if isinstance(effect, LocalShieldRepairEffect):
-             self.__local_repairers.remove((msg.item, effect))
-     */
-    
-    let itemEffects = message.itemEffects
+  func handleEffectsEnded(message: EffectsStopped) {
+    let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? LocalShieldRepairEffect {
         // This feels like it could be an issue

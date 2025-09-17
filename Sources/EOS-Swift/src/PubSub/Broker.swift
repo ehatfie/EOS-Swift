@@ -7,17 +7,17 @@
 // https://github.com/pyfa-org/eos/blob/master/eos/pubsub/broker.py
 
 // I think this `Message` could be a FitMessage
-protocol MockSubscriberProtocol: Hashable {
+protocol BaseSubscriberProtocol: Hashable {
   func notify(message: any Message)
 }
 
-extension MockSubscriberProtocol {
+extension BaseSubscriberProtocol {
   func hash(into hasher: inout Hasher) {
     hasher.combine(self)
   }
 }
 
-class MockSubscriber: MockSubscriberProtocol, Equatable {
+class MockSubscriber: BaseSubscriberProtocol, Equatable {
   let thing: Int
 
   init(thing: Int) {
@@ -63,7 +63,7 @@ extension MockSubscriber: Hashable {
 }
 /// I think this needs to be a protocol and implementations in an extension
 /// Manages message subscriptions and dispatch messages to recipients.
-class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
+class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: FitHaving {
   var fit: Fit {
     self as! Fit
   }
@@ -75,7 +75,7 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
   }
   
   /// Register subscriber for passed message types.
-  func subscribe(subscriber: any MockSubscriberProtocol, for messageTypes: [MessageTypeEnum]) {
+  func subscribe(subscriber: any BaseSubscriberProtocol, for messageTypes: [MessageTypeEnum]) {
     for messageType in messageTypes {
       var set = subscribers[messageType, default: Set<AnyHashable>()]
       _ = set.insert(subscriber)
@@ -111,7 +111,7 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
     var m = message
     m.fit = fit
     for subscriber in self.subscribers[message.messageType] ?? [] {
-      if let foo = subscriber as? any MockSubscriberProtocol {
+      if let foo = subscriber as? any BaseSubscriberProtocol {
         foo.notify(message: m)
       }
       
@@ -125,7 +125,7 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
       m.fit = self.fit
       
       for subscriber in self.subscribers[message.messageType] ?? [] {
-        if let foo = subscriber as? any MockSubscriberProtocol {
+        if let foo = subscriber as? any BaseSubscriberProtocol {
           foo.notify(message: m)
         }
       }
