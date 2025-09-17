@@ -8,7 +8,7 @@
 
 // I think this `Message` could be a FitMessage
 protocol MockSubscriberProtocol: Hashable {
-  func notify(message: Message)
+  func notify(message: any Message)
 }
 
 class MockSubscriber: MockSubscriberProtocol, Equatable {
@@ -18,7 +18,7 @@ class MockSubscriber: MockSubscriberProtocol, Equatable {
     self.thing = thing
   }
   
-  func notify(message: Message) { }
+  func notify(message: any Message) { }
 
 }
 

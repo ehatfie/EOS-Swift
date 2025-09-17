@@ -30,8 +30,7 @@ class MessageHelper {
     messages.append(ItemLoaded(fit: nil, item: item))
     let states = State.allCases.filter { $0 <= item._state }
     messages.append(StatesActivatedLoaded(item: item, states: Set<State>(states)))
-    //msgs.extend(MsgHelper.get_effects_status_update_msgs(item))
-    messages.append(contentsOf: [])
+    messages.append(contentsOf: getEffectsStatusUpdateMessages(item: item))
     return messages
   }
   
@@ -104,38 +103,7 @@ class MessageHelper {
   /// Besides generating messages, it actually updates item's set of effects
   /// which are considered as running.
   static func getEffectsStatusUpdateMessages(item: any BaseItemMixinProtocol) -> [any Message] {
-    /*
-     # Set of effects which should be running according to new conditions
-     new_running_effect_ids = set()
-     effects_status = EffectStatusResolver.resolve_effects_status(item)
-     for effect_id, status in effects_status.items():
-         if status:
-             new_running_effect_ids.add(effect_id)
-     start_ids = new_running_effect_ids.difference(item._running_effect_ids)
-     stop_ids = item._running_effect_ids.difference(new_running_effect_ids)
-     msgs = []
-     if start_ids:
-         item._running_effect_ids.update(start_ids)
-         # Start effects
-         msgs.append(EffectsStarted(item, start_ids))
-         # Apply effects to targets
-         tgt_getter = getattr(item, '_get_effects_tgts', None)
-         if tgt_getter:
-             effects_tgts = tgt_getter(start_ids)
-             for effect_id, tgt_items in effects_tgts.items():
-                 msgs.append(EffectApplied(item, effect_id, tgt_items))
-     if stop_ids:
-         # Unapply effects from targets
-         tgt_getter = getattr(item, '_get_effects_tgts', None)
-         if tgt_getter:
-             effects_tgts = tgt_getter(stop_ids)
-             for effect_id, tgt_items in effects_tgts.items():
-                 msgs.append(EffectUnapplied(item, effect_id, tgt_items))
-         # Stop effects
-         msgs.append(EffectsStopped(item, stop_ids))
-         item._running_effect_ids.difference_update(stop_ids)
-     */
-    
+    // Set of effects which should be running according to new conditions
     var newRunningEffectIds: Set<EffectId> = []
     let effectStatus = EffectStatusResolver.resolveEffectsStatus(item: item)
     for (effectId, status) in effectStatus {
