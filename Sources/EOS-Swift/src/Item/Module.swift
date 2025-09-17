@@ -106,7 +106,7 @@ class Module:
     self.modifierDomain = .ship
   }
 
-  func getEffectTarget(effectIds: [Int64]) -> Any? {
+  func getEffectTarget(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]? {
     // TODO
     return nil
   }

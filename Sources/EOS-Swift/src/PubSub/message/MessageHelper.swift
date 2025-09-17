@@ -34,83 +34,76 @@ class MessageHelper {
     messages.append(contentsOf: [])
     return messages
   }
+  
+  ///Generate messages about unloaded item.
   static func getItemUnloadedMessages(item: any BaseItemMixinProtocol) -> [any Message] {
     var messages: [any Message] = []
-    /*
-     """Generate messages about unloaded item."""
-     msgs = []
-     # Effects
-     running_effect_ids = item._running_effect_ids
-     if running_effect_ids:
-         # Unapply effects before stopping them
-         tgt_getter = getattr(item, '_get_effects_tgts', None)
-         if tgt_getter:
-             effects_tgts = tgt_getter(running_effect_ids)
-             for effect_id, tgt_items in effects_tgts.items():
-                 msgs.append(EffectUnapplied(item, effect_id, tgt_items))
-         # Stop effects
-         # Copy running effect IDs container, because we clear it on the next
-         # line but it will be processed by message subscribers much later
-         msgs.append(EffectsStopped(item, copy(running_effect_ids)))
-         running_effect_ids.clear()
-     # States
-     states = {s for s in State if s <= item.state}
-     msgs.append(StatesDeactivatedLoaded(item, states))
-     # Item
-     msgs.append(ItemUnloaded(item))
-     */
-//    messages.append(ItemUnloaded(fit: nil, item: item))
-//    let states = State.allCases.filter { $0 <= item._state }
-//    messages.append(StatesDeactivatedLoaded(item: item, states: Set<State>(states)))
+   
+    // Effects
+    let runningEffectIds = item.runningEffectIds
+    if !runningEffectIds.isEmpty {
+      // unapply effects before stoppoing them
+      
+      if let foo = item as? BaseTargetableMixinProtocol {
+        let effectTargets = foo.getEffectTargets(effectIds: Array(runningEffectIds))
+        
+        for (effectId, targetItems) in effectTargets ?? [] {
+          messages.append(
+            EffectUnapplied(item: item, effectId: effectId, targetItems: targetItems)
+          )
+        }
+      }
+      
+      // Stop effects
+      // Copy running effect IDs container, because we clear it on the next
+      // line but it will be processed by message subscribers much later
+      let runningEffectCopy = runningEffectIds
+      messages.append(EffectsStopped(item: item, effectIds: runningEffectCopy))
+      item.runningEffectIds.removeAll()
+    }
+    // States
+    let states = State.allCases.filter({ $0 < item._state })
+    messages.append(StatesDeactivatedLoaded(item: item, states: Set(states)))
+    // Item
+    messages.append(ItemUnloaded(item: item))
     return messages
   }
   
+  /// Generate messages about changed item state.
   static func getItemStateUpdateMessages(
     item: any BaseItemMixinProtocol,
     oldState: State,
     newState: State
   ) -> [any Message] {
+    // State switching upwards
     var messages: [any Message] = []
+    // State switching upwards
+    if newState > oldState {
+      let states = Set(State.allCases.filter({ $0 <= newState && $0 > oldState }))
+      messages.append(StatesActivated(item: item, states: states))
+      
+      if item.isLoaded {
+        messages.append(StatesActivatedLoaded(item: item, states: states))
+      }
+    } else {
+      // State switching downward
+      let states = Set(State.allCases.filter({ $0 > newState && $0 <= oldState }))
+      if item.isLoaded {
+        messages.append(StatesDeactivated(item: item, states: states))
+      }
+    }
+    
+    // Effects
+    if item.isLoaded {
+      messages.append(contentsOf: getEffectsStatusUpdateMessages(item: item))
+    }
     return messages
-    /*
-     """Generate messages about changed item state."""
-     msgs = []
-     # State switching upwards
-     if new_state > old_state:
-         states = {s for s in State if old_state < s <= new_state}
-         msgs.append(StatesActivated(item, states))
-         if item._is_loaded:
-             msgs.append(StatesActivatedLoaded(item, states))
-     # State switching downwards
-     else:
-         states = {s for s in State if new_state < s <= old_state}
-         if item._is_loaded:
-             msgs.append(StatesDeactivatedLoaded(item, states))
-         msgs.append(StatesDeactivated(item, states))
-     # Effects
-     if item._is_loaded:
-         msgs.extend(MsgHelper.get_effects_status_update_msgs(item))
-     */
+
   }
   /// Generate messages about changed effect statuses.
   /// Besides generating messages, it actually updates item's set of effects
   /// which are considered as running.
   static func getEffectsStatusUpdateMessages(item: any BaseItemMixinProtocol) -> [any Message] {
-    var newRunningEffectIds: Set<EffectId> = []
-    let effectStatus = EffectStatusResolver.resolveEffectsStatus(item: item)
-    for (effectId, status) in effectStatus {
-      if status {
-        newRunningEffectIds.insert(effectId)
-      }
-    }
-   
-    let startIds = newRunningEffectIds.subtracting(item.runningEffectIds)
-    let stopIds = item.runningEffectIds.subtracting(newRunningEffectIds)
-    
-    var messages: [any Message] = []
-    if !startIds.isEmpty {
-      
-    }
     /*
      # Set of effects which should be running according to new conditions
      new_running_effect_ids = set()
@@ -142,6 +135,46 @@ class MessageHelper {
          msgs.append(EffectsStopped(item, stop_ids))
          item._running_effect_ids.difference_update(stop_ids)
      */
+    
+    var newRunningEffectIds: Set<EffectId> = []
+    let effectStatus = EffectStatusResolver.resolveEffectsStatus(item: item)
+    for (effectId, status) in effectStatus {
+      if status {
+        newRunningEffectIds.insert(effectId)
+      }
+    }
+   
+    let startIds = newRunningEffectIds.subtracting(item.runningEffectIds)
+    let stopIds = item.runningEffectIds.subtracting(newRunningEffectIds)
+    
+    var messages: [any Message] = []
+    if !startIds.isEmpty {
+      item.runningEffectIds = item.runningEffectIds.union(startIds)
+      // Start effects
+      messages.append(EffectsStarted(item: item, effectIds: startIds))
+      
+      // Apply effects to targets
+      if let foo = item as? BaseTargetableMixinProtocol {
+        let results = foo.getEffectTargets(effectIds: Array(startIds))
+        for (effectId, targetItems) in results ?? [] {
+          messages.append(EffectApplied(item: item, effectId: effectId, targetItems: targetItems))
+        }
+      }
+    }
+    
+    if !stopIds.isEmpty {
+      // Unapply effects from targets
+      if let foo = item as? BaseTargetableMixinProtocol {
+        let results = foo.getEffectTargets(effectIds: Array(stopIds))
+        for (effectId, targetItems) in results ?? [] {
+          messages.append(EffectUnapplied(item: item, effectId: effectId, targetItems: targetItems))
+        }
+      }
+      // Stop effects
+      messages.append(EffectsStopped(item: item, effectIds: stopIds))
+      item.runningEffectIds.subtract(stopIds)
+    }
+    
     return messages
   }
 

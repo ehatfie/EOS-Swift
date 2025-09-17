@@ -79,3 +79,21 @@ struct EffectsUnapplied: ItemMessage {
   let effectIds: Set<EffectId>
   let targetItems: [any BaseItemMixinProtocol]
 }
+
+struct EffectApplied: ItemMessage {
+  var fit: Fit? = nil
+  let messageType: MessageTypeEnum = .EffectsUnapplied
+  let item: any BaseItemMixinProtocol
+  
+  let effectId: EffectId
+  let targetItems: [any BaseItemMixinProtocol]
+}
+
+struct EffectUnapplied: ItemMessage {
+  var fit: Fit? = nil
+  let messageType: MessageTypeEnum = .EffectsUnapplied
+  let item: any BaseItemMixinProtocol
+  
+  let effectId: EffectId
+  let targetItems: [any BaseItemMixinProtocol]
+}

@@ -7,11 +7,11 @@
 
 
 protocol BaseTargetableMixinProtocol {
-  func getEffectTarget(effectIds: [Int64]) -> Any?
+  func getEffectTargets(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]?
 }
 
 class BaseTargetableMixin: BaseTargetableMixinProtocol {
-  func getEffectTarget(effectIds: [Int64]) -> Any? {
+  func getEffectTargets(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]? {
     return nil
   }
 }
