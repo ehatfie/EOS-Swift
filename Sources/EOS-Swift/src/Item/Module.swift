@@ -35,7 +35,7 @@ class Module:
   SingleTargetableMixinProtocol,
   ModuleProtocol
 {
-
+  var target: (any BaseItemMixinProtocol)?
   
   var charge: Charge?
   /*
@@ -90,8 +90,6 @@ class Module:
     return delayMs / 1000
   }
 
-  var target: Any?
-
   var cycleTime: Double = 0
 
   func safeGetFromDefeff(key: String) {
@@ -106,37 +104,17 @@ class Module:
     self.modifierDomain = .ship
   }
 
-  func getEffectTarget(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]? {
-    // TODO
-    return nil
-  }
-
   func childItemIterator() -> AnyIterator<any BaseItemMixinProtocol> {
-    
     let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
     let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
     let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
     var index: Int = 0
+
     return AnyIterator {
       guard index < values.count else { return nil }
       defer { index += 1 }
       return values[index]
     }
-    
-    
-/*
- charge = self.charge
- if charge is not None:
-     yield charge
- # Try next in MRO
- try:
-     child_item_iter = super()._child_item_iter
- except AttributeError:
-     pass
- else:
-     for item in child_item_iter(**kwargs):
-         yield item
- */
   }
 }
 

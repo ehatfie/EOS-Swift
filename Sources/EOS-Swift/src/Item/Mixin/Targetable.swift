@@ -17,5 +17,34 @@ class BaseTargetableMixin: BaseTargetableMixinProtocol {
 }
 
 protocol SingleTargetableMixinProtocol: BaseTargetableMixinProtocol {
-  var target: Any? { get }
+  var target: (any BaseItemMixinProtocol)? { get }
 }
+
+extension SingleTargetableMixinProtocol where Self: BaseItemMixinProtocol {
+  
+  func getEffectTargets(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]? {
+    var effectTargets: [EffectId: [any BaseItemMixinProtocol]] = [:]
+    
+    if let target {
+      for effectId in effectIds {
+        effectTargets[effectId] = [target]
+      }
+    }
+    
+    return effectTargets.map { ($0.key, $0.value)}
+  }
+  
+}
+//extension SingleTargetableMixinProtocol {
+//  func getEffectTargets(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]? {
+//    var effectTargets: [EffectId: Any] = [:]
+//    
+//    if let target {
+//      
+//    }
+//    
+//    return nil
+//  }
+//}
+
+
