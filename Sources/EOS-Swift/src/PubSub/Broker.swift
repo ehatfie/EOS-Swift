@@ -11,6 +11,12 @@ protocol MockSubscriberProtocol: Hashable {
   func notify(message: any Message)
 }
 
+extension MockSubscriberProtocol {
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(self)
+  }
+}
+
 class MockSubscriber: MockSubscriberProtocol, Equatable {
   let thing: Int
 
@@ -62,17 +68,17 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
     self as! Fit
   }
   
-  var subscribers: [MessageTypeEnum: Set<SubscriberType>] = [:]
+  var subscribers: [MessageTypeEnum: Set<AnyHashable>] = [:]
 
   init() {
     self.subscribers = [:]
   }
-
+  
   /// Register subscriber for passed message types.
-  func subscribe(subscriber: SubscriberType, for messageTypes: [MessageTypeEnum]) {
+  func subscribe(subscriber: any MockSubscriberProtocol, for messageTypes: [MessageTypeEnum]) {
     for messageType in messageTypes {
-      var set = subscribers[messageType, default: Set<SubscriberType>()]
-      set.insert(subscriber)
+      var set = subscribers[messageType, default: Set<AnyHashable>()]
+      _ = set.insert(subscriber)
       subscribers[messageType] = set
     }
   }
@@ -99,29 +105,33 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
     }
   }
 
-  func publish<MessageType: Message>(_ message: MessageType) {
-    var set: Set<SubscriberType> = []
-
-    if let subscribersForType = subscribers[message.messageType] {
-      for subscriber in subscribersForType {
-        subscriber.notify(message: message)
+  /// Publish single message.
+  // inout?
+  func publish(message: any Message) {
+    var m = message
+    m.fit = fit
+    for subscriber in self.subscribers[message.messageType] ?? [] {
+      if let foo = subscriber as? any MockSubscriberProtocol {
+        foo.notify(message: m)
       }
-    }
-
-    //return !set.isEmpty
-  }
-  
-  func publish(messages: [any Message]) {
-    for message in messages {
-      var m = message
-      for subscriber in self.subscribers[message.messageType] ?? [] {
-        subscriber.notify(message: message)
-      }
-      //m.fit = self
       
     }
   }
 
+  /// Publish multiple messages.
+  func publishBulk(messages: [any Message]) {
+    for message in messages {
+      var m = message
+      m.fit = self.fit
+      
+      for subscriber in self.subscribers[message.messageType] ?? [] {
+        if let foo = subscriber as? any MockSubscriberProtocol {
+          foo.notify(message: m)
+        }
+      }
+    }
+  }
+  
 }
 
 /*
@@ -131,11 +141,6 @@ class FitMessageBroker<SubscriberType: MockSubscriberProtocol>: FitHaving {
      def __init__(self):
          # Format: {event class: {subscribers}}
          self.__subscribers = {}
-
-     def _subscribe(self, subscriber, msg_types):
-         """Register subscriber for passed message types."""
-         for msg_type in msg_types:
-             self.__subscribers.setdefault(msg_type, set()).add(subscriber)
 
      def _unsubscribe(self, subscriber, msg_types):
          """Unregister subscriber from passed message types."""

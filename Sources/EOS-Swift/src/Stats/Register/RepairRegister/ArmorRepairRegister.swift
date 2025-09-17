@@ -21,6 +21,7 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
   init(fit: Fit) {
     self.fit = fit
     //let set = Set<(any BaseItemMixinProtocol, Effect)>()
+    fit.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
   }
   
   func handleEffectsStarted(message: ItemEffectsMessage) {
@@ -36,4 +37,8 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
   func handleEffectsEnded(message: ItemEffectsMessage) {
     
   }
+}
+
+extension ArmorRepairerRegister: MockSubscriberProtocol {
+  
 }
