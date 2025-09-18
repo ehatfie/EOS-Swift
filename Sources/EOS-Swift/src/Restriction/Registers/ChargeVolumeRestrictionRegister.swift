@@ -38,6 +38,7 @@ class ChargeVolumeRestrictionRegister: BaseRestrictionRegisterProtocol {
       }
     }
   }
+  
   func handleItemLoaded(message: ItemLoaded) {
     let messageItem = message.item
     if !(messageItem is Charge) { return }
@@ -59,11 +60,9 @@ class ChargeVolumeRestrictionRegister: BaseRestrictionRegisterProtocol {
       let chargeVolume = charge.typeAttributes[.volume, default: 0.0]
       let containerCapacity = item.typeAttributes[.capacity, default: 0.0]
       
-      
       if chargeVolume > containerCapacity {
         taintedItems[charge as AnyHashable] = ChargeVolumeErrorData(size: chargeVolume, maxAllowedVolume: containerCapacity)
       }
-      
     }
     
     if !taintedItems.isEmpty {
