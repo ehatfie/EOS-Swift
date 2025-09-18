@@ -56,7 +56,6 @@ class CapitalItemRestrictionRegister: BaseRestrictionRegisterProtocol {
     capitalItems.remove(message.item as! AnyHashable)
   }
   
-  
   func validate() throws {
     guard let ship = self.fit.ship else { return }
     guard ship.typeAttributes[.is_capital_size] == nil else {
@@ -67,6 +66,7 @@ class CapitalItemRestrictionRegister: BaseRestrictionRegisterProtocol {
     if !self.capitalItems.isEmpty {
       var taintedItems: [AnyHashable: CapitalItemErrorData] = [:]
       let items = Array(self.capitalItems).compactMap { $0 as? any BaseItemMixinProtocol }
+      
       for item in items {
         let itemTypeVolume = item.typeAttributes[.volume, default: 0.0]
         taintedItems[item as! AnyHashable] = CapitalItemErrorData(itemVolume: itemTypeVolume, maxSubcapVolume: MAX_SUBCAP_VOLUME)

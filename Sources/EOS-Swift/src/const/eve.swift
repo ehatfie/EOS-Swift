@@ -14,7 +14,7 @@
 
 // https://github.com/pyfa-org/eos/blob/master/eos/const/eve.py
 
-public enum AttrId: Int64 {
+public enum AttrId: Int64, Sendable {
   case cpu = 50
   case cpu_output = 48
   case drone_bandwidth = 1271
