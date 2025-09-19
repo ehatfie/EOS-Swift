@@ -19,8 +19,6 @@ class ModuleRack {
     self.mid = mid
     self.low = low
   }
-  
-  
 }
 
 /// Item view over all module items within all racks.
@@ -50,6 +48,22 @@ class ModuleItemView {
     guard let value = value else {
       return false
     }
-    return false
+    
+    if let moduleHigh = value as? ModuleHigh {
+      return self.racks.high.contains(value: moduleHigh)
+    } else if let moduleMid = value as? ModuleMid {
+      return self.racks.mid.contains(value: moduleMid)
+    } else if let moduleLow = value as? ModuleLow {
+      return self.racks.low.contains(value: moduleLow)
+    } else {
+      return false
+    }
+  }
+  
+  func length() -> Int {
+    let high = racks.high.list.compactMap(\.self).count
+    let mid = racks.mid.list.compactMap(\.self).count
+    let low = racks.low.list.compactMap(\.self).count
+    return high + mid + low
   }
 }
