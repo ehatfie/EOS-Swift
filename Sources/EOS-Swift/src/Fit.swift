@@ -29,7 +29,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
   var implants: ItemSet<Implant>? // Set for implants.
   var boosters: ItemSet<Booster>?  // Set for boosters.
   var subsystems: ItemSet<Subsystem>? // Set for subsystems.
-  var effect_beacon: String?// Access point for effect beacons (e.g. wormhole effects).
+  var effect_beacon: EffectBeacon?// Access point for effect beacons (e.g. wormhole effects).
   var stats: StatService? //  All aggregated stats for fit are accessible via this access
   //  point.
   var defaultIncomingDamage: DamageProfile? {
@@ -37,7 +37,6 @@ class Fit: FitMessageBroker<MockSubscriber> {
       return
     }
     get {
-      
       nil
     }
   }
@@ -69,6 +68,36 @@ class Fit: FitMessageBroker<MockSubscriber> {
     return self
   }
   
+  /*
+   def _item_iter(self, skip_autoitems=False):
+       single = (self.character, self.ship, self.stance, self.effect_beacon)
+       for item in chain(
+           (i for i in single if i is not None),
+           self.skills,
+           self.implants,
+           self.boosters,
+           self.subsystems,
+           self.modules.items(),
+           self.rigs,
+           self.drones,
+           self.fighters
+       ):
+           yield item
+           for child_item in item._child_item_iter(
+               skip_autoitems=skip_autoitems
+           ):
+               yield child_item
+   */
+  func itemIterator(skipAutoitems: Bool = false) -> AnyIterator<any BaseItemMixinProtocol> {
+    var values: [(any BaseItemMixinProtocol)?] = [self.character, self.ship, self.stance] // self.effectBeacon
+    
+    var index: Int = 0
+    return AnyIterator {
+      guard index < values.count else { return nil }
+      defer { index += 1 }
+      return values[index]
+    }
+  }
 }
 
 /*

@@ -5,15 +5,15 @@
 //  Created by Erik Hatfield on 9/5/25.
 //
 
-protocol ItemContainerBaseProtocol<BaseItemMixinProtocol>: AnyObject {
-  associatedtype BaseItemMixinProtocol
+protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
+  associatedtype ExpectedType
   /*
    @property
     def _fit(self):
         return self.__parent._fit
    */
   
-  func checkClass(item: BaseItemMixinProtocol) -> Bool
+  func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool
   
   //func handleItemAddition(item: Any, container: Any) {
 
@@ -46,15 +46,15 @@ class BaseTestItemContainer<T: BaseItemMixinProtocol>: TestItemContainerProtocol
 
 /*
  8/7/25 - Pretty sure this is 95% done
+ 8/18/25 - Maybe this should be a default implementation on ItemContainerBaseProtocol
  */
 
 class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
-  typealias ExpectedItemType = T
-  
+  typealias ExpectedType = T
   
   init() { }
   
-  func handleItemAddition(_ item: T, container: ItemContainerBase<BaseItemMixin>) throws {
+  func handleItemAddition(_ item: T, container: any ItemContainerBaseProtocol) throws {
     guard item.container == nil else {
       fatalError("Item already assigned to another container")
     }
@@ -67,6 +67,8 @@ class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
     }
     
     for subItem in subItemIterator(item: item) {
+      let messages = MessageHelper.getItemAddedMessages(item: subItem)
+      fit.publishBulk(messages: messages)
       subItem.load()
     }
   }
@@ -90,23 +92,25 @@ class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
      */
     let fit = item.fit
     for subItem in self.subItemIterator(item: item) {
-      //subItem.unload()
       subItem.unload()
-      // TODO
-//      if fit is not None:
-//          msgs = MsgHelper.get_item_removed_msgs(subitem)
-//          fit._publish_bulk(msgs)
+      if let fit = fit {
+        let messages = MessageHelper.getItemRemovedMessages(item: subItem)
+        fit.publishBulk(messages: messages)
+      }
     }
     item.container = nil
   }
   
   func subitemIterator(item: T) {
-    
+    print("++ baseItemCOntainer subitemIterator")
   }
 
   /// Check if class of passed item corresponds to our expectations.
-  func checkClass(item: any BaseItemMixinProtocol) -> Bool {
-    return item is ExpectedItemType
+  func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool {
+    guard let item = item else {
+      return allowNil
+    }
+    return item is ExpectedType
   }
 }
 
