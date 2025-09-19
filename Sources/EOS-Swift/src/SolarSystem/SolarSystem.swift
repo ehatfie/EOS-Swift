@@ -13,7 +13,8 @@ class MockSolarSystem: SolarSystemProtocol {
   
 }
 
-class SolarSystem {
+class SolarSystem: MaybeFitHaving {
   var source: Any?
+  weak var fit: Fit?
   // var calculator = CalculationService
 }

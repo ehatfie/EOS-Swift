@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/17/25.
 //
 
-fileprivate let ALLOWED_GROUP_ATTR_IDS = [
+fileprivate let ALLOWED_GROUP_ATTR_IDS1 = [
   AttrId.charge_group_1,
   AttrId.charge_group_2,
   AttrId.charge_group_3,
@@ -78,7 +78,7 @@ class ChargeGroupRestrictionRegister: BaseRestrictionRegisterProtocol, FitHaving
     
     var allowedGroupIds: Set<Int64> = []
     
-    for attributeId in ALLOWED_GROUP_ATTR_IDS {
+    for attributeId in ALLOWED_GROUP_ATTR_IDS1 {
       guard let allowedGroupId = messageItem.attributes[attributeId] else { return }
       allowedGroupIds.insert(Int64(allowedGroupId))
     }
