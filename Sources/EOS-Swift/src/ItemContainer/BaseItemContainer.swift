@@ -16,7 +16,7 @@ protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
   func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool
   
   //func handleItemAddition(item: Any, container: Any) {
-
+  func subItemIterator(item: ExpectedType) -> AnyIterator<ExpectedType>
 }
 
 public protocol TestItemContainerProtocol<BaseItemMixinProtocol> {
@@ -75,7 +75,15 @@ class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
   
   func subItemIterator(item: T) -> AnyIterator<T> {
     var index = 0
-    let values = [T]()
+    var values = [T]()
+    let iterResult = item.childItemIterator(skipAutoItems: true)?.map({ $0})
+    
+    values = [item] + (iterResult as? [T] ?? [])
+    
+    if let iterResult, iterResult.count != (values.count - 1) {
+      print("++ child item iterator values count mismatch")
+    }
+    
     return AnyIterator {
       guard index < values.count else { return nil }
       defer { index += 1 }

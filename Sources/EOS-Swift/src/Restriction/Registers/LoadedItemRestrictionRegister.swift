@@ -21,7 +21,15 @@ class LoadedItemRestriction: BaseRestrictionProtocol, FitHaving {
   func validate() throws {
     var taintedItems: [AnyHashable: LoadedItemErrorData] = [:]
     
+    for item in self.fit.itemIterator(skipAutoitems: true) {
+      if !item.isLoaded {
+        taintedItems[item as! AnyHashable] = LoadedItemErrorData()
+      }
+    }
     
+    if !taintedItems.isEmpty {
+      throw RestrictionValidationError(data: taintedItems)
+    }
   }
   
 }

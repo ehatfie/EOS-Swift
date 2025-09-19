@@ -5,10 +5,10 @@
 //  Created by Erik Hatfield on 9/18/25.
 //
 
-
+// Maybe should be a Struct?
 /// Container for all module racks.
 /// Each rack is actually list container for module items.
-class ModuleRack {
+class ModuleRacks {
   
   let high: ItemList<ModuleHigh>
   let mid: ItemList<ModuleMid>
@@ -19,13 +19,17 @@ class ModuleRack {
     self.mid = mid
     self.low = low
   }
+  
+  func items() -> ModuleItemView {
+    return ModuleItemView(racks: self)
+  }
 }
 
 /// Item view over all module items within all racks.
 class ModuleItemView {
-  var racks: ModuleRack
+  var racks: ModuleRacks
   
-  init(racks: ModuleRack) {
+  init(racks: ModuleRacks) {
     self.racks = racks
   }
   

@@ -242,10 +242,6 @@ extension BaseItemMixinProtocol {
 }
 
 open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
-  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<BaseItemMixin>? {
-    nil
-  }
-  
   public var userModifiable: Bool
   
   public var typeId: Int64

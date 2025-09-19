@@ -17,20 +17,21 @@ class Fit: FitMessageBroker<MockSubscriber> {
   weak var fleet: MockFleet?
   var ship: Ship? // Access point for ship.
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
-  
+  var modules: ModuleRacks
   //var modules.high: // List for high-slot modules.
   //var modules.mid: // List for medium-slot modules.
   //var modules.low: // List for low-slot modules.
-  var rigs: ItemSet<Rig>? //  Set for rigs.
+  var rigs: ItemSet<Rig> //  Set for rigs.
   var drones: String? // Set for drones.
   var fighters: String? // Set for fighter squads.
   var character: Character? // Access point for character.
-  var skills: TypeUniqueSet<Skill>? // Keyed set for skills.
-  var implants: ItemSet<Implant>? // Set for implants.
-  var boosters: ItemSet<Booster>?  // Set for boosters.
-  var subsystems: ItemSet<Subsystem>? // Set for subsystems.
-  var effect_beacon: EffectBeacon?// Access point for effect beacons (e.g. wormhole effects).
-  var stats: StatService? //  All aggregated stats for fit are accessible via this access
+  var skills: TypeUniqueSet<Skill> // Keyed set for skills.
+  var implants: ItemSet<Implant> // Set for implants.
+  var boosters: ItemSet<Booster> // Set for boosters.
+  var subsystems: ItemSet<Subsystem> // Set for subsystems.
+  var effect_beacon: EffectBeacon? // Access point for effect beacons (e.g. wormhole effects).
+  var stats: StatService //  All aggregated stats for fit are accessible via this access
+  //var restriction: RestrictionService?
   //  point.
   var defaultIncomingDamage: DamageProfile? {
     set {
@@ -53,6 +54,11 @@ class Fit: FitMessageBroker<MockSubscriber> {
     
     self.rigs = ItemSet<Rig>(parent: self, containerOverride: nil)
     self.stats = StatService(fit: self)
+    self.modules = ModuleRacks(
+      high: ItemList(parent: self),
+      mid: ItemList(parent: self),
+      low: ItemList(parent: self)
+    )
     //super.init()
   }
   
@@ -89,7 +95,42 @@ class Fit: FitMessageBroker<MockSubscriber> {
                yield child_item
    */
   func itemIterator(skipAutoitems: Bool = false) -> AnyIterator<any BaseItemMixinProtocol> {
-    var values: [(any BaseItemMixinProtocol)?] = [self.character, self.ship, self.stance] // self.effectBeacon
+    let optionalValues: [(any BaseItemMixinProtocol)?] = [
+      self.character, self.ship, self.stance, self.effect_beacon
+    ]
+
+    // TODO: Simplify
+    let skills = fit.skills.iterator().map { item -> [any BaseItemMixinProtocol] in
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      return [item] + children
+    }.flatMap { $0 }
+    
+    let implants = fit.implants.iterator().map { item -> [any BaseItemMixinProtocol] in
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      return [item] + children
+    }.flatMap { $0 }
+    
+    let boosters = fit.boosters.iterator().map { item -> [any BaseItemMixinProtocol] in
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      return [item] + children
+    }.flatMap { $0 }
+
+    let subsystems = fit.subsystems.iterator().map { item -> [any BaseItemMixinProtocol] in
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      return [item] + children
+    }.flatMap { $0 }
+    
+    let modules = self.modules.items().iter().map { item -> [any BaseItemMixinProtocol] in
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      return [item] + children
+    }.flatMap { $0 }
+    
+    let rigs = fit.rigs.iterator().map { item -> [any BaseItemMixinProtocol] in
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      return [item] + children
+    }.flatMap { $0 }
+    //let modules = self.modul
+    var values: [any BaseItemMixinProtocol] = optionalValues.compactMap { $0 } + skills + implants + boosters + subsystems + modules + rigs // + drones + fighters
     
     var index: Int = 0
     return AnyIterator {
