@@ -6,23 +6,19 @@
 //
 import Foundation
 
-struct Coordinates {
-  var x: CGFloat
-  var y: CGFloat
-  var z: CGFloat
+
+
+protocol SolarSystemItemMixinProtocol {
+  var coordinate: Coordinates { get set }
+  var orientation: Orientation { get set }
 }
 
-protocol SolarSystemMixinProtocol {
-  var coordinate: CGSize { get set }
-  var orientation: CGSize { get set }
-}
-
-class SolarSystemMixin {
-  let coordinate: CGSize
-  let orientation: CGSize
+class SolarSystemItemMixin {
+  let coordinate: Coordinates
+  let orientation: Orientation
   
-  init(coordinate: CGSize, orientation: CGSize) {
-    self.coordinate = coordinate
-    self.orientation = orientation
+  init() {
+    self.coordinate = Coordinates(x: 0, y: 0, z: 0)
+    self.orientation = Orientation(x: 1, y: 0, z: 0)
   }
 }

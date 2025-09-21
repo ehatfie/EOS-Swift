@@ -7,14 +7,10 @@
 
 
 protocol BaseResourceRegisterProtocol: BaseStatsRegisterProtocol {
-  
   var used: Double { get }
   var output: Double { get }
   var users: Set<AnyHashable> { get } // any BaseItemMixinProtocol ??
 }
-
-
-
 
 // TODO: Move
 protocol EffectsSubscriberProtocol {

@@ -11,8 +11,11 @@ class StatService {
   var ddRegister: DamageDealerRegister
   var armorRepRegister: ArmorRepairerRegister
   var shieldRepRegister: ShieldRepairerRegister
-  // var cpu: CpuRegister
-  
+  var cpu: CPURegister
+  var powerGrid: PowergridRegister
+  var calibration: CalibrationRegister
+  // var dronebay: DronebayVolumeRegister
+  // var droneBandwidth: DoneBandwidthRegister
   
   init(fit: Fit) {
     self.fit = fit
@@ -20,5 +23,10 @@ class StatService {
     self.ddRegister = DamageDealerRegister(fit: fit)
     self.armorRepRegister = ArmorRepairerRegister(fit: fit)
     self.shieldRepRegister = ShieldRepairerRegister(fit: fit)
+    self.cpu = CPURegister(fit: fit)
+    self.powerGrid = PowergridRegister(fit: fit)
+    self.calibration = CalibrationRegister(fit: fit)
+    
+    
   }
 }
