@@ -35,12 +35,17 @@ class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
   
   var slotUsers: Set<AnyHashable> = []
   
-  weak var fit: Fit?
-  
   var users: Set<AnyHashable> {
     return slotUsers
   }
   
+  weak var fit: Fit?
+  
+  init(fit: Fit) {
+    self.fit = fit
+    
+    self.fit?.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
+  }
   
   func handleEffectsStarted(message: EffectsStarted) {
     if message.effectIds.contains(slotEffectId) {
@@ -53,14 +58,6 @@ class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
       self.slotUsers.remove(message.item as! AnyHashable)
     }
   }
-  
-
-  init(fit: Fit) {
-    self.fit = fit
-    
-    self.fit?.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
-  }
-  
 }
 
 class TurretSlotRegister: HardpointEffectSlotRegister {
