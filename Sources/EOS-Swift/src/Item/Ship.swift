@@ -11,9 +11,8 @@ class Ship:
   BaseItemMixin,
   ImmutableStateMixinProtocol,
   BufferTankingMixinProtocol,
-  SolarSystemMixinProtocol
+  SolarSystemItemMixinProtocol
 {
-  
 //  var modifierDomain: ModDomain?
 //  
 //  var ownerModifiable: Bool
@@ -42,9 +41,8 @@ class Ship:
   
   //var worstCaseEHP: ItemHP
   
-  var coordinate: CGSize = .init(width: 0, height: 0)
-  
-  var orientation: CGSize = .init(width: 0, height: 0)
+  var coordinate: CGSize = Coordinates(x: 0, y: 0, z: 0)
+  var orientation: CGSize = Orientation(x: 1, y: 0, z: 0)
   
   override init(typeId: Int64, state: State) {
     super.init(typeId: typeId, state: state)

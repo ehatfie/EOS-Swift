@@ -14,8 +14,9 @@ class StatService {
   var cpu: CPURegister
   var powerGrid: PowergridRegister
   var calibration: CalibrationRegister
-  // var dronebay: DronebayVolumeRegister
-   var droneBandwidth: DroneBandwidthRegister
+  var dronebay: DronebayVolumeRegister
+  var droneBandwidth: DroneBandwidthRegister
+  // var turretSlots: TurretSlotRegister
   
   init(fit: Fit) {
     self.fit = fit
@@ -26,7 +27,8 @@ class StatService {
     self.cpu = CPURegister(fit: fit)
     self.powerGrid = PowergridRegister(fit: fit)
     self.calibration = CalibrationRegister(fit: fit)
-    
+    self.dronebay = DronebayVolumeRegister(fit: fit)
     self.droneBandwidth = DroneBandwidthRegister(fit: fit)
+    // self.turretSlots = TurretSlotRegister(fit)
   }
 }
