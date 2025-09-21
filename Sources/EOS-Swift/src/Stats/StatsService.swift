@@ -6,7 +6,7 @@
 //
 
 class StatService {
-  var fit: Fit? = nil
+  weak var fit: Fit? = nil
   
   var ddRegister: DamageDealerRegister
   var armorRepRegister: ArmorRepairerRegister
@@ -15,7 +15,7 @@ class StatService {
   var powerGrid: PowergridRegister
   var calibration: CalibrationRegister
   // var dronebay: DronebayVolumeRegister
-  // var droneBandwidth: DoneBandwidthRegister
+   var droneBandwidth: DroneBandwidthRegister
   
   init(fit: Fit) {
     self.fit = fit
@@ -27,6 +27,6 @@ class StatService {
     self.powerGrid = PowergridRegister(fit: fit)
     self.calibration = CalibrationRegister(fit: fit)
     
-    
+    self.droneBandwidth = DroneBandwidthRegister(fit: fit)
   }
 }
