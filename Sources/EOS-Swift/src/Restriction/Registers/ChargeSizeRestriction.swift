@@ -33,14 +33,12 @@ class ChargeSizeRestrictionRegister: BaseRestrictionRegisterProtocol {
   }
   
   func notify(message: any Message) {
-    func notify(message: any Message) {
-      switch message {
-      case let m as ItemLoaded:
-        handleItemLoaded(message: m)
-      case let m as ItemUnloaded:
-        handleItemUnloaded(message: m)
-      default: break
-      }
+    switch message {
+    case let m as ItemLoaded:
+      handleItemLoaded(message: m)
+    case let m as ItemUnloaded:
+      handleItemUnloaded(message: m)
+    default: break
     }
   }
   func handleItemLoaded(message: ItemLoaded) {

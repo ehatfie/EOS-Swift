@@ -23,5 +23,6 @@ class ItemClassRestriction: BaseRestrictionProtocol {
     var taintedItems: [AnyHashable: ItemClassErrorData] = [:]
     // TODO
     // _loaded_item_iter(skip_autoitems=True):
+    
   }
 }

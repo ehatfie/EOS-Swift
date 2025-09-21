@@ -43,7 +43,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
       case let message as EffectsStarted:
       self.handleEffectsStarted(message: message)
     case let message as EffectsStopped:
-      self.handleEffectsEnded(message: message)
+      self.handleEffectsStopped(message: message)
     default:
       break
     }
@@ -75,7 +75,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     }
   }
   
-  func handleEffectsEnded(message: EffectsStopped) {
+  func handleEffectsStopped(message: EffectsStopped) {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {

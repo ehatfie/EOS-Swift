@@ -30,7 +30,7 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
     }
   }
   
-  func handleEffectsEnded(message: EffectsStopped) {
+  func handleEffectsStopped(message: EffectsStopped) {
     
   }
   
@@ -39,7 +39,7 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
     case is EffectsStarted:
       handleEffectsStarted(message: message as! EffectsStarted)
     case is EffectsStopped:
-      handleEffectsEnded(message: message as! EffectsStopped)
+      handleEffectsStopped(message: message as! EffectsStopped)
     default: break
     }
   }
