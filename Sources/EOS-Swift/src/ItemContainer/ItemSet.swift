@@ -73,7 +73,7 @@ class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated, Maybe
     return set.contains(item)
   }
   
-  func length() -> Int {
+  override func length() -> Int {
     return set.count
   }
   

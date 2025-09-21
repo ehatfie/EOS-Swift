@@ -15,7 +15,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     fit.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
-  func getVolley(itemFilter: Any?, targetResists: ResistProfile) -> DamageStats {
+  func getVolley(itemFilter: Any?, targetResists: ResistProfile?) -> DamageStats {
     var damageStats: [DamageStats?] = []
     for item in ddIterator(itemFilter: nil) {
       damageStats.append(item.getVolley(targetResists: targetResists))
@@ -52,7 +52,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
   func getDps(
     itemFilter: Any?,
     reload: Bool,
-    targetResists: ResistProfile
+    targetResists: ResistProfile?
   ) -> DamageStats {
     var dpsValues: [DamageStats] = []
     for item in self.ddIterator(itemFilter: itemFilter) {

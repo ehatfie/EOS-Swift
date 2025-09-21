@@ -14,6 +14,7 @@
 ///    item_class: Class of items this container is allowed to contain.
 
 
+
 class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T> {
   typealias BaseItemMixin = T
   weak var parent: (any FitHaving)? // ParentHaving??
@@ -224,7 +225,7 @@ class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T> {
     return list.contains(where: {$0 == value})
   }
   
-  func length() -> Int {
+  override func length() -> Int {
     return self.list.count
   }
   

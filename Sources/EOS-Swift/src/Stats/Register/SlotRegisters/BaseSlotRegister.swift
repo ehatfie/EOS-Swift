@@ -11,8 +11,6 @@ protocol BaseSlotRegisterProtocol: BaseStatsRegisterProtocol {
   var users: Set<AnyHashable> { get }
 }
 
-
-
 class BaseSlotRegister: BaseSlotRegisterProtocol {
   static func == (lhs: BaseSlotRegister, rhs: BaseSlotRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)

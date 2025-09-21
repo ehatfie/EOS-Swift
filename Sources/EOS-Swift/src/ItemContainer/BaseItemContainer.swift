@@ -17,6 +17,7 @@ protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
   
   //func handleItemAddition(item: Any, container: Any) {
   func subItemIterator(item: ExpectedType) -> AnyIterator<ExpectedType>
+  func length() -> Int
 }
 
 public protocol TestItemContainerProtocol<BaseItemMixinProtocol> {
@@ -119,6 +120,10 @@ class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
       return allowNil
     }
     return item is ExpectedType
+  }
+  
+  func length() -> Int {
+    return 0
   }
 }
 
