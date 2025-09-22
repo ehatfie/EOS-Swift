@@ -12,11 +12,17 @@ let package = Package(
             targets: ["EOS-Swift"]
         ),
     ],
+    dependencies: [
+      .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.1"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "EOS-Swift"
+            name: "EOS-Swift",
+            dependencies: [
+              .product(name: "Yams", package: "Yams")
+            ]
         ),
         .testTarget(
             name: "EOS-SwiftTests",

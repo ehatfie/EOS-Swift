@@ -367,8 +367,34 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     }
   }
 
-
+  /// Load item's source-specific data.
   public func load() {
+    /*
+             fit = self._fit
+             # Do nothing if we cannot reach cache handler
+             try:
+                 getter = fit.solar_system.source.cache_handler.get_type
+             except AttributeError:
+                 return
+             # Do nothing if cache handler doesn't have item type we need
+             try:
+                 self._type = getter(self._type_id)
+             except TypeFetchError:
+                 return
+             # If fetch is successful, launch bunch of messages
+             if fit is not None:
+                 msgs = MsgHelper.get_item_loaded_msgs(self)
+                 fit._publish_bulk(msgs)
+             # Add autocharges, if effects specify any
+             for effect_id, effect in self._type_effects.items():
+                 autocharge_type_id = effect.get_autocharge_type_id(self)
+                 if autocharge_type_id is None:
+                     continue
+                 self._add_autocharge(effect_id, autocharge_type_id)
+     */
+    
+    let fit = self.fit
+    let foo = fit?.solarSystem?.source?.cacheHandler.getType
     // get a getter
     for (effectId, effect) in self.typeEffects {
       //let autoChargeTypeId = effect.getAutoChargeTypeId(item: <#T##BaseItemMixin#>)
