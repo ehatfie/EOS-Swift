@@ -20,6 +20,14 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
     fit.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
+  func getRps(item: (any BaseItemMixinProtocol)?, damageProfile: DamageProfile?, reload: Bool) -> Double {
+    var rps: Double = 0.0
+    for (repItem, repEffect) in self.localRepairers {
+      
+    }
+    return 0.0
+  }
+  
   func handleEffectsStarted(message: EffectsStarted) {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
@@ -47,12 +55,8 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
 
 extension ArmorRepairerRegister {
 
-  
-
-  
   static func == (lhs: ArmorRepairerRegister, rhs: ArmorRepairerRegister) -> Bool {
     return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
-  
   
 }

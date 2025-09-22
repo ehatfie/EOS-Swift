@@ -42,6 +42,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
   var boosters: ItemSet<Booster>! // Set for boosters.
   var subsystems: ItemSet<Subsystem>! // Set for subsystems.
   var effect_beacon: EffectBeacon? // Access point for effect beacons (e.g. wormhole effects).
+  var restriction: RestrictionService!
   var stats: StatService! //  All aggregated stats for fit are accessible via this access
   //var restriction: RestrictionService?
   //  point.
@@ -57,7 +58,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
   init(solarSystem: SolarSystem? = DefaultSolarSystem(), fleet: MockFleet?) {
     self.solarSystem =  solarSystem
     self.fleet = fleet
-    
+  
     super.init()
     
 
@@ -77,6 +78,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
     // self.fighters = ItemSet<FighterSquad>(parent: self, containerOverride: nil)
     
     // Initialize services
+    self.restriction = RestrictionService(fit: self)
     self.stats = StatService(fit: self)
     
     // Initialize simulators
@@ -103,6 +105,12 @@ class Fit: FitMessageBroker<MockSubscriber> {
       //fleet.fits.add(self)
     }
     
+  }
+  
+  /// Run fit Validation
+  func validate(skipChecks: [Any]) throws {
+    //self.restriction.validate()
+    try self.restriction.validate(skipChecks: skipChecks)
   }
   
   func setDefaultIncomingDamage(value: Any) {

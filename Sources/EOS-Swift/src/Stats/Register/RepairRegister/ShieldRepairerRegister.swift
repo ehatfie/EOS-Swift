@@ -37,10 +37,11 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   
   // TODO
   func getRps(
-    item: any BufferTankingMixinProtocol,
+    item: (any BufferTankingMixinProtocol)?,
     damageProfile: DamageProfile?,
     reload: Bool
-  ) {
+  ) -> Double {
+    guard let item = item else { return 0.0 }
     var rps: Double = 0.0
     for (key, value) in self.localRepairers {
       let repItem = value.item
@@ -70,6 +71,8 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
     if let damageProfile {
       rps *= item.getTankingEfficiency(damageProfile: damageProfile, resists: item.resists.shield)
     }
+    
+    return rps
   }
   
   func handleEffectsStarted(message: EffectsStarted) {

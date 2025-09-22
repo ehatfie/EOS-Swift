@@ -4,6 +4,11 @@
 //
 //  Created by Erik Hatfield on 9/7/25.
 //
+import Foundation
+
+protocol StatsServiceProtocol: StatServiceRegistersProtocol, StatServiceSlotsProtocol, StatServiceValuesProtocol {
+  
+}
 
 protocol StatServiceRegistersProtocol {
   var ddRegister: DamageDealerRegister { get set }
@@ -18,7 +23,7 @@ protocol StatServiceRegistersProtocol {
   var launcherSlots: LauncherSlotRegister { get set }
 }
 
-protocol StatServiceRegisterSlotsProtocol: MaybeFitHaving {
+protocol StatServiceSlotsProtocol: MaybeFitHaving {
   var highSlots: SlotStats { get }
   var midSlots: SlotStats { get }
   var lowSlots: SlotStats { get }
@@ -26,26 +31,26 @@ protocol StatServiceRegisterSlotsProtocol: MaybeFitHaving {
   var subsystemSlots: SlotStats { get }
   var fighterSquads: SlotStats { get }
   
-  func getSlotStats(container: any ItemContainerBaseProtocol) -> SlotStats
+  func getSlotStats(container: any ItemContainerBaseProtocol, attrId: AttrId) -> SlotStats
 }
 
-protocol StatServiceRegisterValuesProtocol: MaybeFitHaving, StatServiceRegistersProtocol {
+protocol StatServiceValuesProtocol: MaybeFitHaving, StatServiceRegistersProtocol {
   var hp: ItemHP { get }
   
   var resists: any TankingLayersProtocol { get }
   var worstCaseEHP: ItemHP { get }
-  var agilityFactor: Double { get }
-  var alignTime: Double { get }
+  var agilityFactor: Double? { get }
+  var alignTime: Double? { get }
   
   func getEHP(damageProfile: DamageProfile?) -> ItemHP
   func getVolley(itemFilter: Any?, targetResists: ResistProfile?) -> DamageStats
-  func getDPS(itemFilter: Any?, targetResists: ResistProfile?) -> DamageStats
+  func getDPS(itemFilter: Any?, reload: Bool, targetResists: ResistProfile?) -> DamageStats
   
   func getArmorRps(damageProfile: DamageProfile, reload: Bool) -> Double
   func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double
 }
 
-extension StatServiceRegisterValuesProtocol {
+extension StatServiceValuesProtocol {
   
   /// Fetch ship HP stats.
   /// Returns:
@@ -88,9 +93,46 @@ extension StatServiceRegisterValuesProtocol {
   func getDPS(itemFilter: Any? = nil, reload: Bool = false, targetResists: ResistProfile? = nil) -> DamageStats {
     return self.ddRegister.getDps(itemFilter: itemFilter, reload: reload, targetResists: targetResists)
   }
+  
+  func getArmorRps(damageProfile: DamageProfile, reload: Bool = false) -> Double {
+
+    if damageProfile is DefaultImpl {
+      let dmgProfile = self.fit?.defaultIncomingDamage
+      return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
+    }
+    return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
+  }
+  
+  func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double {
+    if damageProfile is DefaultImpl {
+      let dmgProfile = self.fit?.defaultIncomingDamage
+      return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
+    }
+    return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
+  }
+  
+  var agilityFactor: Double? {
+    guard let ship = self.fit?.ship else {
+      return nil
+    }
+    guard let agility = ship.attributes[.agility],
+          let mass = ship.attributes[.mass] else {
+      return nil
+    }
+    
+    let agilityFactor = -log(0.25) * agility * mass / 1000000
+    return agilityFactor
+  }
+  
+  var alignTime: Double? {
+    guard let agilityFactor else {
+      return nil
+    }
+    return ceil(agilityFactor)
+  }
 }
 
-extension StatServiceRegisterValuesProtocol {
+extension StatServiceValuesProtocol {
   var highSlots: SlotStats {
     guard let modules = fit?.modules.high else {
       return SlotStats(used: 0, total: 0)
@@ -123,7 +165,7 @@ extension StatServiceRegisterValuesProtocol {
     return self.getSlotStats(container: modules, attrId: .rig_slots)
   }
   
-  var subSystemSlots: SlotStats {
+  var subsystemSlots: SlotStats {
     guard let modules = fit?.subsystems else {
       return SlotStats(used: 0, total: 0)
     }
@@ -148,7 +190,7 @@ extension StatServiceRegisterValuesProtocol {
   }
 }
 
-class StatService: StatServiceRegistersProtocol {
+class StatService: StatsServiceProtocol {
   weak var fit: Fit? = nil
   
   var ddRegister: DamageDealerRegister
