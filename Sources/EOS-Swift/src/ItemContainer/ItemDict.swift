@@ -21,19 +21,19 @@ class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
   weak var parent: (any MaybeFitHaving)?
   
   var itemSet: ItemSet<T>
-  var keyedItems: [T: any BaseItemMixinProtocol] = [:]
+  var keyedItems: [AnyHashable: T] = [:]
   
   init(parent: any MaybeFitHaving, containerOverride: Any?) {
     self.parent = parent
     self.itemSet = ItemSet<T>(parent: parent, containerOverride: containerOverride)
   }
   
-  func setItem(key: T, item: any BaseItemMixinProtocol) {
+  func setItem(key: AnyHashable, item: T) {
     if self.keyedItems[key] != nil {
       fatalError("Item with key \(key) already exists in this container.")
     }
     self.keyedItems[key] = item
-    self.itemSet.add(item: key)
+    self.itemSet.add(item: item)
   }
   
   func deleteItem(key: T) {
@@ -41,7 +41,7 @@ class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
       return
     }
     
-    self.itemSet.remove(item: key)
+    self.itemSet.remove(item: item)
     self.keyedItems[key] = nil
   }
   
@@ -54,11 +54,11 @@ class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
     return self.keyedItems[key] ?? defaultValue ?? nil
   }
   
-  func keys() -> [T] {
+  func keys() -> [AnyHashable] {
     return Array(self.keyedItems.keys)
   }
   
-  func values() -> [any BaseItemMixinProtocol] {
+  func values() -> [T] {
     
     return Array(self.keyedItems.values)
   }

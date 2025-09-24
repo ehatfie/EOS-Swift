@@ -17,14 +17,14 @@
 
 class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T> {
   typealias BaseItemMixin = T
-  weak var parent: (any FitHaving)? // ParentHaving??
+  weak var parent: (any MaybeFitHaving)? // ParentHaving??
   var list: [T?] = []
   
   var fit: Fit? {
     return self.parent?.fit
   }
   
-  init(parent: any FitHaving) {
+  init(parent: any MaybeFitHaving) {
     //super.init(parent: parent)
     self.parent = parent
     self.list = []

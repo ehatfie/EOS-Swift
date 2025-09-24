@@ -8,7 +8,7 @@
 class TypeUniqueSet<T: BaseItemMixinProtocol>: ItemSet<T> {
   var typeIdMap: [Int64: T] = [:]
   
-  init(parent: FitHaving) {
+  init(parent: MaybeFitHaving) {
     super.init(parent: parent, containerOverride: nil)
   }
   

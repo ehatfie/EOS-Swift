@@ -7,6 +7,7 @@
 import Foundation
 
 class JsonCachehandler: BaseCacheHandlerProtocol {
+
   var cachePath: String
   
   var typeStore: [Int64: ItemType] = [:]
@@ -21,8 +22,8 @@ class JsonCachehandler: BaseCacheHandlerProtocol {
     self.loadPersistantCache()
   }
   
-  func getType(typeId: Int64) {
-    
+  func getType(typeId: Int64) -> ItemType? {
+    return nil
   }
   
   func getAttribute(attributeId: AttrId) {

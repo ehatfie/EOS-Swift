@@ -63,9 +63,9 @@ extension MockSubscriber: Hashable {
 }
 /// I think this needs to be a protocol and implementations in an extension
 /// Manages message subscriptions and dispatch messages to recipients.
-class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: FitHaving {
-  var fit: Fit {
-    self as! Fit
+class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitHaving {
+  var fit: Fit? {
+    self as? Fit
   }
   
   var subscribers: [MessageTypeEnum: Set<AnyHashable>] = [:]

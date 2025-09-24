@@ -121,9 +121,9 @@ class Fit: FitMessageBroker<MockSubscriber> {
     
   }
   
-  override var fit: Fit {
-    return self
-  }
+//  var fit: Fit? {
+//    return self
+//  }
   
   /*
    def _item_iter(self, skip_autoitems=False):
@@ -151,22 +151,22 @@ class Fit: FitMessageBroker<MockSubscriber> {
     ]
 
     // TODO: Simplify
-    let skills = fit.skills.iterator().map { item -> [any BaseItemMixinProtocol] in
+    let skills = fit!.skills.iterator().map { item -> [any BaseItemMixinProtocol] in
       let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
     
-    let implants = fit.implants.iterator().map { item -> [any BaseItemMixinProtocol] in
+    let implants = fit!.implants.iterator().map { item -> [any BaseItemMixinProtocol] in
       let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
     
-    let boosters = fit.boosters.iterator().map { item -> [any BaseItemMixinProtocol] in
+    let boosters = fit!.boosters.iterator().map { item -> [any BaseItemMixinProtocol] in
       let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
 
-    let subsystems = fit.subsystems.iterator().map { item -> [any BaseItemMixinProtocol] in
+    let subsystems = fit!.subsystems.iterator().map { item -> [any BaseItemMixinProtocol] in
       let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
@@ -176,7 +176,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
       return [item] + children
     }.flatMap { $0 }
     
-    let rigs = fit.rigs.iterator().map { item -> [any BaseItemMixinProtocol] in
+    let rigs = fit!.rigs.iterator().map { item -> [any BaseItemMixinProtocol] in
       let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }

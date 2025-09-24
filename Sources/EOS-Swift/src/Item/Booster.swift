@@ -11,6 +11,7 @@ struct SideEffectData {
 }
 
 class Booster: ImmutableStateMixinProtocol {
+
   let SIDE_EFFECT_STATE = State.offline
 
   var typeId: Int64
@@ -40,6 +41,11 @@ class Booster: ImmutableStateMixinProtocol {
     ownerModifiable = false
     solsysCarrier = nil
   }
+  
+  var autocharges: ItemDict<AutoCharge>?
+  
+  func clearAutocharges() { }
+  
 
   var sideEffectChances: [EffectId: Double] {
     var sideEffectChances: [EffectId: Double] = [:]

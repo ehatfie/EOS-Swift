@@ -35,6 +35,8 @@ class Module:
   SingleTargetableMixinProtocol,
   ModuleProtocol
 {
+
+  
   var target: (any BaseItemMixinProtocol)?
   
   var charge: Charge?
@@ -103,7 +105,21 @@ class Module:
     self.ownerModifiable = false
     self.modifierDomain = .ship
   }
+  
+  override func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+    let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
+    let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
+    let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
+    var index: Int = 0
 
+    return AnyIterator {
+      guard index < values.count else { return nil }
+      defer { index += 1 }
+      return values[index]
+    }
+  }
+  
+  // duplicate?? Pretty sure the above is the right way to do it
   func childItemIterator() -> AnyIterator<any BaseItemMixinProtocol> {
     let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
     let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
@@ -129,8 +145,22 @@ class Module:
          self.__autocharges.clear()
          self.__autocharges = None
      */
+    if self.autocharges == nil {
+      self.autocharges = ItemDict<AutoCharge>(parent: self, containerOverride: self)
+    }
     
-    let foo = ItemDict<AutoCharge>(parent: self, containerOverride: self)
+    self.autocharges?.setItem(
+      key: effectId as AnyHashable,
+      item: AutoCharge(typeId: autoChargeTypeId)
+    )
+    //let foo = ItemDict<AutoCharge>(parent: self, containerOverride: self)
+  }
+  
+  override func clearAutocharges() {
+    if let autocharges = self.autocharges {
+      autocharges.clear()
+      self.autocharges = nil
+    }
   }
 }
 

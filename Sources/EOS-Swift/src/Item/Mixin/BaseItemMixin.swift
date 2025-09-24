@@ -52,6 +52,8 @@ protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   func load()
   func unload()
   
+  func clearAutocharges()
+  
 }
 
 extension BaseItemMixinProtocol {
@@ -267,8 +269,6 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     return nil
   }
   
-  
-  
   init(typeId: Int64, state: State) {
     self.typeId = typeId
     self.itemType = nil
@@ -301,7 +301,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     return nil
   }
   
-  func childItemIter(skipAutoitems: Bool = false) -> AnyIterator<any BaseItemMixinProtocol> {
+  func childItemIter(skipAutoitems: Bool = false)  {
     if !skipAutoitems {
       // for item in self.autocharges.values():
       // yield item
@@ -496,6 +496,11 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   func addAutoCharge(effectId: EffectId, autoChargeTypeId: Int64) {
     //
   }
+  
+  func clearAutocharges() {
+    
+  }
+  
 }
 
 
