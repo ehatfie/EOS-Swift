@@ -116,6 +116,22 @@ class Module:
       return values[index]
     }
   }
+  
+  override func addAutoCharge(effectId: EffectId, autoChargeTypeId: Int64) {
+    /*
+     if self.__autocharges is None:
+         self.__autocharges = ItemDict(
+             self, Autocharge, container_override=self)
+     self.__autocharges[effect_id] = Autocharge(autocharge_type_id)
+
+ def _clear_autocharges(self):
+     if self.__autocharges is not None:
+         self.__autocharges.clear()
+         self.__autocharges = None
+     */
+    
+    let foo = ItemDict<AutoCharge>(parent: self, containerOverride: self)
+  }
 }
 
 class ModuleHigh: Module {

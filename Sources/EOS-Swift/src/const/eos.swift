@@ -82,6 +82,16 @@ enum ModAffecteeFilter: Int, CaseIterable {
   case domain_group = 3  // Domain children only, excluding parent item
   case domain_skillrq = 4  // Domain children only, excluding parent item
   case owner_skillrq = 5
+  
+  init?(value: String) {
+    switch value {
+    case "ItemModifier": self = .item
+    case "LocationGroupModifier": self = .domain_group
+    case "LocationRequiredSkillModifier": self = .domain_skillrq
+    case "OwnerRequiredSkillModifier": self = .owner_skillrq
+    default: return nil
+    }
+  }
 }
 
 public enum ModDomain: Int, CaseIterable {
@@ -95,6 +105,18 @@ public enum ModDomain: Int, CaseIterable {
   case ship = 3
   case target = 4
   case other = 5  // Module for charge, charge for module
+  
+  init?(value: String) {
+    switch value {
+    case "itemID": self = .me
+    case "charID": self = .character
+    case "shipID": self = .ship
+    case "targetID": self = .target
+    case "other": self = .other
+    
+    default: return nil
+    }
+  }
 }
 
 enum ModOperator: Int, CaseIterable {

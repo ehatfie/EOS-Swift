@@ -32,11 +32,11 @@ class SolarSystem: MaybeFitHaving {
 
 
 class SourceManager {
-  nonisolated(unsafe) static let defaultValue: SourceManager? = nil
+  nonisolated(unsafe) static let defaultValue: Source? = nil
   var sources: [String: Source] = [:]
 }
 
 struct Source {
   let alias: String
-  let cacheHandler: () -> Void
+  let cacheHandler: any BaseCacheHandlerProtocol
 }

@@ -11,7 +11,7 @@ protocol FitHaving: AnyObject {
 }
 
 protocol FitRelated: AnyObject {
-  var parent: (any FitHaving)? { get }
+  var parent: (any MaybeFitHaving)? { get }
 }
 
 protocol MaybeFitHaving: AnyObject {
@@ -20,7 +20,7 @@ protocol MaybeFitHaving: AnyObject {
 
 
 class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated, MaybeFitHaving {
-  weak var parent: (any FitHaving)?
+  weak var parent: (any MaybeFitHaving)?
   
   var set: Set<T> = []
   var containerOverride: (any ItemContainerBaseProtocol)? = nil
@@ -32,7 +32,7 @@ class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated, Maybe
                be assigned as container to all items being added.
    */
   
-  init(parent: any FitHaving, containerOverride: Any?) {
+  init(parent: any MaybeFitHaving, containerOverride: Any?) {
     self.parent = parent
     super.init()
   }

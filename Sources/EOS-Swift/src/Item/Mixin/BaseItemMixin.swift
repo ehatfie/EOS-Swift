@@ -28,7 +28,7 @@
  
  */
 
-protocol BaseItemMixinProtocol: AnyObject, Hashable {
+protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var typeId: Int64 { get }
   var itemType: ItemType? { get set }
   //var container: String? { get set }
@@ -38,6 +38,7 @@ protocol BaseItemMixinProtocol: AnyObject, Hashable {
   var effectModeOverrides: [EffectId: EffectMode]? { get set }
   var effectTargets: String? { get set }
   var attributes: [AttrId: Double] { get set } // will be a custom dictionary type
+  var autocharges: ItemDict<AutoCharge>? { get set }
   
   var _state: State { get set }
   var modifierDomain: ModDomain? { get set }
@@ -255,6 +256,9 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   open var _state: State
   
   public var attributes: [AttrId: Double] = [:]
+  var autocharges: ItemDict<AutoCharge>? = nil
+  
+   
   
   var fit: Fit? {
     if let container = self.container as? MaybeFitHaving {
@@ -271,7 +275,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     self.container = nil
     self.effectModeOverrides = nil
     self.effectTargets = nil
-    self.autocharges = [:]
+    self.autocharges = nil
     self._state = state
     
     self.modifierDomain = .ship
@@ -297,7 +301,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     return nil
   }
   
-  func childItemIter(skipAutoitems: Bool = false) {
+  func childItemIter(skipAutoitems: Bool = false) -> AnyIterator<any BaseItemMixinProtocol> {
     if !skipAutoitems {
       // for item in self.autocharges.values():
       // yield item
@@ -394,10 +398,26 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
      */
     
     let fit = self.fit
-    let foo = fit?.solarSystem?.source?.cacheHandler.getType
+    guard let cacheHandler = fit?.solarSystem?.source?.cacheHandler else {
+      return
+    }
+    guard let result = cacheHandler.getType(typeId: self.typeId) else {
+      return
+    }
+    
+    self.itemType = result
+    
+    if let fit = fit {
+      let messages = MessageHelper.getItemLoadedMessages(item: self)
+      fit.publishBulk(messages: messages)
+    }
     // get a getter
     for (effectId, effect) in self.typeEffects {
       //let autoChargeTypeId = effect.getAutoChargeTypeId(item: <#T##BaseItemMixin#>)
+      guard let autoChargeTypeId = effect.getAutoChargeTypeId(item: self) else {
+        continue
+      }
+      self.addAutoCharge(effectId: effectId, autoChargeTypeId: autoChargeTypeId)
     }
   }
   
@@ -453,8 +473,8 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     }
     
     if let fit = self.fit {
-      // msgs = MsgHelper.get_effects_status_update_msgs(self)
-      // fit.publish_bulk(msgs)
+      let messages = MessageHelper.getEffectsStatusUpdateMessages(item: self)
+      fit.publishBulk(messages: messages)
     }
     
   }
@@ -471,28 +491,10 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
        return self.__autocharges or {}
    */
   
-  var autocharges: [Int64: AutoCharge] = [:]
+ 
   
-    /*
-     def _add_autocharge(self, effect_id, autocharge_type_id):
-         # Using import here is ugly, but there's no good way to use subclass
-         # within parent class. Other solution is to create method on fit and
-         # call that method, but fit shouldn't really care about implementation
-         # details of items too
-         from eos.item import Autocharge
-         if self.__autocharges is None:
-             self.__autocharges = ItemDict(
-                 self, Autocharge, container_override=self)
-         self.__autocharges[effect_id] = Autocharge(autocharge_type_id)
-
-     def _clear_autocharges(self):
-         if self.__autocharges is not None:
-             self.__autocharges.clear()
-             self.__autocharges = None
-     */
-  
-  func addAutoCharge(effectId: Int64, autoChargeTypeId: Int64) {
-    
+  func addAutoCharge(effectId: EffectId, autoChargeTypeId: Int64) {
+    //
   }
 }
 

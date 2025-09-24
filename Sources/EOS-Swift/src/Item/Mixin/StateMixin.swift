@@ -58,20 +58,26 @@ class MutableStateMixin: BaseItemMixin {
       super._state = newValue
       if let fit = super.fit {
         // update via messages?
-        /*
-         msgs = []
-         # Messages for item itself
-         msgs.extend(MsgHelper.get_item_state_update_msgs(
-             self, old_state, new_state))
-         # Messages for all state-dependent child items
-         for child_item in self._child_item_iter():
-             if isinstance(child_item, ContainerStateMixin):
-                 msgs.extend(MsgHelper.get_item_state_update_msgs(
-                     child_item, old_state, new_state))
-         fit._publish_bulk(msgs)
-         */
+        var messages = [any Message]()
+
+        let stateUpdateMessages = MessageHelper.getItemStateUpdateMessages(
+          item: self,
+          oldState: oldState,
+          newState: newValue
+        )
+        messages.append(contentsOf: stateUpdateMessages)
+        if let iterator = self.childItemIterator(skipAutoItems: false) {
+          for childItem in iterator where childItem is ContainerStateMixin{
+            let otherUpdateMessages = MessageHelper.getItemStateUpdateMessages(
+              item: childItem as! ContainerStateMixin, oldState: oldState, newState: newValue)
+            messages.append(contentsOf: otherUpdateMessages)
+//            if let foo = childItem as? ContainerStateMixin {
+//              
+//            }
+          }
+        }
+        fit.publishBulk(messages: messages)
       }
-      
     }
   }
 }

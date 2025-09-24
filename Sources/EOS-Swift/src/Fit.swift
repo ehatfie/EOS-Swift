@@ -55,7 +55,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
     }
   }
   
-  init(solarSystem: SolarSystem? = DefaultSolarSystem(), fleet: MockFleet?) {
+  init(solarSystem: SolarSystem? = DefaultSolarSystem(source: nil), fleet: MockFleet?) {
     self.solarSystem =  solarSystem
     self.fleet = fleet
   

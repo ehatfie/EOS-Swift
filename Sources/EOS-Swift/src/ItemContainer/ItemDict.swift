@@ -18,12 +18,12 @@
  */
 class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
   var fit: Fit?
-  weak var parent: (any FitHaving)?
+  weak var parent: (any MaybeFitHaving)?
   
   var itemSet: ItemSet<T>
   var keyedItems: [T: any BaseItemMixinProtocol] = [:]
   
-  init(parent: any FitHaving, containerOverride: Any?) {
+  init(parent: any MaybeFitHaving, containerOverride: Any?) {
     self.parent = parent
     self.itemSet = ItemSet<T>(parent: parent, containerOverride: containerOverride)
   }

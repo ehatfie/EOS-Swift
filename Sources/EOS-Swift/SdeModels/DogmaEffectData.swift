@@ -30,6 +30,7 @@ public struct DogmaEffectData: Codable, Sendable {
 public struct ModifierData: Codable, Sendable {
     public let domain: String
     public let `func`: String
+    public let groupId: Int64?
     public let modifiedAttributeID: Int64?
     public let modifyingAttributeID: Int64?
     public let operation: Int64?

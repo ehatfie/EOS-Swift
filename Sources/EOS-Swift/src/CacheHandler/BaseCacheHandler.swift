@@ -6,7 +6,7 @@
 //
 
 protocol BaseCacheHandlerProtocol {
-  func getType(typeId: Int64)
+  func getType(typeId: Int64) -> ItemType?
   func getAttribute(attributeId: AttrId)
   func getEffect(effectId: EffectId)
   func getBuffTemplates(buffId: Int64)
