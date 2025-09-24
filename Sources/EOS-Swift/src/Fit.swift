@@ -30,9 +30,6 @@ class Fit: FitMessageBroker<MockSubscriber> {
   var ship: Ship? // Access point for ship.
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
   var modules: ModuleRacks!
-  //var modules.high: // List for high-slot modules.
-  //var modules.mid: // List for medium-slot modules.
-  //var modules.low: // List for low-slot modules.
   var rigs: ItemSet<Rig>! //  Set for rigs.
   var drones: String? // Set for drones.
   var fighters: String? // Set for fighter squads.
@@ -44,7 +41,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
   var effect_beacon: EffectBeacon? // Access point for effect beacons (e.g. wormhole effects).
   var restriction: RestrictionService!
   var stats: StatService! //  All aggregated stats for fit are accessible via this access
-  //var restriction: RestrictionService?
+  
   //  point.
   var defaultIncomingDamage: DamageProfile? {
     set {
@@ -61,7 +58,6 @@ class Fit: FitMessageBroker<MockSubscriber> {
   
     super.init()
     
-
     self.skills = TypeUniqueSet(parent: self) //<Skill>(parent: self, containerOverride: nil)
     self.implants = ItemSet<Implant>(parent: self, containerOverride: nil)
     self.boosters = ItemSet<Booster>(parent: self, containerOverride: nil)
@@ -94,7 +90,9 @@ class Fit: FitMessageBroker<MockSubscriber> {
     
     // Add fit to solar syhstem
     if solarSystem is DefaultImpl {
-      
+      let value = SolarSystem(source: SourceManager())
+      self.solarSystem = value
+      self.solarSystem?.fit = self
     }
     
     if let solarSystem = self.solarSystem {
@@ -192,13 +190,6 @@ class Fit: FitMessageBroker<MockSubscriber> {
   }
   
   func loadedItemIterator(skipAutoItems: Bool = false) -> AnyIterator<any BaseItemMixinProtocol> {
-    /*
-     def _loaded_item_iter(self, skip_autoitems=False):
-         for item in self._item_iter(skip_autoitems=skip_autoitems):
-             if item._is_loaded:
-                 yield item
-
-     */
     let values: [any BaseItemMixinProtocol] = self.itemIterator(skipAutoitems: skipAutoItems).filter { $0.isLoaded }
     
     var index: Int = 0
@@ -217,7 +208,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
   
   func unloadItems() {
     for item in self.itemIterator(skipAutoitems: true) {
-      item.load()
+      item.unload()
     }
   }
 }

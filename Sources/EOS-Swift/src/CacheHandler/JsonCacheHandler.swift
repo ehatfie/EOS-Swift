@@ -7,6 +7,18 @@
 import Foundation
 
 class JsonCachehandler: BaseCacheHandlerProtocol {
+  func getType(typeId: Int64) -> ItemType? {
+    nil
+  }
+  
+  func getAttribute(attributeId: AttrId) {
+    
+  }
+  
+  func getFingerprint() -> Int {
+    0
+  }
+  
 
   var cachePath: String
   
@@ -22,11 +34,11 @@ class JsonCachehandler: BaseCacheHandlerProtocol {
     self.loadPersistantCache()
   }
   
-  func getType(typeId: Int64) -> ItemType? {
+  func getType(typeId: Int64) async -> ItemType? {
     return nil
   }
   
-  func getAttribute(attributeId: AttrId) {
+  func getAttribute(attributeId: AttrId) async {
     
   }
   

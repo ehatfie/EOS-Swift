@@ -53,8 +53,8 @@ class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
 
   }
 
-  func getFingerprint() {
-
+  func getFingerprint() -> Int {
+    return 0
   }
 
   func updateCache(eveObjects: Any, fingerprint: Any) {
@@ -84,6 +84,12 @@ class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
             for: .dogmaEffects,
             type: DogmaEffectData.self
           )) ?? []
+        
+        self.updateMemoryCache(
+          types: types,
+          attributes: attributes,
+          effects: effects
+        )
       }
     } else {
       print("++ load persistant cache fallback")
@@ -97,7 +103,7 @@ class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
 
   func updateMemoryCache(
     types: [(Int64, TypeData)],
-    attribtes: [(Int64, DogmaAttributeData)],
+    attributes: [(Int64, DogmaAttributeData)],
     effects: [(Int64, DogmaEffectData)]
   ) {
 
@@ -137,11 +143,11 @@ class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
         isAssistance: effectData.isAssistance,
         durationAttributeID: effectData.durationAttributeID,
         dischargeAttributeID: effectData.dischargeAttributeID,
-        rangeAttributeID: nil,
-        falloffAttributeID: nil,
-        trackingSpeedAttributeID: nil,
-        fittingUseUsageChanceAttributeID: nil,
-        resistanceAttributeId: nil,
+        rangeAttributeID: effectData.rangeAttributeID,
+        falloffAttributeID: effectData.falloffAttributeID,
+        trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
+        fittingUseUsageChanceAttributeID: effectData.fittingUsageChanceAttributeID,
+        resistanceAttributeId: effectData.resistanceAttributeID,
         buildStatus: .none,
         modifiers: modifiers ?? []
       )

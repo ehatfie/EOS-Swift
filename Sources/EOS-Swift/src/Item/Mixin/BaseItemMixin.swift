@@ -260,8 +260,6 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   public var attributes: [AttrId: Double] = [:]
   var autocharges: ItemDict<AutoCharge>? = nil
   
-   
-  
   var fit: Fit? {
     if let container = self.container as? MaybeFitHaving {
       return container.fit
@@ -373,30 +371,6 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
 
   /// Load item's source-specific data.
   public func load() {
-    /*
-             fit = self._fit
-             # Do nothing if we cannot reach cache handler
-             try:
-                 getter = fit.solar_system.source.cache_handler.get_type
-             except AttributeError:
-                 return
-             # Do nothing if cache handler doesn't have item type we need
-             try:
-                 self._type = getter(self._type_id)
-             except TypeFetchError:
-                 return
-             # If fetch is successful, launch bunch of messages
-             if fit is not None:
-                 msgs = MsgHelper.get_item_loaded_msgs(self)
-                 fit._publish_bulk(msgs)
-             # Add autocharges, if effects specify any
-             for effect_id, effect in self._type_effects.items():
-                 autocharge_type_id = effect.get_autocharge_type_id(self)
-                 if autocharge_type_id is None:
-                     continue
-                 self._add_autocharge(effect_id, autocharge_type_id)
-     */
-    
     let fit = self.fit
     guard let cacheHandler = fit?.solarSystem?.source?.cacheHandler else {
       return
@@ -411,9 +385,8 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
       let messages = MessageHelper.getItemLoadedMessages(item: self)
       fit.publishBulk(messages: messages)
     }
-    // get a getter
+    
     for (effectId, effect) in self.typeEffects {
-      //let autoChargeTypeId = effect.getAutoChargeTypeId(item: <#T##BaseItemMixin#>)
       guard let autoChargeTypeId = effect.getAutoChargeTypeId(item: self) else {
         continue
       }
@@ -421,9 +394,16 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     }
   }
   
+  /// Clear items `Source` dependent data
   public func unload() {
     let fit = self.fit
-  
+    if let fit = fit, self.isLoaded {
+      let messages = MessageHelper.getItemUnloadedMessages(item: self)
+      fit.publishBulk(messages: messages)
+    }
+    self.attributes.removeAll()
+    self.clearAutocharges()
+    self.itemType = nil
   }
   
   var effects: [EffectId: EffectData] {

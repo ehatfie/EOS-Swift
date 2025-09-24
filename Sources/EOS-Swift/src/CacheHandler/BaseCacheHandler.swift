@@ -10,6 +10,6 @@ protocol BaseCacheHandlerProtocol {
   func getAttribute(attributeId: AttrId)
   func getEffect(effectId: EffectId)
   func getBuffTemplates(buffId: Int64)
-  func getFingerprint()
+  func getFingerprint() -> Int
   func updateCache(eveObjects: Any, fingerprint: Any)
 }
