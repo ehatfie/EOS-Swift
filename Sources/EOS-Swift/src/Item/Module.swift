@@ -134,17 +134,6 @@ class Module:
   }
   
   override func addAutoCharge(effectId: EffectId, autoChargeTypeId: Int64) {
-    /*
-     if self.__autocharges is None:
-         self.__autocharges = ItemDict(
-             self, Autocharge, container_override=self)
-     self.__autocharges[effect_id] = Autocharge(autocharge_type_id)
-
- def _clear_autocharges(self):
-     if self.__autocharges is not None:
-         self.__autocharges.clear()
-         self.__autocharges = None
-     */
     if self.autocharges == nil {
       self.autocharges = ItemDict<AutoCharge>(parent: self, containerOverride: self)
     }
@@ -153,15 +142,8 @@ class Module:
       key: effectId as AnyHashable,
       item: AutoCharge(typeId: autoChargeTypeId)
     )
-    //let foo = ItemDict<AutoCharge>(parent: self, containerOverride: self)
   }
-  
-  override func clearAutocharges() {
-    if let autocharges = self.autocharges {
-      autocharges.clear()
-      self.autocharges = nil
-    }
-  }
+
 }
 
 class ModuleHigh: Module {

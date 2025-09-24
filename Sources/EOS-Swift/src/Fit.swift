@@ -24,9 +24,9 @@ protocol DefaultHaving {
 }
 
 class Fit: FitMessageBroker<MockSubscriber> {
-  
   weak var solarSystem: SolarSystem?
   weak var fleet: MockFleet?
+  
   var ship: Ship? // Access point for ship.
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
   var modules: ModuleRacks!
@@ -121,9 +121,9 @@ class Fit: FitMessageBroker<MockSubscriber> {
     
   }
   
-//  var fit: Fit? {
-//    return self
-//  }
+  override var fit: Fit? {
+    return self
+  }
   
   /*
    def _item_iter(self, skip_autoitems=False):

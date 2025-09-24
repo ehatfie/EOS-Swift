@@ -498,7 +498,10 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   func clearAutocharges() {
-    
+    if let autocharges = self.autocharges {
+      autocharges.clear()
+      self.autocharges = nil
+    }
   }
   
 }
