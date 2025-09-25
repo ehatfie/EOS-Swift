@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/5/25.
 //
 
-protocol Message {
+public protocol Message {
   var fit: Fit? { get set }
   var messageType: MessageTypeEnum { get }
 }
@@ -35,7 +35,7 @@ struct StatesActivatedLoaded: ItemMessage {
   let messageType: MessageTypeEnum = .StatesActivatedLoaded
   let item: any BaseItemMixinProtocol
   
-  let states: Set<State>
+  let states: Set<StateI>
 }
 
 struct StatesDeactivatedLoaded: ItemMessage {
@@ -43,7 +43,7 @@ struct StatesDeactivatedLoaded: ItemMessage {
   let messageType: MessageTypeEnum = .StatesDeactivatedLoaded
   let item: any BaseItemMixinProtocol
   
-  let states: Set<State>
+  let states: Set<StateI>
 }
 
 struct EffectsStarted: ItemMessage {

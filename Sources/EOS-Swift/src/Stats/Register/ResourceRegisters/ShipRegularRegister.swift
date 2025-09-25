@@ -50,6 +50,9 @@ class CalibrationRegister: ShipRegularResourceRegisterProtocol {
   static func == (lhs: CalibrationRegister, rhs: CalibrationRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
 
   var outputAttrId: AttrId = .upgrade_capacity
   var useEffectId: EffectId = .rig_slot
@@ -87,6 +90,10 @@ class CPURegister: RoundedShipRegularResourceRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var outputAttrId: AttrId = .cpu_output
   var useEffectId: EffectId = .online
   var useAttrId: AttrId = .cpu
@@ -121,6 +128,10 @@ class CPURegister: RoundedShipRegularResourceRegisterProtocol {
 class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
   static func == (lhs: PowergridRegister, rhs: PowergridRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
   }
   
   var outputAttrId: AttrId = .power_output

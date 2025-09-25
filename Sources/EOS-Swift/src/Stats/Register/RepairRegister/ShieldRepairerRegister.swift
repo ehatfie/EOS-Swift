@@ -10,6 +10,10 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   typealias MessageType = ItemEffectsMessage
   
   var fit: Fit?

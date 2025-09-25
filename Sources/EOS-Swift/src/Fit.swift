@@ -7,7 +7,7 @@
 
 
 
-class MockFleet {
+public class MockFleet {
   
 }
 
@@ -15,26 +15,28 @@ protocol DefaultImpl {
   
 }
 
-class DefaultSolarSystem: SolarSystem, DefaultImpl {
-  
+public class DefaultSolarSystem: SolarSystem, DefaultImpl {
+  public override init(source: SourceManager? = nil) {
+    super.init(source: source)
+  }
 }
 
 protocol DefaultHaving {
   //static var defaultVal: Self.Type { get }
 }
 
-class Fit: FitMessageBroker<MockSubscriber> {
+public class Fit: FitMessageBroker<MockSubscriber> {
   weak var solarSystem: SolarSystem?
   weak var fleet: MockFleet?
   
-  var ship: Ship? // Access point for ship.
+  public var ship: Ship? // Access point for ship.
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
-  var modules: ModuleRacks!
+  public var modules: ModuleRacks!
   var rigs: ItemSet<Rig>! //  Set for rigs.
   var drones: String? // Set for drones.
   var fighters: String? // Set for fighter squads.
   var character: Character? // Access point for character.
-  var skills: TypeUniqueSet<Skill>! // Keyed set for skills.
+  public var skills: TypeUniqueSet<Skill>! // Keyed set for skills.
   var implants: ItemSet<Implant>! // Set for implants.
   var boosters: ItemSet<Booster>! // Set for boosters.
   var subsystems: ItemSet<Subsystem>! // Set for subsystems.
@@ -52,7 +54,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
     }
   }
   
-  init(solarSystem: SolarSystem? = DefaultSolarSystem(source: nil), fleet: MockFleet?) {
+  public init(solarSystem: SolarSystem? = DefaultSolarSystem(source: nil), fleet: MockFleet?) {
     self.solarSystem =  solarSystem
     self.fleet = fleet
   
@@ -119,7 +121,7 @@ class Fit: FitMessageBroker<MockSubscriber> {
     
   }
   
-  override var fit: Fit? {
+  public override var fit: Fit? {
     return self
   }
   

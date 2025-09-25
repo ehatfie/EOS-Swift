@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/5/25.
 //
 
-protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
+public protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
   associatedtype ExpectedType
   /*
    @property
@@ -16,7 +16,7 @@ protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
   func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool
   
   //func handleItemAddition(item: Any, container: Any) {
-  func subItemIterator(item: ExpectedType) -> AnyIterator<ExpectedType>
+  func subItemIterator(item: ExpectedType) -> AnyIterator<any BaseItemMixinProtocol>
   func length() -> Int
 }
 
@@ -50,8 +50,8 @@ class BaseTestItemContainer<T: BaseItemMixinProtocol>: TestItemContainerProtocol
  8/18/25 - Maybe this should be a default implementation on ItemContainerBaseProtocol
  */
 
-class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
-  typealias ExpectedType = T
+public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
+  public typealias ExpectedType = T
   
   init() { }
   
@@ -61,7 +61,7 @@ class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
     }
     
     item.container = self
-    
+    //print("handleItemAddition \()")
     guard let fit = item.fit else {
       print("++ Item no fit")
       return
@@ -74,15 +74,16 @@ class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
     }
   }
   
-  func subItemIterator(item: T) -> AnyIterator<T> {
+  public func subItemIterator(item: T) -> AnyIterator<any BaseItemMixinProtocol> {
     var index = 0
     var values = [T]()
-    let iterResult = item.childItemIterator(skipAutoItems: true)?.map({ $0})
+    let iterResult = item.childItemIterator(skipAutoItems: true)?.map({ $0 })
+    let castIterResult = (iterResult as? [T] ?? [])
+    values = [item] + castIterResult
     
-    values = [item] + (iterResult as? [T] ?? [])
-    
-    if let iterResult, iterResult.count != (values.count - 1) {
-      print("++ child item iterator values count mismatch")
+    if let iterResult, iterResult.count != castIterResult.count {
+      print("++ child item iterator values count mismatch \(iterResult.count) vs \(castIterResult.count)")
+      print("++ iterResult: \(iterResult) values \(values)")
     }
     
     return AnyIterator {
@@ -115,14 +116,14 @@ class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProtocol {
   }
 
   /// Check if class of passed item corresponds to our expectations.
-  func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool {
+  public func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool {
     guard let item = item else {
       return allowNil
     }
     return item is ExpectedType
   }
   
-  func length() -> Int {
+  public func length() -> Int {
     return 0
   }
 }

@@ -11,16 +11,16 @@ protocol StatsServiceProtocol: StatServiceRegistersProtocol, StatServiceSlotsPro
 }
 
 protocol StatServiceRegistersProtocol {
-  var ddRegister: DamageDealerRegister { get set }
-  var armorRepRegister: ArmorRepairerRegister { get set }
-  var shieldRepRegister: ShieldRepairerRegister { get set }
-  var cpu: CPURegister { get set }
-  var powerGrid: PowergridRegister { get set }
-  var calibration: CalibrationRegister { get set }
-  var dronebay: DronebayVolumeRegister { get set }
-  var droneBandwidth: DroneBandwidthRegister { get set }
-  var turretSlots: TurretSlotRegister { get set }
-  var launcherSlots: LauncherSlotRegister { get set }
+//  var ddRegister: DamageDealerRegister { get set }
+//  var armorRepRegister: ArmorRepairerRegister { get set }
+//  var shieldRepRegister: ShieldRepairerRegister { get set }
+//  var cpu: CPURegister { get set }
+//  var powerGrid: PowergridRegister { get set }
+//  var calibration: CalibrationRegister { get set }
+//  var dronebay: DronebayVolumeRegister { get set }
+//  var droneBandwidth: DroneBandwidthRegister { get set }
+//  var turretSlots: TurretSlotRegister { get set }
+//  var launcherSlots: LauncherSlotRegister { get set }
 }
 
 protocol StatServiceSlotsProtocol: MaybeFitHaving {
@@ -87,28 +87,34 @@ extension StatServiceValuesProtocol {
   }
   
   func getVolley(itemFilter: Any? = nil, targetResists: ResistProfile? = nil) -> DamageStats {
-    return self.ddRegister.getVolley(itemFilter: itemFilter, targetResists: targetResists)
+    return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    //return self.ddRegister.getVolley(itemFilter: itemFilter, targetResists: targetResists)
   }
   
   func getDPS(itemFilter: Any? = nil, reload: Bool = false, targetResists: ResistProfile? = nil) -> DamageStats {
-    return self.ddRegister.getDps(itemFilter: itemFilter, reload: reload, targetResists: targetResists)
+    DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    //return self.ddRegister.getDps(itemFilter: itemFilter, reload: reload, targetResists: targetResists)
   }
   
   func getArmorRps(damageProfile: DamageProfile, reload: Bool = false) -> Double {
 
     if damageProfile is DefaultImpl {
       let dmgProfile = self.fit?.defaultIncomingDamage
-      return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
+      return 0.0
+      //return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
     }
-    return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
+    return 0.0
+    //return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
   }
   
   func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double {
     if damageProfile is DefaultImpl {
       let dmgProfile = self.fit?.defaultIncomingDamage
-      return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
+      return 0.0
+      //return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
     }
-    return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
+    return 0.0
+    //return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
   }
   
   var agilityFactor: Double? {

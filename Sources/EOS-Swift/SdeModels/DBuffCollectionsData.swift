@@ -6,7 +6,7 @@
 //
 
 
-struct DBuffCollectionsData: Codable {
+public struct DBuffCollectionsData: Codable, Sendable {
   let aggregateMode: String
   let developerDescription: String
   let displayName: ThingName?

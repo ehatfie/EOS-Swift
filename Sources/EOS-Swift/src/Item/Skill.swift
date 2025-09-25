@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/7/25.
 //
 
-class Skill: ImmutableStateMixin {
+public class Skill: ImmutableStateMixin {
   var level: Int {
     get {
       _level
@@ -24,7 +24,7 @@ class Skill: ImmutableStateMixin {
   
   //let modifierDomain: ModDomain = .character
   
-  init(typeId: Int64, level: Int = 0) {
+  public init(typeId: Int64, level: Int = 0) {
     self._level = level
     // self.attrs.setOverrideCallback
     super.init(typeId: typeId, state: .offline)

@@ -8,11 +8,11 @@
 // Maybe should be a Struct?
 /// Container for all module racks.
 /// Each rack is actually list container for module items.
-class ModuleRacks {
+public class ModuleRacks {
   
-  let high: ItemList<ModuleHigh>
-  let mid: ItemList<ModuleMid>
-  let low: ItemList<ModuleLow>
+  public let high: ItemList<ModuleHigh>
+  public let mid: ItemList<ModuleMid>
+  public let low: ItemList<ModuleLow>
   
   init(high: ItemList<ModuleHigh>, mid: ItemList<ModuleMid>, low: ItemList<ModuleLow>) {
     self.high = high

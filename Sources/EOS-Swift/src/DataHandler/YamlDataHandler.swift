@@ -8,57 +8,126 @@
 import Foundation
 import Yams
 
+public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
+  public init() {
 
+  }
 
-class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
-  func getEveTypes() async  -> [EveTypeData] {
+  public func getEveTypes() async -> [EveTypeData] {
     let fetcher = await YamlDataFetcher.shared
-    
-    return (try? await fetcher.readYamlAsync(for: .typeIDs, type: EveTypeData.self).map { $0.1 }) ?? []
+//    return [
+//      EveTypeData(
+//        typeID: 2929, groupID: 55, capacity: 3.0, mass: 75, radius: 200, volume: 20)
+//    ]
+    let results =
+      (try? await fetcher.readYamlAsync(for: .typeIDs, type: TypeData.self))
+      ?? []
+    print("++ getEveTypes results \(results.count)")
+    return results.compactMap { value -> EveTypeData? in
+      let typeId = value.0
+      let data = value.1
+      if typeId == 2929 {
+        print(EveTypeData(
+          typeID: typeId,
+          groupID: data.groupID,
+          capacity: data.capacity,
+          mass: data.mass,
+          radius: data.radius,
+          volume: data.volume
+        ))
+      }
+      return EveTypeData(
+        typeID: typeId,
+        groupID: data.groupID,
+        capacity: data.capacity,
+        mass: data.mass,
+        radius: data.radius,
+        volume: data.volume
+      )
+    }
   }
-  
-  func getEveGroups() async  -> [EveGroupData] {
+
+  public func getEveGroups() async -> [EveGroupData] {
+    print("++ getEveGroups")
     let fetcher = await YamlDataFetcher.shared
-    return (try? await fetcher.readYamlAsync(for: .groupIDs, type: EveGroupData.self).map { $0.1 }) ?? []
+    let results =
+      (try? await fetcher.readYamlAsync(for: .groupIDs, type: GroupData.self))
+      ?? []
+
+    let eveGroupData = results.map {
+      EveGroupData(groupID: $0.0, categoryID: $0.1.categoryID)
+    }
+
+    return eveGroupData
   }
-  
-  func getDogmaAttributes() async -> [DogmaAttributeData] {
+
+  public func getDogmaAttributes() async -> [DogmaAttributeData] {
     let fetcher = await YamlDataFetcher.shared
-    return (try? await fetcher.readYamlAsync(for: .dogmaAttrbutes, type: DogmaAttributeData.self).map { $0.1 }) ?? []
+    return
+      (try? await fetcher.readYamlAsync(
+        for: .dogmaAttrbutes,
+        type: DogmaAttributeData.self
+      ).map { $0.1 }) ?? []
   }
-  
-  func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData] {
+
+  public func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData] {
     let fetcher = await YamlDataFetcher.shared
-    return (try? await fetcher.readYamlAsync(for: .typeDogma, type: DogmaTypeAttributeData.self).map { $0.1 }) ?? []
+    return
+      (try? await fetcher.readYamlAsync(
+        for: .typeDogma,
+        type: DogmaTypeAttributeData.self
+      ).map { $0.1 }) ?? []
   }
-  
-  func getDogmaEffects() async -> [DogmaEffectData] {
+
+  public func getDogmaEffects() async -> [DogmaEffectData] {
     let fetcher = await YamlDataFetcher.shared
-    return (try? await fetcher.readYamlAsync(for: .dogmaEffects, type: DogmaEffectData.self).map { $0.1 }) ?? []
+    return
+      (try? await fetcher.readYamlAsync(
+        for: .dogmaEffects,
+        type: DogmaEffectData.self
+      ).map { $0.1 }) ?? []
   }
-  
-  func getDogmaTypeEffects() async  -> [DogmaTypeEffect] {
+
+  public func getDogmaTypeEffects() async -> [DogmaTypeEffect] {
     let fetcher = await YamlDataFetcher.shared
     var rows: [DogmaTypeEffect] = []
-    let result = (try? await fetcher.readYamlAsync(for: .typeDogmaInfo, type: TypeDogmaData.self)) ?? []
-    
+    let result =
+      (try? await fetcher.readYamlAsync(
+        for: .typeDogmaInfo,
+        type: TypeDogmaData.self
+      )) ?? []
+
     rows = result.flatMap { (typeId, typeData) in
-      return typeData.dogmaEffects.map { DogmaTypeEffect(typeId: typeId, effectID: $0.effectID, isDefault: $0.isDefault) }
+      return typeData.dogmaEffects.map {
+        DogmaTypeEffect(
+          typeId: typeId,
+          effectID: $0.effectID,
+          isDefault: $0.isDefault
+        )
+      }
     }
-    
+
     //let bar = foo.map { DogmaTypeEffect(typeId: $0.0, effectID: <#T##Int64#>, isDefault: <#T##Bool#>)}
     return rows
   }
 
-  func getDebuffCollection() async -> [DBuffCollectionsData] {
+  public func getDebuffCollection() async -> [DBuffCollectionsData] {
     let fetcher = await YamlDataFetcher.shared
-    return (try? await fetcher.readYamlAsync(for: .dbuffCollections, type: DBuffCollectionsData.self).map { $0.1 }) ?? []
+    return
+      (try? await fetcher.readYamlAsync(
+        for: .dbuffCollections,
+        type: DBuffCollectionsData.self
+      ).map { $0.1 }) ?? []
   }
-  
-  func getSkillReqs() async -> [TypeSkillReq] {
+
+  public func getSkillReqs() async -> [TypeSkillReq] {
     let fetcher = await YamlDataFetcher.shared
-    let typeDogmaData = (try? await fetcher.readYamlAsync(for: .typeDogmaInfo, type: TypeDogmaData.self)) ?? []
-    
+    let typeDogmaData =
+      (try? await fetcher.readYamlAsync(
+        for: .typeDogmaInfo,
+        type: TypeDogmaData.self
+      )) ?? []
+
     let primary = AttrId.required_skill_1.rawValue
     let expectedAtrributes: [(AttrId, AttrId)] = [
       (.required_skill_1, .required_skill_1_level),
@@ -66,23 +135,33 @@ class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       (.required_skill_3, .required_skill_3_level),
       (.required_skill_4, .required_skill_4_level),
       (.required_skill_5, .required_skill_5_level),
-      (.required_skill_6, .required_skill_6_level)
+      (.required_skill_6, .required_skill_6_level),
     ]
+
     var skillTypeReqs: [TypeSkillReq] = []
-    for (typeId, typeDogmaData)  in typeDogmaData {
+
+    for (typeId, typeDogmaData) in typeDogmaData {
       let data = TypeSkillReq(typeId: typeId, skillTypeId: 0, level: 1)
       let dogmaAttributes = typeDogmaData.dogmaAttributes
       for (requiredSkill, requiredSkillLevel) in expectedAtrributes {
         // this should be a dict
-        guard let attr1 = dogmaAttributes.first(where: { $0.attributeID == requiredSkill.rawValue }),
-              let attr2 = dogmaAttributes.first(where: { $0.attributeID == requiredSkillLevel.rawValue })
+        guard
+          let attr1 = dogmaAttributes.first(where: {
+            $0.attributeID == requiredSkill.rawValue
+          }),
+          let attr2 = dogmaAttributes.first(where: {
+            $0.attributeID == requiredSkillLevel.rawValue
+          })
         else { break }
-        skillTypeReqs.append(TypeSkillReq(typeId: typeId, skillTypeId: Int64(attr1.value), level: Int64(attr2.value)))
+        skillTypeReqs.append(
+          TypeSkillReq(
+            typeId: typeId,
+            skillTypeId: Int64(attr1.value),
+            level: Int64(attr2.value)
+          )
+        )
       }
-      
-     
     }
-    
 
     return skillTypeReqs
   }
@@ -91,7 +170,7 @@ class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
 
   }
 
-  func getVersion() -> String {
+  func getVersion() -> String? {
     return ""
   }
 }

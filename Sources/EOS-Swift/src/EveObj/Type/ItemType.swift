@@ -42,8 +42,8 @@ public class ItemType {
     return nil
   }
   
-  func maxState() -> State {
-    var maxState: State = .offline
+  func maxState() -> StateI {
+    var maxState: StateI = .offline
     for effect in effects.values {
       maxState = max(maxState, effect.state)
     }

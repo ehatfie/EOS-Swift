@@ -28,7 +28,7 @@ protocol ModuleProtocol:
   func childItemIterator() -> AnyIterator<any BaseItemMixinProtocol>
 }
 
-class Module:
+public class Module:
   MutableStateMixin,
   EffectStatsMixinProtocol,
   BaseTargetableMixinProtocol,
@@ -98,7 +98,7 @@ class Module:
 
   }
 
-  init(typeId: Int64, state: State = .offline, charge: Charge?) {
+  public init(typeId: Int64, state: StateI = .offline, charge: Charge? = nil) {
     self.charge = charge
     super.init(typeId: typeId, state: state)
 
@@ -106,7 +106,7 @@ class Module:
     self.modifierDomain = .ship
   }
   
-  override func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+  override public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
     let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
     let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
     let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
@@ -146,14 +146,14 @@ class Module:
 
 }
 
-class ModuleHigh: Module {
+public class ModuleHigh: Module {
+  
+}
+
+public class ModuleMid: Module {
 
 }
 
-class ModuleMid: Module {
-
-}
-
-class ModuleLow: Module {
+public class ModuleLow: Module {
 
 }

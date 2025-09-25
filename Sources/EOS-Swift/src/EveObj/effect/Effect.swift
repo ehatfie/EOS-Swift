@@ -98,19 +98,19 @@ public class Effect: Hashable {
     return self.categoryID == EffectCategoryId.target
   }
 
-  var effectStateMap: [EffectCategoryId: State] = [
-    EffectCategoryId.passive: State.offline,
-    EffectCategoryId.active: State.active,
-    EffectCategoryId.target: State.active,
-    EffectCategoryId.online: State.online,
-    EffectCategoryId.overload: State.overload,
-    EffectCategoryId.system: State.offline,
+  var effectStateMap: [EffectCategoryId: StateI] = [
+    EffectCategoryId.passive: StateI.offline,
+    EffectCategoryId.active: StateI.active,
+    EffectCategoryId.target: StateI.active,
+    EffectCategoryId.online: StateI.online,
+    EffectCategoryId.overload: StateI.overload,
+    EffectCategoryId.system: StateI.offline,
   ]
   
   /// Returns `State` of effect.
   /// It means if item takes this state or higher, effect activates.
   /// - Returns `State`
-  var state: State {
+  var state: StateI {
     guard let effectCategory = self.categoryID else {
       return .offline
     }
@@ -335,8 +335,8 @@ struct EffectState {
     return EffectCategoryId(rawValue: Int64(Int(categoryID)))!
   }
 
-  var effectState: State {
-    return State(rawValue: Int(stateID))!
+  var effectState: StateI {
+    return StateI(rawValue: Int(stateID))!
   }
 }
 

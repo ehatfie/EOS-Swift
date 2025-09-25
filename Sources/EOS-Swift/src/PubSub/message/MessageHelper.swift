@@ -12,15 +12,15 @@ class MessageHelper {
     var messages: [any Message] = []
     messages.append(ItemAdded(fit: nil, item: item))
     // states = {s for s in State if s <= item.state}
-    let states = State.allCases.filter { $0 <= item._state }
-    messages.append(StatesActivated(item: item, states: Set<State>(states)))
+    let states = StateI.allCases.filter { $0 <= item._state }
+    messages.append(StatesActivated(item: item, states: Set<StateI>(states)))
     return messages
   }
   
   static func getItemRemovedMessages(item: any BaseItemMixinProtocol) -> [any Message] {
     var messages: [any Message] = []
-    let states = State.allCases.filter { $0 <= item._state }
-    messages.append(StatesDeactivated(item: item, states: Set<State>(states)))
+    let states = StateI.allCases.filter { $0 <= item._state }
+    messages.append(StatesDeactivated(item: item, states: Set<StateI>(states)))
     messages.append(ItemRemoved(fit: nil, item: item))
     return messages
   }
@@ -28,8 +28,8 @@ class MessageHelper {
   static func getItemLoadedMessages(item: any BaseItemMixinProtocol) -> [any Message] {
     var messages: [any Message] = []
     messages.append(ItemLoaded(fit: nil, item: item))
-    let states = State.allCases.filter { $0 <= item._state }
-    messages.append(StatesActivatedLoaded(item: item, states: Set<State>(states)))
+    let states = StateI.allCases.filter { $0 <= item._state }
+    messages.append(StatesActivatedLoaded(item: item, states: Set<StateI>(states)))
     messages.append(contentsOf: getEffectsStatusUpdateMessages(item: item))
     return messages
   }
@@ -61,7 +61,7 @@ class MessageHelper {
       item.runningEffectIds.removeAll()
     }
     // States
-    let states = State.allCases.filter({ $0 < item._state })
+    let states = StateI.allCases.filter({ $0 < item._state })
     messages.append(StatesDeactivatedLoaded(item: item, states: Set(states)))
     // Item
     messages.append(ItemUnloaded(item: item))
@@ -71,14 +71,14 @@ class MessageHelper {
   /// Generate messages about changed item state.
   static func getItemStateUpdateMessages(
     item: any BaseItemMixinProtocol,
-    oldState: State,
-    newState: State
+    oldState: StateI,
+    newState: StateI
   ) -> [any Message] {
     // State switching upwards
     var messages: [any Message] = []
     // State switching upwards
     if newState > oldState {
-      let states = Set(State.allCases.filter({ $0 <= newState && $0 > oldState }))
+      let states = Set(StateI.allCases.filter({ $0 <= newState && $0 > oldState }))
       messages.append(StatesActivated(item: item, states: states))
       
       if item.isLoaded {
@@ -86,7 +86,7 @@ class MessageHelper {
       }
     } else {
       // State switching downward
-      let states = Set(State.allCases.filter({ $0 > newState && $0 <= oldState }))
+      let states = Set(StateI.allCases.filter({ $0 > newState && $0 <= oldState }))
       if item.isLoaded {
         messages.append(StatesDeactivated(item: item, states: states))
       }

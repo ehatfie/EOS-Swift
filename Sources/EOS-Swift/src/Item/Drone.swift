@@ -31,7 +31,7 @@ class Drone: MutableStateMixin, DroneProtocol {
   
   }
   
-  override init(typeId: Int64, state: State = .offline) {
+  override init(typeId: Int64, state: StateI = .offline) {
     
     self.coordinate = Coordinates(x: 0, y: 0, z: 0)
     self.orientation = Orientation(x: 1, y: 0, z: 0)

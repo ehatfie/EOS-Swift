@@ -10,7 +10,7 @@
 This file holds IDs of multiple Eos-specific entities.
 */
 
-public enum State: Int, Codable, CaseIterable {
+public enum StateI: Int, Codable, CaseIterable {
   /*
    Contains possible item states.
   
@@ -27,8 +27,8 @@ public enum State: Int, Codable, CaseIterable {
   case overload = 4
 }
 
-extension State: Comparable {
-  public static func < (lhs: State, rhs: State) -> Bool {
+extension StateI: Comparable {
+  public static func < (lhs: StateI, rhs: StateI) -> Bool {
     lhs.rawValue < rhs.rawValue
   }
 }

@@ -10,6 +10,10 @@ class DronebayVolumeRegister: BaseResourceRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var used: Double {
     var returnValue: Double = 0.0
     

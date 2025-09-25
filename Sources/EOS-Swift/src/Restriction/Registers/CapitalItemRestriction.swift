@@ -32,6 +32,7 @@ class CapitalItemRestrictionRegister: BaseRestrictionRegisterProtocol {
   }
   
   init(fit: Fit) {
+    print("++ CapitalItemRestrictionRegister init")
     self.fit = fit
     self.restrictionType = .capital_item
     fit.subscribe(subscriber: self, for: [MessageTypeEnum.ItemLoaded, .ItemUnloaded])

@@ -7,7 +7,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
 
   var handlerMap: [Int64 : CallbackHandler] = [:]
   
-  var fit: Fit?
+  weak var fit: Fit?
   var damageDealers: [Int64: any DamageDealerMixinProtocol] = [:]
   
   init(fit: Fit) {
@@ -82,5 +82,9 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
         self.damageDealers[Int64(effectId.rawValue)] = nil
       }
     }
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
   }
 }

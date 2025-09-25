@@ -12,7 +12,7 @@ struct SideEffectData {
 
 class Booster: ImmutableStateMixinProtocol {
 
-  let SIDE_EFFECT_STATE = State.offline
+  let SIDE_EFFECT_STATE = StateI.offline
 
   var typeId: Int64
   var itemType: ItemType?
@@ -27,7 +27,7 @@ class Booster: ImmutableStateMixinProtocol {
 
   var attributes: [AttrId: Double] = [:]
 
-  var _state: State
+  var _state: StateI
   var ownerModifiable: Bool
   var modifierDomain: ModDomain? = .character
   var solsysCarrier: Ship?

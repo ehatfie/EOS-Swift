@@ -19,6 +19,7 @@ class YamlDataFetcher: @unchecked Sendable {
     type: T.Type,
     splits: Int = 3
   ) async throws -> [(Int64, T)] {
+    print("++ readYamlAsync \(fileName.rawValue)")
     guard
       let path = Bundle.main.path(
         forResource: fileName.rawValue,

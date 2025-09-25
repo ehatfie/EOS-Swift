@@ -28,7 +28,7 @@
  
  */
 
-protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
+public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var typeId: Int64 { get }
   var itemType: ItemType? { get set }
   //var container: String? { get set }
@@ -40,7 +40,7 @@ protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var attributes: [AttrId: Double] { get set } // will be a custom dictionary type
   var autocharges: ItemDict<AutoCharge>? { get set }
   
-  var _state: State { get set }
+  var _state: StateI { get set }
   var modifierDomain: ModDomain? { get set }
   var ownerModifiable: Bool { get set }
   var solsysCarrier: Ship? { get set }
@@ -249,25 +249,25 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   
   public var typeId: Int64
   public var itemType: ItemType?
-  weak var container: (any ItemContainerBaseProtocol)? = nil
+  weak public var container: (any ItemContainerBaseProtocol)? = nil
   
-  var runningEffectIds: Set<EffectId> = []
-  var effectModeOverrides: [EffectId: EffectMode]? = nil
+  public var runningEffectIds: Set<EffectId> = []
+  public var effectModeOverrides: [EffectId: EffectMode]? = nil
   public var effectTargets: String? = nil
   
-  open var _state: State
+  open var _state: StateI
   
   public var attributes: [AttrId: Double] = [:]
-  var autocharges: ItemDict<AutoCharge>? = nil
+  public var autocharges: ItemDict<AutoCharge>? = nil
   
-  var fit: Fit? {
+  public var fit: Fit? {
     if let container = self.container as? MaybeFitHaving {
       return container.fit
     }
     return nil
   }
   
-  init(typeId: Int64, state: State) {
+  init(typeId: Int64, state: StateI) {
     self.typeId = typeId
     self.itemType = nil
     self.container = nil
@@ -290,7 +290,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     hasher.combine(ObjectIdentifier(self))
   }
   
-  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
     if !skipAutoItems {
 //      for item in self.autocharges!.lazy.map(\.value) {
 //
@@ -349,7 +349,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   
   public var ownerModifiable: Bool
 
-  var solsysCarrier: Ship?
+  public var solsysCarrier: Ship?
   
   var others: Set<BaseItemMixin> {
     var otherItems: Set<BaseItemMixin> = []
@@ -373,9 +373,11 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   public func load() {
     let fit = self.fit
     guard let cacheHandler = fit?.solarSystem?.source?.cacheHandler else {
+      print("++ no cacheHandler for \(self.typeId)")
       return
     }
     guard let result = cacheHandler.getType(typeId: self.typeId) else {
+      print("++ no cache result \(self.typeId)")
       return
     }
     
@@ -477,7 +479,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     //
   }
   
-  func clearAutocharges() {
+  public func clearAutocharges() {
     if let autocharges = self.autocharges {
       autocharges.clear()
       self.autocharges = nil

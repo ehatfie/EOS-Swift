@@ -22,7 +22,7 @@ struct StatesActivated: ItemMessage {
   let messageType: MessageTypeEnum = .StatesActivated
   let item: any BaseItemMixinProtocol
   
-  let states: Set<State>
+  let states: Set<StateI>
 }
 
 struct StatesDeactivated: ItemMessage {
@@ -30,7 +30,7 @@ struct StatesDeactivated: ItemMessage {
   let messageType: MessageTypeEnum = .StatesDeactivated
   let item: any BaseItemMixinProtocol
   
-  let states: Set<State>
+  let states: Set<StateI>
 }
 
 /*

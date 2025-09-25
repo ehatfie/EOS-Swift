@@ -10,17 +10,17 @@ protocol FitHaving: AnyObject {
   var fit: Fit { get }
 }
 
-protocol FitRelated: AnyObject {
+public protocol FitRelated: AnyObject {
   var parent: (any MaybeFitHaving)? { get }
 }
 
-protocol MaybeFitHaving: AnyObject {
+public protocol MaybeFitHaving: AnyObject {
   var fit: Fit? { get }
 }
 
 
-class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated, MaybeFitHaving {
-  weak var parent: (any MaybeFitHaving)?
+public class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated, MaybeFitHaving {
+  weak public var parent: (any MaybeFitHaving)?
   
   var set: Set<T> = []
   var containerOverride: (any ItemContainerBaseProtocol)? = nil
@@ -41,7 +41,7 @@ class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated, Maybe
     set.insert(item)
     
     let containerToUse = containerOverride ?? self
-    try? self.handleItemAddition(item, container: containerToUse as! ItemContainerBase<BaseItemMixin>)
+    try? self.handleItemAddition(item, container: containerToUse as! ItemContainerBase<T>)
   }
   
   func remove(item: T) {
@@ -73,11 +73,11 @@ class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated, Maybe
     return set.contains(item)
   }
   
-  override func length() -> Int {
+  public override func length() -> Int {
     return set.count
   }
   
-  var fit: Fit? {
+  public var fit: Fit? {
     return parent?.fit
   }
 }

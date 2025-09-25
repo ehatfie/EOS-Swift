@@ -7,7 +7,7 @@
 // https://github.com/pyfa-org/eos/blob/master/eos/pubsub/broker.py
 
 // I think this `Message` could be a FitMessage
-protocol BaseSubscriberProtocol: Hashable {
+public protocol BaseSubscriberProtocol: Hashable {
   func notify(message: any Message)
 }
 
@@ -17,18 +17,18 @@ extension BaseSubscriberProtocol {
   }
 }
 
-class MockSubscriber: BaseSubscriberProtocol, Equatable {
+public class MockSubscriber: BaseSubscriberProtocol, Equatable {
   let thing: Int
 
   init(thing: Int) {
     self.thing = thing
   }
   
-  func notify(message: any Message) { }
+  public func notify(message: any Message) { }
 
 }
 
-enum MessageTypeEnum {
+public enum MessageTypeEnum {
   case AttributeValueChanged
   case AttributeValueChangedMasked
   
@@ -63,8 +63,8 @@ extension MockSubscriber: Hashable {
 }
 /// I think this needs to be a protocol and implementations in an extension
 /// Manages message subscriptions and dispatch messages to recipients.
-class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitHaving {
-  var fit: Fit? {
+public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitHaving {
+  public var fit: Fit? {
     self as? Fit
   }
   

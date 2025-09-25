@@ -5,14 +5,14 @@
 //  Created by Erik Hatfield on 9/7/25.
 //
 
-class TypeUniqueSet<T: BaseItemMixinProtocol>: ItemSet<T> {
+public class TypeUniqueSet<T: BaseItemMixinProtocol>: ItemSet<T> {
   var typeIdMap: [Int64: T] = [:]
   
   init(parent: MaybeFitHaving) {
     super.init(parent: parent, containerOverride: nil)
   }
   
-  override func add(item: T) {
+  override public func add(item: T) {
     let typeId = item.typeId
     
     if typeIdMap[typeId] == nil {
@@ -22,7 +22,7 @@ class TypeUniqueSet<T: BaseItemMixinProtocol>: ItemSet<T> {
     }
   }
   
-  override func remove(item: T) {
+  override public func remove(item: T) {
     super.remove(item: item)
     typeIdMap[item.typeId] = nil
   }

@@ -30,6 +30,10 @@ class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var slotEffectId: EffectId = .hardpoint_modifier_effect
   var slotAttrId: AttrId = .hi_slot_modifier
   

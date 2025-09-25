@@ -11,6 +11,10 @@ class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var used: Double {
     var returnValue: Double = 0.0
     for item in self.resourceUsers {

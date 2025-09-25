@@ -5,8 +5,8 @@
 //  Created by Erik Hatfield on 9/6/25.
 //
 
-class BaseCharge: ContainerStateMixin {
-  init(typeId: Int64) {
+public class BaseCharge: ContainerStateMixin {
+  public init(typeId: Int64) {
     super.init(typeId: typeId, state: .offline)
     modifierDomain = .ship
     ownerModifiable = true
@@ -14,7 +14,7 @@ class BaseCharge: ContainerStateMixin {
 }
 
 
-class Charge: BaseCharge {
+public class Charge: BaseCharge {
   /*
    """Represents a regular charge.
 
@@ -29,7 +29,7 @@ class Charge: BaseCharge {
    */
 }
 
-class AutoCharge: BaseCharge {
+public class AutoCharge: BaseCharge {
   /*
    """Represents an autocharge.
 

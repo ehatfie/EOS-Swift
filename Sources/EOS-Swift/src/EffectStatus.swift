@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/7/25.
 //
 
-typealias Resolver = (any BaseItemMixinProtocol, Effect, Bool, State?) -> Bool
+typealias Resolver = (any BaseItemMixinProtocol, Effect, Bool, StateI?) -> Bool
 
 struct EffectStatus {
   
@@ -15,7 +15,7 @@ class EffectStatusResolver {
   static func resolveEffectStatus(
     item: any BaseItemMixinProtocol,
     effectId: Int64,
-    stateOverride: State? = nil
+    stateOverride: StateI? = nil
   ) -> Bool {
     let effectId = EffectId(rawValue: Int(effectId))!
     let effectStatus = EffectStatusResolver.resolveEffectsStatus(item: item, effectIds: [effectId])
@@ -25,7 +25,7 @@ class EffectStatusResolver {
   static func resolveEffectsStatus(
     item: any BaseItemMixinProtocol,
     effectIds: [EffectId]? = nil,
-    stateOverride: State? = nil
+    stateOverride: StateI? = nil
   ) -> [EffectId: Bool] {
     let itemEffects = item.typeEffects  //.filter(\.id.in(effectIds))
     var requiredEffectIds: Set<EffectId> = []
@@ -73,7 +73,7 @@ class EffectStatusResolver {
     item: any BaseItemMixinProtocol,
     effect: Effect,
     onlineOrRunning: Bool,
-    stateOverride: State? = nil
+    stateOverride: StateI? = nil
   ) -> Bool {
     var resolverMap: [EffectMode: Any] = [
       EffectMode.full_compliance: EffectStatusResolver.resolveFullCompliance,
@@ -84,7 +84,7 @@ class EffectStatusResolver {
     let effectMode = item.getEffectMode(effectId: EffectId(rawValue: Int(effect.effectId))!)
     let resolver = resolverMap[effectMode]!
     if let resolver = resolver
-      as? (any BaseItemMixinProtocol, Effect, Bool, State?) -> Bool
+      as? (any BaseItemMixinProtocol, Effect, Bool, StateI?) -> Bool
     {
       return resolver(item, effect, onlineOrRunning, stateOverride)
     }
@@ -113,10 +113,10 @@ class EffectStatusResolver {
     item: any BaseItemMixinProtocol,
     effect: Effect,
     onlineOrRunning: Bool,
-    stateOverride: State? = nil
+    stateOverride: StateI? = nil
   ) -> Bool {
-    let itemState: State = stateOverride ?? item._state
-    let effectState: State = effect.state
+    let itemState: StateI = stateOverride ?? item._state
+    let effectState: StateI = effect.state
     if itemState < effectState {
       return false
     }
@@ -143,9 +143,9 @@ class EffectStatusResolver {
     item: any BaseItemMixinProtocol,
     effect: Effect,
     onlineOrRunning: Bool,
-    stateOverride: State? = nil
+    stateOverride: StateI? = nil
   ) -> Bool {
-    let itemState: State = stateOverride ?? item._state
+    let itemState: StateI = stateOverride ?? item._state
     return itemState >= effect.state
   }
 

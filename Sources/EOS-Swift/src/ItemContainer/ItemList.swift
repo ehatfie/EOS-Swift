@@ -15,12 +15,12 @@
 
 
 
-class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T> {
+public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHaving {
   typealias BaseItemMixin = T
   weak var parent: (any MaybeFitHaving)? // ParentHaving??
   var list: [T?] = []
   
-  var fit: Fit? {
+  public var fit: Fit? {
     return self.parent?.fit
   }
   
@@ -117,7 +117,7 @@ class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T> {
   
   /// Put item to first free slot in container.
   /// If container doesn't have free slots, append item to the end of the container.
-  func equip(item: any BaseItemMixinProtocol) {
+  public func equip(item: any BaseItemMixinProtocol) {
     guard self.checkClass(item: item, allowNil: false) else {
       return
     }
@@ -225,7 +225,7 @@ class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T> {
     return list.contains(where: {$0 == value})
   }
   
-  override func length() -> Int {
+  override public func length() -> Int {
     return self.list.count
   }
   

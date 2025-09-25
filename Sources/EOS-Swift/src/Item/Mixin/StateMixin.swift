@@ -7,22 +7,22 @@
 //
 
 protocol MutableStateMixinProtocol: BaseItemMixinProtocol {
-  var state: State { get set }
+  var state: StateI { get set }
 }
 
 extension MutableStateMixinProtocol {
-  var state: State {
+  var state: StateI {
     return _state
   }
 }
 
 
 protocol ImmutableStateMixinProtocol: BaseItemMixinProtocol {
-  var state: State { get }
+  var state: StateI { get }
 }
 
 extension ImmutableStateMixinProtocol {
-  var state: State {
+  var state: StateI {
     get {
       return _state
     }
@@ -33,8 +33,8 @@ extension ImmutableStateMixinProtocol {
   }
 }
 
-class ImmutableStateMixin: BaseItemMixin {
-  override var _state: State {
+public class ImmutableStateMixin: BaseItemMixin {
+  public override var _state: StateI {
     set {
       return
     }
@@ -44,8 +44,8 @@ class ImmutableStateMixin: BaseItemMixin {
   }
 }
 
-class MutableStateMixin: BaseItemMixin {
-  override var _state: State {
+public class MutableStateMixin: BaseItemMixin {
+  public override var _state: StateI {
     get {
       super._state
     }
@@ -84,8 +84,8 @@ class MutableStateMixin: BaseItemMixin {
 
 
 /// Items based on this class inherit state from item which contains them.
-class ContainerStateMixin: BaseItemMixin {
-  override var _state: State {
+public class ContainerStateMixin: BaseItemMixin {
+  public override var _state: StateI {
     set {
       return
     }

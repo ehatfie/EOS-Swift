@@ -9,8 +9,8 @@ import Yams
 
 enum YamlFiles: String {
   case categoryIDs = "categoryIDs"
-  case groupIDs = "groupIDs"
-  case typeIDs = "typeIDs"
+  case groupIDs = "groups"
+  case typeIDs = "types"
   case dogmaAttrbutes = "dogmaAttributes"
   case dogmaEffects = "dogmaEffects"
   case typeDogma = "typeDogma"
@@ -23,7 +23,7 @@ enum YamlFiles: String {
   case dbuffCollections = "dbuffCollections"
 }
 
-class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
+public class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
   var cachePath: String
 
   var typeStore: [Int64: ItemType] = [:]
@@ -31,11 +31,14 @@ class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
   var effectStore: [Int64: Effect] = [:]
   var buffTemplateStore: [Int64: [BuffTemplate]] = [:]
   var fingerprint: String? = nil
+  
+  private let cache = Cache<Int64, ItemType>()
 
-  init(cachePath: String) {
+  public init(cachePath: String) {
     self.cachePath = cachePath
 
     self.loadPersistantCache()
+    
   }
 
   func getType(typeId: Int64) -> ItemType? {

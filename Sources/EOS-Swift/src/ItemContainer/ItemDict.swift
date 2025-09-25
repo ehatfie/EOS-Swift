@@ -16,8 +16,8 @@
          container_override (optional): When this argument is set, its value will
              be assigned as container to all items being added.
  */
-class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
-  var fit: Fit?
+public class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
+  public var fit: Fit?
   weak var parent: (any MaybeFitHaving)?
   
   var itemSet: ItemSet<T>
