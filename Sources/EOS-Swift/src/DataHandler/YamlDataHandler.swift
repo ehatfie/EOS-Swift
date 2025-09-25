@@ -8,30 +8,39 @@
 import Foundation
 import Yams
 
+
+
 class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
   func getEveTypes() async  -> [EveTypeData] {
-    return (try? await readYamlAsync(for: .typeIDs, type: EveTypeData.self).map { $0.1 }) ?? []
+    let fetcher = await YamlDataFetcher.shared
+    
+    return (try? await fetcher.readYamlAsync(for: .typeIDs, type: EveTypeData.self).map { $0.1 }) ?? []
   }
   
   func getEveGroups() async  -> [EveGroupData] {
-    return (try? await readYamlAsync(for: .groupIDs, type: EveGroupData.self).map { $0.1 }) ?? []
+    let fetcher = await YamlDataFetcher.shared
+    return (try? await fetcher.readYamlAsync(for: .groupIDs, type: EveGroupData.self).map { $0.1 }) ?? []
   }
   
   func getDogmaAttributes() async -> [DogmaAttributeData] {
-    return (try? await readYamlAsync(for: .dogmaAttrbutes, type: DogmaAttributeData.self).map { $0.1 }) ?? []
+    let fetcher = await YamlDataFetcher.shared
+    return (try? await fetcher.readYamlAsync(for: .dogmaAttrbutes, type: DogmaAttributeData.self).map { $0.1 }) ?? []
   }
   
   func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData] {
-    return (try? await readYamlAsync(for: .typeDogma, type: DogmaTypeAttributeData.self).map { $0.1 }) ?? []
+    let fetcher = await YamlDataFetcher.shared
+    return (try? await fetcher.readYamlAsync(for: .typeDogma, type: DogmaTypeAttributeData.self).map { $0.1 }) ?? []
   }
   
   func getDogmaEffects() async -> [DogmaEffectData] {
-    return (try? await readYamlAsync(for: .dogmaEffects, type: DogmaEffectData.self).map { $0.1 }) ?? []
+    let fetcher = await YamlDataFetcher.shared
+    return (try? await fetcher.readYamlAsync(for: .dogmaEffects, type: DogmaEffectData.self).map { $0.1 }) ?? []
   }
   
   func getDogmaTypeEffects() async  -> [DogmaTypeEffect] {
+    let fetcher = await YamlDataFetcher.shared
     var rows: [DogmaTypeEffect] = []
-    let result = (try? await readYamlAsync(for: .typeDogmaInfo, type: TypeDogmaData.self)) ?? []
+    let result = (try? await fetcher.readYamlAsync(for: .typeDogmaInfo, type: TypeDogmaData.self)) ?? []
     
     rows = result.flatMap { (typeId, typeData) in
       return typeData.dogmaEffects.map { DogmaTypeEffect(typeId: typeId, effectID: $0.effectID, isDefault: $0.isDefault) }
@@ -41,12 +50,41 @@ class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
     return rows
   }
 
-  func getDebuffCollection() {
-
+  func getDebuffCollection() async -> [DBuffCollectionsData] {
+    let fetcher = await YamlDataFetcher.shared
+    return (try? await fetcher.readYamlAsync(for: .dbuffCollections, type: DBuffCollectionsData.self).map { $0.1 }) ?? []
   }
+  
+  func getSkillReqs() async -> [TypeSkillReq] {
+    let fetcher = await YamlDataFetcher.shared
+    let typeDogmaData = (try? await fetcher.readYamlAsync(for: .typeDogmaInfo, type: TypeDogmaData.self)) ?? []
+    
+    let primary = AttrId.required_skill_1.rawValue
+    let expectedAtrributes: [(AttrId, AttrId)] = [
+      (.required_skill_1, .required_skill_1_level),
+      (.required_skill_2, .required_skill_2_level),
+      (.required_skill_3, .required_skill_3_level),
+      (.required_skill_4, .required_skill_4_level),
+      (.required_skill_5, .required_skill_5_level),
+      (.required_skill_6, .required_skill_6_level)
+    ]
+    var skillTypeReqs: [TypeSkillReq] = []
+    for (typeId, typeDogmaData)  in typeDogmaData {
+      let data = TypeSkillReq(typeId: typeId, skillTypeId: 0, level: 1)
+      let dogmaAttributes = typeDogmaData.dogmaAttributes
+      for (requiredSkill, requiredSkillLevel) in expectedAtrributes {
+        // this should be a dict
+        guard let attr1 = dogmaAttributes.first(where: { $0.attributeID == requiredSkill.rawValue }),
+              let attr2 = dogmaAttributes.first(where: { $0.attributeID == requiredSkillLevel.rawValue })
+        else { break }
+        skillTypeReqs.append(TypeSkillReq(typeId: typeId, skillTypeId: Int64(attr1.value), level: Int64(attr2.value)))
+      }
+      
+     
+    }
+    
 
-  func getSkillReqs() {
-
+    return skillTypeReqs
   }
 
   func getTypeFighterabils() {

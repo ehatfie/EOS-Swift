@@ -20,6 +20,7 @@ enum YamlFiles: String {
   case blueprints = "blueprints"
   case races = "races"
   case marketGroups = "marketGroups"
+  case dbuffCollections = "dbuffCollections"
 }
 
 class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {

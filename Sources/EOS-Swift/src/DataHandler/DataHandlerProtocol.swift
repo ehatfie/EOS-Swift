@@ -18,13 +18,13 @@ protocol DataHandlerProtocol {
   func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData]
   func getDogmaEffects() async -> [DogmaEffectData]
   func getDogmaTypeEffects() async -> [DogmaTypeEffect]
-  func getDebuffCollection()
-  func getSkillReqs()
+  func getDebuffCollection() async -> [DBuffCollectionsData]
+  func getSkillReqs() async -> [TypeSkillReq]
   func getTypeFighterabils()
   func getVersion() -> String
 }
 
-struct EveTypeData: Decodable {
+struct EveTypeData: Codable {
   let typeID: Int64
   let groupID: Int64
   let capacity: Double
@@ -33,12 +33,12 @@ struct EveTypeData: Decodable {
   let volume: Double
 }
 
-struct EveGroupData: Decodable {
+struct EveGroupData: Codable {
   let groupID: Int64
   let categoryID: Int64
 }
 
-struct DogmaTypeAttributeData: Decodable {
+struct DogmaTypeAttributeData: Codable {
   let typeID: Int64
   let attributeID: Int64
   let value: Double
@@ -53,4 +53,10 @@ struct DogmaTypeEffect {
 struct DogmaTypeEffectData {
   let effectID: Int64
   let isDefault: Bool
+}
+
+struct TypeSkillReq {
+  let typeId: Int64
+  let skillTypeId: Int64
+  let level: Int64
 }
