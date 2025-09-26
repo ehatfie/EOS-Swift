@@ -86,6 +86,7 @@ enum ModAffecteeFilter: Int, CaseIterable {
   init?(value: String) {
     switch value {
     case "ItemModifier": self = .item
+    case "LocationModifier": self = .domain
     case "LocationGroupModifier": self = .domain_group
     case "LocationRequiredSkillModifier": self = .domain_skillrq
     case "OwnerRequiredSkillModifier": self = .owner_skillrq
@@ -138,6 +139,20 @@ enum ModOperator: Int, CaseIterable {
   case post_percent = 9
   case post_assign = 10
 
+  init?(rawValue: Int) {
+    switch rawValue {
+    case -1: self = .pre_assign
+    case 0: self = .pre_mul
+    case 1: self = .pre_div
+    case 2: self = .mod_add
+    case 3: self = .mod_sub
+    case 4: self = .post_mul
+    case 5: self = .post_div
+    case 6: self = .post_percent
+    case 7: self = .post_assign
+    default: return nil
+    }
+  }
 }
 
 enum ModAggregateMode: Int, CaseIterable {

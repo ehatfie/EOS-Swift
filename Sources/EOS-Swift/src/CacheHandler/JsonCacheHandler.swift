@@ -7,16 +7,16 @@
 import Foundation
 
 class JsonCachehandler: BaseCacheHandlerProtocol {
+  func getFingerprint() -> String {
+    ""
+  }
+  
   func getType(typeId: Int64) -> ItemType? {
     nil
   }
   
   func getAttribute(attributeId: AttrId) {
     
-  }
-  
-  func getFingerprint() -> Int {
-    0
   }
   
 
