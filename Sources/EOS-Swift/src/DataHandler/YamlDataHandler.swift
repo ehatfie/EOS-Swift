@@ -166,11 +166,11 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
     return skillTypeReqs
   }
 
-  func getTypeFighterabils() {
+  public func getTypeFighterabils() {
 
   }
 
-  func getVersion() -> String? {
+  public func getVersion() -> String? {
     return ""
   }
 }

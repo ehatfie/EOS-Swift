@@ -392,6 +392,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
       guard let autoChargeTypeId = effect.getAutoChargeTypeId(item: self) else {
         continue
       }
+      
       self.addAutoCharge(effectId: effectId, autoChargeTypeId: autoChargeTypeId)
     }
   }

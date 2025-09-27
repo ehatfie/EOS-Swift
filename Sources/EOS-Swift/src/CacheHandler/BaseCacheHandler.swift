@@ -5,11 +5,11 @@
 //  Created by Erik Hatfield on 9/21/25.
 //
 nonisolated
-protocol BaseCacheHandlerProtocol: Sendable {
+public protocol BaseCacheHandlerProtocol: Sendable {
   func getType(typeId: Int64) -> ItemType?
   func getAttribute(attributeId: AttrId)
   func getEffect(effectId: EffectId)
   func getBuffTemplates(buffId: Int64)
   func getFingerprint() -> String
-  func updateCache(eveObjects: Any, fingerprint: Any)
+  func updateCache(eveObjects: [EveTypeData], fingerprint: String)
 }

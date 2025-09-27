@@ -24,7 +24,7 @@ enum YamlFiles: String {
 }
 
 public actor YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol, @unchecked Sendable {
-  nonisolated func getFingerprint() -> String {
+  nonisolated public func getFingerprint() -> String {
     return ""
   }
   
@@ -48,19 +48,19 @@ public actor YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol, @unchec
     
   }
   
-  nonisolated func getType(typeId: Int64) -> ItemType? {
+  nonisolated public func getType(typeId: Int64) -> ItemType? {
     return nil
   }
   
-  nonisolated func getAttribute(attributeId: AttrId) {
+  nonisolated public func getAttribute(attributeId: AttrId) {
     
   }
   
-  nonisolated func getEffect(effectId: EffectId) {
+  nonisolated public func getEffect(effectId: EffectId) {
     
   }
   
-  nonisolated func getBuffTemplates(buffId: Int64) {
+  nonisolated public func getBuffTemplates(buffId: Int64) {
     
   }
   
@@ -68,7 +68,7 @@ public actor YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol, @unchec
     return 0
   }
   
-  nonisolated func updateCache(eveObjects: Any, fingerprint: Any) {
+  nonisolated public func updateCache(eveObjects: Any, fingerprint: Any) {
 
   }
 

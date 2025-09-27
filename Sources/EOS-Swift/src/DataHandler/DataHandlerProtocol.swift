@@ -10,7 +10,7 @@
   are named against data structures (usually tables) they request, returning
   iterable with rows, each row being dictionary in {field name: field value} format.
  */
-protocol DataHandlerProtocol {
+public protocol DataHandlerProtocol {
   func getEveTypes() async -> [EveTypeData]
   
   func getEveGroups() async -> [EveGroupData]
