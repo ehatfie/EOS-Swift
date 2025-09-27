@@ -5,7 +5,9 @@
 //  Created by Erik Hatfield on 9/24/25.
 //
 
-class EveObjectBuilder {
+class EveObjectBuilder: @unchecked Sendable {
+  
+  nonisolated(unsafe)
   static func run(dataHandler: any DataHandlerProtocol) async -> ([EveTypeData]) {
     let eveTypes = await dataHandler.getEveTypes()
     let eveGroups = await dataHandler.getEveGroups()

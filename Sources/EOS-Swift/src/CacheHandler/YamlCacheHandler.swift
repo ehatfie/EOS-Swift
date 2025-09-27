@@ -23,9 +23,13 @@ enum YamlFiles: String {
   case dbuffCollections = "dbuffCollections"
 }
 
-public class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
+public actor YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol, @unchecked Sendable {
+  nonisolated func getFingerprint() -> String {
+    return ""
+  }
+  
   var cachePath: String
-
+  
   var typeStore: [Int64: ItemType] = [:]
   var attributeStore: [Int64: Attribute] = [:]
   var effectStore: [Int64: Effect] = [:]
@@ -33,52 +37,56 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
   var fingerprint: String? = nil
   
   private let cache = Cache<Int64, ItemType>()
-
+  
   public init(cachePath: String) {
     self.cachePath = cachePath
-
-    self.loadPersistantCache()
+    
+    Task { @MainActor in
+      await self.loadPersistantCache()
+    }
+    
     
   }
-
-  func getType(typeId: Int64) -> ItemType? {
+  
+  nonisolated func getType(typeId: Int64) -> ItemType? {
     return nil
   }
-
-  func getAttribute(attributeId: AttrId) {
-
+  
+  nonisolated func getAttribute(attributeId: AttrId) {
+    
   }
-
-  func getEffect(effectId: EffectId) {
-
+  
+  nonisolated func getEffect(effectId: EffectId) {
+    
   }
-
-  func getBuffTemplates(buffId: Int64) {
-
+  
+  nonisolated func getBuffTemplates(buffId: Int64) {
+    
   }
-
+  
   func getFingerprint() -> Int {
     return 0
   }
-
-  func updateCache(eveObjects: Any, fingerprint: Any) {
+  
+  nonisolated func updateCache(eveObjects: Any, fingerprint: Any) {
 
   }
 
-  func loadPersistantCache() {
+  func loadPersistantCache() async {
 
     //let foo = readYamlAsync(for: ., type: <#T##(Decodable & Sendable).Type#>)
     // verify file exists
     guard let path = Bundle.main.path(forResource: "", ofType: "Yaml") else {
       return
     }
+    
     if #available(macOS 10.15, *) {
-      Task {
+      //Task { [weak self] in
+        //guard let self = self else { return }
         let types =
           (try? await readYamlAsync(for: .typeIDs, type: TypeData.self)) ?? []
 
-        let attributes =
-          (try? await readYamlAsync(
+        let attributes = (try? await self.readYamlAsync(
             for: .dogmaAttrbutes,
             type: DogmaAttributeData.self
           )) ?? []
@@ -94,7 +102,7 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol, @unchecked Sendable {
           attributes: attributes,
           effects: effects
         )
-      }
+     //}
     } else {
       print("++ load persistant cache fallback")
       // Fallback on earlier versions

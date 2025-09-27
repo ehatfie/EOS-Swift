@@ -6,7 +6,8 @@
 //
 import Foundation
 
-class JsonCachehandler: BaseCacheHandlerProtocol {
+nonisolated
+class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
   func getFingerprint() -> String {
     ""
   }
@@ -18,7 +19,6 @@ class JsonCachehandler: BaseCacheHandlerProtocol {
   func getAttribute(attributeId: AttrId) {
     
   }
-  
 
   var cachePath: String
   
@@ -28,10 +28,13 @@ class JsonCachehandler: BaseCacheHandlerProtocol {
   var buffTemplateStore: [Int64: [BuffTemplate]] = [:]
   var fingerprint: String? = nil
   
+  nonisolated
   init(cachePath: String) {
     self.cachePath = cachePath
+    Task {
+      await self.loadPersistantCache()
+    }
     
-    self.loadPersistantCache()
   }
   
   func getType(typeId: Int64) async -> ItemType? {
@@ -57,7 +60,8 @@ class JsonCachehandler: BaseCacheHandlerProtocol {
   func updateCache(eveObjects: Any, fingerprint: Any) {
     
   }
-  
+
+  nonisolated
   func loadPersistantCache() {
     // verify file exists
     guard let path = Bundle.main.path(forResource: "", ofType: "json") else {

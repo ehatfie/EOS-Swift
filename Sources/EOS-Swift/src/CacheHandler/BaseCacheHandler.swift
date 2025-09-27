@@ -4,8 +4,8 @@
 //
 //  Created by Erik Hatfield on 9/21/25.
 //
-
-protocol BaseCacheHandlerProtocol {
+nonisolated
+protocol BaseCacheHandlerProtocol: Sendable {
   func getType(typeId: Int64) -> ItemType?
   func getAttribute(attributeId: AttrId)
   func getEffect(effectId: EffectId)

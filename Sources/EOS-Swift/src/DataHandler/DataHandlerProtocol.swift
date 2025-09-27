@@ -24,6 +24,7 @@ protocol DataHandlerProtocol {
   func getVersion() -> String?
 }
 
+
 public struct EveTypeData: Codable, Sendable {
   public let typeID: Int64
   public let groupID: Int64?
