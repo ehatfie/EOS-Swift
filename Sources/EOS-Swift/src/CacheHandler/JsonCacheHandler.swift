@@ -8,6 +8,10 @@ import Foundation
 
 nonisolated
 class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
+  func updateCache(eveObjects: [EveTypeData], fingerprint: String) {
+    
+  }
+  
   func getFingerprint() -> String {
     ""
   }

@@ -54,6 +54,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     }
   }
   
+  @MainActor
   public init(solarSystem: SolarSystem? = DefaultSolarSystem(source: nil), fleet: MockFleet?) {
     self.solarSystem =  solarSystem
     self.fleet = fleet

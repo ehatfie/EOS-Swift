@@ -24,6 +24,8 @@ enum YamlFiles: String {
 }
 
 public actor YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol, @unchecked Sendable {
+
+  
   nonisolated public func getFingerprint() -> String {
     return ""
   }
@@ -68,8 +70,8 @@ public actor YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol, @unchec
     return 0
   }
   
-  nonisolated public func updateCache(eveObjects: Any, fingerprint: Any) {
-
+  nonisolated public func updateCache(eveObjects: [EveTypeData], fingerprint: String) {
+    
   }
 
   func loadPersistantCache() async {
