@@ -9,6 +9,7 @@ import Foundation
 import Yams
 
 public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
+  
   public init() {
 
   }
@@ -70,13 +71,13 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       ).map { $0.1 }) ?? []
   }
 
-  public func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData] {
+  public func getDogmaTypeAttributes() async -> [(Int64,DogmaTypeAttributeData)] {
     let fetcher = await YamlDataFetcher.shared
     return
       (try? await fetcher.readYamlAsync(
         for: .typeDogma,
         type: DogmaTypeAttributeData.self
-      ).map { $0.1 }) ?? []
+      )) ?? []
   }
 
   public func getDogmaEffects() async -> [DogmaEffectData] {

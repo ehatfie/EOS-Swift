@@ -21,6 +21,10 @@ class DroneGroupRestrictionRegister: BaseRestrictionRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var restrictionType: Restriction = .drone_group
   
   var fit: Fit

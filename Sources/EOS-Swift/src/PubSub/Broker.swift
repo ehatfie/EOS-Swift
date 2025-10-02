@@ -11,11 +11,7 @@ public protocol BaseSubscriberProtocol: Hashable {
   func notify(message: any Message)
 }
 
-extension BaseSubscriberProtocol {
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(self)
-  }
-}
+
 
 public class MockSubscriber: BaseSubscriberProtocol, Equatable {
   let thing: Int
@@ -65,7 +61,8 @@ extension MockSubscriber: Hashable {
 /// Manages message subscriptions and dispatch messages to recipients.
 public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitHaving {
   public var fit: Fit? {
-    self as? Fit
+    print("FitMessageBroker \(self as? Fit)")
+    return self as? Fit
   }
   
   var subscribers: [MessageTypeEnum: Set<AnyHashable>] = [:]
@@ -123,7 +120,7 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
     for message in messages {
       var m = message
       m.fit = self.fit
-      
+      print("subscriber count for \(message.messageType) is \(self.subscribers[message.messageType]?.count)")
       for subscriber in self.subscribers[message.messageType] ?? [] {
         if let foo = subscriber as? any BaseSubscriberProtocol {
           foo.notify(message: m)

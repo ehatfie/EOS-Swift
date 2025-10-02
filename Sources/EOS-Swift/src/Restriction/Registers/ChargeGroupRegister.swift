@@ -24,6 +24,10 @@ class ChargeGroupRestrictionRegister: BaseRestrictionRegisterProtocol, FitHaving
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var fit: Fit
   
   var restrictionType: Restriction = .charge_group
@@ -43,7 +47,7 @@ class ChargeGroupRestrictionRegister: BaseRestrictionRegisterProtocol, FitHaving
         continue
       }
       
-      guard let charge = module.charge else {
+      guard let charge = module.charge.item else {
         continue
       }
       
@@ -73,6 +77,7 @@ class ChargeGroupRestrictionRegister: BaseRestrictionRegisterProtocol, FitHaving
   }
   
   func handleItemLoaded(message: ItemLoaded) {
+    print("++ CGR - handleItemLoaded ")
     let messageItem = message.item
     if !(messageItem is Charge) { return }
     

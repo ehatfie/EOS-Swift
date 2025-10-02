@@ -15,7 +15,7 @@ public protocol DataHandlerProtocol {
   
   func getEveGroups() async -> [EveGroupData]
   func getDogmaAttributes() async -> [DogmaAttributeData]
-  func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData]
+  func getDogmaTypeAttributes() async -> [(Int64, DogmaTypeAttributeData)]
   func getDogmaEffects() async -> [DogmaEffectData]
   func getDogmaTypeEffects() async -> [DogmaTypeEffect]
   func getDebuffCollection() async -> [DBuffCollectionsData]

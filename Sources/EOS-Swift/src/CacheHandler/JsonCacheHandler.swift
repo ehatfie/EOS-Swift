@@ -8,8 +8,38 @@ import Foundation
 
 nonisolated
 class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
-  func updateCache(eveObjects: [EveTypeData], fingerprint: String) {
-    
+  public func updateCache(
+    types: [ItemType],
+    attributes: [Attribute],
+    effects: [Effect],
+    buffTemplates: [BuffTemplate],
+    fingerprint: String
+  ) {
+    print(
+      "++ JSONCacheHandler updateCache types: \(types.count) attributes: \(attributes) effects: \(effects) fingerprint: \(fingerprint)"
+    )
+    /*
+     types, attrs, effects, buff_templates = eve_objects
+     cache_data = {
+         'types':
+             [self.__type_compress(t) for t in types],
+         'attrs':
+             [self.__attr_compress(a) for a in attrs],
+         'effects':
+             [self.__effect_compress(e) for e in effects],
+         'buff_templates':
+             [self.__buff_template_compress(t) for t in buff_templates],
+         'fingerprint':
+             fingerprint}
+     self.__update_persistent_cache(cache_data)
+     self.__update_memory_cache(cache_data)
+     */
+//    self.updateMemoryCache2(
+//      types: types,
+//      attributes: attributes,
+//      effects: effects,
+//      buffTemplates: buffTemplates
+//    )
   }
   
   func getFingerprint() -> String {

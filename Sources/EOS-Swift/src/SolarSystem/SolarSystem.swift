@@ -16,10 +16,12 @@ class MockSolarSystem: SolarSystemProtocol {
 public class SolarSystem: MaybeFitHaving {
   var source: Source? {
     get {
-      self.Source
+      print("++ getSource \(self.Source)")
+      return self.Source
     }
     set {
-      let oldSource = self.source
+      print("++ set source to \(newValue?.alias)")
+      let oldSource = self.Source
       if newValue == oldSource {
         return
       }
@@ -30,9 +32,9 @@ public class SolarSystem: MaybeFitHaving {
         }
       }
 
-      self.source = newValue
+      self.Source = newValue
 
-      if let source = self.source {
+      if let source = self.Source {
         for fit in self.fits {
           fit.loadItems()
         }
@@ -96,10 +98,14 @@ public class SourceManager: @unchecked Sendable {
       }
     }
     
-    
     // Generate eve objects and cache them, as generation takes significant amount of time
     let eveObjects = await EveObjectBuilder.run(dataHandler: dataHandler)
-    await cacheHandler.updateCache(eveObjects: eveObjects, fingerprint: currentFP)
+    let attributes = eveObjects.0
+    let effects = eveObjects.1
+    let types = eveObjects.2
+    let buffTemplates = eveObjects.3
+    
+    await cacheHandler.updateCache(types: types, attributes: attributes, effects: effects, buffTemplates: buffTemplates, fingerprint: currentFP)
     
     //Finally, add record to list of sources
     let source = Source(alias: alias, cacheHandler: cacheHandler)

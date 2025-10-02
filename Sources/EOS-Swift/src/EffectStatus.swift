@@ -131,7 +131,7 @@ class EffectStatusResolver {
         return onlineOrRunning
       }
     case .active:
-      print("++ EffectState == active !!!")
+      //print("++ EffectState for \(effect.effectId) == active \(item.typeId)  !!!")
       return item.typeDefaultEffect is Effect
     case .overload:
       return true

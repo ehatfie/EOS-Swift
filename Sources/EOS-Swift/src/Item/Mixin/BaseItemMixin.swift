@@ -31,7 +31,7 @@
 public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var typeId: Int64 { get }
   var itemType: ItemType? { get set }
-  //var container: String? { get set }
+  
   var container: (any ItemContainerBaseProtocol)? { get set }
   
   var runningEffectIds: Set<EffectId> { get set }
@@ -66,6 +66,7 @@ extension BaseItemMixinProtocol {
   }
   
   func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+    print("!! default childItemIterator impl")
     if !skipAutoItems {
 //      for item in self.autocharges!.lazy.map(\.value) {
 //
@@ -75,6 +76,7 @@ extension BaseItemMixinProtocol {
   }
   
   func childItemIter(skipAutoitems: Bool = false) {
+    
     if !skipAutoitems {
       // for item in self.autocharges.values():
       // yield item
@@ -139,6 +141,7 @@ extension BaseItemMixinProtocol {
 
 
   func load() {
+    print("!! Default Load Implementation")
     // get a getter
     for (effectId, effect) in self.typeEffects {
       //let autoChargeTypeId = effect.getAutoChargeTypeId(item: <#T##BaseItemMixin#>)
@@ -264,6 +267,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     if let container = self.container as? MaybeFitHaving {
       return container.fit
     }
+    print("-- \(self.typeId) container \(container)")
     return nil
   }
   
@@ -291,12 +295,14 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+    print("++ baseItemMixin childItemIterator")
     if !skipAutoItems {
 //      for item in self.autocharges!.lazy.map(\.value) {
 //
 //      }
     }
     return nil
+    //return super.childItemIterator(skipAutoItems: skipAutoItems)
   }
   
   func childItemIter(skipAutoitems: Bool = false)  {
@@ -334,10 +340,10 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   var typeEffects: [EffectId: Effect] {
     // return self.type.effects
     
-    return [:]
+    return self.itemType?.effects ?? [:]
   }
   
-  var typeDefaultEffect: Any? {
+  var typeDefaultEffect: Effect? {
     return self.itemType?.defaultEffect
   }
   
@@ -371,9 +377,10 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
 
   /// Load item's source-specific data.
   public func load() {
+    print("++ loadFor \(self.typeId)")
     let fit = self.fit
     guard let cacheHandler = fit?.solarSystem?.source?.cacheHandler else {
-      print("++ no cacheHandler for \(self.typeId)")
+      print("++ no cacheHandler for \(self.typeId) fit: \(fit) solarSystem: \(fit?.solarSystem) source: \(fit?.solarSystem?.source) \(fit?.solarSystem?.source?.cacheHandler)")
       return
     }
     guard let result = cacheHandler.getType(typeId: self.typeId) else {

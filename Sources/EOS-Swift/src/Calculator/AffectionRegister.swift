@@ -409,14 +409,14 @@ class AffectionRegister {
     
     // Domain and skill requirement
     storage = self.affecteesDomainSkillRequirement
-    for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [] {
+    for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [:] {
       key = (affecteeFit, affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
       storages.append((key, storage))
     }
     // Owner-modifiable and skill requirement
     if affecteeItem.ownerModifiable {
       storage = self.affecteesOwnerSkillRequirement
-      for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [] {
+      for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [:] {
         key = (affecteeFit, affecteeSkillRequirementTypeId) as! AnyHashable
         storages.append((key, storage))
       }

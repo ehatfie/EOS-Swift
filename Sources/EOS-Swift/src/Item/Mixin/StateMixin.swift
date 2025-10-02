@@ -85,12 +85,16 @@ public class MutableStateMixin: BaseItemMixin {
 
 /// Items based on this class inherit state from item which contains them.
 public class ContainerStateMixin: BaseItemMixin {
+  
   public override var _state: StateI {
     set {
       return
     }
     get {
-      return .active
+      if let container = self.container as? any BaseItemMixinProtocol {
+        return container._state
+      }
+      return .offline
 //      if let foo = container {
 //        return bar.state
 //      }

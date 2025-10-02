@@ -17,7 +17,8 @@ protocol ModuleProtocol:
   MutableStateMixin,
   EffectStatsMixinProtocol,
   BaseTargetableMixinProtocol,
-  SingleTargetableMixinProtocol
+  SingleTargetableMixinProtocol,
+  ItemContainerBaseProtocol
 {
 
   var chargeQuantity: Double? { get }
@@ -35,11 +36,23 @@ public class Module:
   SingleTargetableMixinProtocol,
   ModuleProtocol
 {
-
+  public func subItemIterator(item: BaseItemMixin) -> AnyIterator<any BaseItemMixinProtocol> {
+    return self.subItemIterator(item: item as! BaseItemMixin) as! AnyIterator<any BaseItemMixinProtocol>
+  }
+  
+  public typealias ExpectedType = BaseItemMixin
+  
+  public func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool {
+    return true
+  }
+  
+  public func length() -> Int {
+    return Int(chargeQuantity ?? 0)
+  }
   
   var target: (any BaseItemMixinProtocol)?
   
-  var charge: Charge?
+  var charge: ItemDescriptor<Charge>
   /*
    Max quantity of loadable charges.
   
@@ -51,7 +64,7 @@ public class Module:
       is returned.
    */
   var chargeQuantity: Double? {
-    guard let charge = charge else { return nil }
+    guard let charge = charge.get() else { return nil }
 
     guard let containerCapacity = self.attributes[AttrId.capacity],
       let chargeVolume = self.attributes[AttrId.volume]
@@ -99,19 +112,30 @@ public class Module:
   }
 
   public init(typeId: Int64, state: StateI = .offline, charge: Charge? = nil) {
-    self.charge = charge
+    self.charge = ItemDescriptor<Charge>()
+    
     super.init(typeId: typeId, state: state)
-
+    if let charge = charge {
+      do {
+        try self.charge.set(item: charge, parent: self)
+      } catch let error {
+        print("++ module init set charge error \(error)")
+      }
+      
+    }
+    
     self.ownerModifiable = false
     self.modifierDomain = .ship
   }
   
   override public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+    print("++ module childItemIterator")
+    let charge = self.charge.item
     let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
     let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
     let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
     var index: Int = 0
-
+    print("++ module childItemIterator value count \(values.count) with \(values)")
     return AnyIterator {
       guard index < values.count else { return nil }
       defer { index += 1 }
@@ -121,11 +145,13 @@ public class Module:
   
   // duplicate?? Pretty sure the above is the right way to do it
   func childItemIterator() -> AnyIterator<any BaseItemMixinProtocol> {
+    print("++ module childItemIterator2")
+    let charge = self.charge.item
     let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
     let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
     let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
     var index: Int = 0
-
+    print("++ module childItemIterator2 value count \(values.count)")
     return AnyIterator {
       guard index < values.count else { return nil }
       defer { index += 1 }

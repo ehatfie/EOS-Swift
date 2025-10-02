@@ -22,6 +22,10 @@ class ChargeSizeRestrictionRegister: BaseRestrictionRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var restrictionType: Restriction = .charge_size
   var restrictedContainers: Set<AnyHashable> = []
   

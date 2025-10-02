@@ -15,9 +15,32 @@ public protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
   
   func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool
   
-  //func handleItemAddition(item: Any, container: Any) {
+  func handleItemAddition(item: ExpectedType, container: any ItemContainerBaseProtocol) throws
   func subItemIterator(item: ExpectedType) -> AnyIterator<any BaseItemMixinProtocol>
   func length() -> Int
+}
+
+extension ItemContainerBaseProtocol where ExpectedType: BaseItemMixinProtocol {
+  public func handleItemAddition(item: ExpectedType, container: any ItemContainerBaseProtocol) throws {
+    guard item.container == nil else {
+      fatalError("Item already assigned to another container")
+    }
+    print("++ handleItemAddition extension \(item.typeId)")
+    item.container = self
+    print("++ item.container \(item.typeId) set \(item.container)")
+    //print("handleItemAddition \()")
+    guard let fit = item.fit else {
+      print("++ Item no fit")
+      return
+    }
+    
+    for subItem in subItemIterator(item: item) {
+      print("++ subItem for \(item.typeId) is \(subItem.typeId)")
+      let messages = MessageHelper.getItemAddedMessages(item: subItem)
+      fit.publishBulk(messages: messages)
+      subItem.load()
+    }
+  }
 }
 
 public protocol TestItemContainerProtocol<BaseItemMixinProtocol> {
@@ -55,12 +78,13 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
   
   init() { }
   
-  func handleItemAddition(_ item: T, container: any ItemContainerBaseProtocol) throws {
+  public func handleItemAddition(item: T, container: any ItemContainerBaseProtocol) throws {
     guard item.container == nil else {
       fatalError("Item already assigned to another container")
     }
-    
-    item.container = self
+    print("++ handleItemAddition \(item.typeId)")
+    item.container = container
+    print("++ item.container \(item.typeId) set \(item.container)")
     //print("handleItemAddition \()")
     guard let fit = item.fit else {
       print("++ Item no fit")
@@ -68,6 +92,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     }
     
     for subItem in subItemIterator(item: item) {
+      print("++ subItem1 for \(item.typeId) is \(subItem.typeId)")
       let messages = MessageHelper.getItemAddedMessages(item: subItem)
       fit.publishBulk(messages: messages)
       subItem.load()
@@ -76,9 +101,9 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
   
   public func subItemIterator(item: T) -> AnyIterator<any BaseItemMixinProtocol> {
     var index = 0
-    var values = [T]()
+    var values = [any BaseItemMixinProtocol]()
     let iterResult = item.childItemIterator(skipAutoItems: true)?.map({ $0 })
-    let castIterResult = (iterResult as? [T] ?? [])
+    let castIterResult = (iterResult as? [any BaseItemMixinProtocol] ?? [])
     values = [item] + castIterResult
     
     if let iterResult, iterResult.count != castIterResult.count {

@@ -16,6 +16,10 @@ class BaseSlotRegister: BaseSlotRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
   var used: Int {
     0
   }

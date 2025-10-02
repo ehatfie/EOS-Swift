@@ -58,7 +58,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     }
     
     do {
-      try self.handleItemAddition(value as! T, container: self)
+      try self.handleItemAddition(item: value as! T, container: self)
     } catch let error {
       print("++ ItemList insert item error")
       self.list.remove(at: index)
@@ -75,7 +75,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     
     self.list.append(item as? T)
     do {
-      try self.handleItemAddition(item as! T, container: self)
+      try self.handleItemAddition(item: item as! T, container: self)
     } catch let error {
       print("++ ItemList insert error")
       // remove last?
@@ -106,7 +106,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     self.list[index] = item as? T
     
     do {
-      try self.handleItemAddition(item as! T, container: self)
+      try self.handleItemAddition(item: item as! T, container: self)
     } catch let error {
       print("++ ItemList place error \(error)")
       self.list.remove(at: index)
@@ -131,7 +131,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     }
     
     do {
-      try self.handleItemAddition(item as! T, container: self)
+      try self.handleItemAddition(item: item as! T, container: self)
     } catch let error {
       print("++ ItemList equip error \(error)")
       self.list.remove(at: index)

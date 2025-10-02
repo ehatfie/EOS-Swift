@@ -26,7 +26,7 @@ protocol DefaultHaving {
 }
 
 public class Fit: FitMessageBroker<MockSubscriber> {
-  weak var solarSystem: SolarSystem?
+  public var solarSystem: SolarSystem?
   weak var fleet: MockFleet?
   
   public var ship: Ship? // Access point for ship.
@@ -56,6 +56,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   
   @MainActor
   public init(solarSystem: SolarSystem? = DefaultSolarSystem(source: nil), fleet: MockFleet?) {
+    print("++ fit init solarSystem \(solarSystem)")
     self.solarSystem =  solarSystem
     self.fleet = fleet
   
@@ -93,6 +94,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     
     // Add fit to solar syhstem
     if solarSystem is DefaultImpl {
+      print("++ use default solarSystem")
       let value = SolarSystem(source: SourceManager())
       self.solarSystem = value
       self.solarSystem?.fit = self

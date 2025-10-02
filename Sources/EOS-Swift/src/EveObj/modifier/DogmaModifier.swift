@@ -115,7 +115,7 @@ struct ModificationData {
   let aggregateKey: AnyHashable?
 }
 
-struct BuffTemplate {
+public struct BuffTemplate {
   var affecteeFilter: ModAffecteeFilter?
   var affecteeFilterExtraArg: Int64?
   var affecteeAtributeId: AttrId?

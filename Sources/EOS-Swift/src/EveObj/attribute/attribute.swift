@@ -30,7 +30,7 @@
 //
 //from eos.util.repr import make_repr_str
 
-struct Attribute {
+public struct Attribute {
 
   /*Represents eve attribute with all its metadata.
   

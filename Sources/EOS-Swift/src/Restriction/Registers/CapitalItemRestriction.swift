@@ -31,6 +31,11 @@ class CapitalItemRestrictionRegister: BaseRestrictionRegisterProtocol {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(self))
+  }
+  
+  
   init(fit: Fit) {
     print("++ CapitalItemRestrictionRegister init")
     self.fit = fit
