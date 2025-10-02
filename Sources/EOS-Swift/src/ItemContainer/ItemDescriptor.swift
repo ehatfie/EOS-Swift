@@ -50,6 +50,28 @@ class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHa
     
   }
   
+  func set1(item: T, parent: any ItemContainerBaseProtocol) throws {
+    print("++ ItemDescriptor set")
+    let oldItem = self.item
+    if let oldItem {
+      self.handleItemRemoval(oldItem)
+    }
+    
+    guard let parent = parent as? ItemContainerBaseProtocol else {
+      return
+    }
+    
+    self.item = item
+    do {
+      try self.handleItemAddition(item: item, container: parent)
+    } catch let error {
+      if let oldItem {
+        try self.handleItemAddition(item: oldItem, container: parent)
+      }
+    }
+    
+  }
+  
   override func handleItemAddition(item: T, container: any ItemContainerBaseProtocol) throws {
     print("++ ItemDescriptor handleItemAddition")
     guard item.container == nil else {

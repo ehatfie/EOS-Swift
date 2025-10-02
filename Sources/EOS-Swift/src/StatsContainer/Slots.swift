@@ -6,7 +6,7 @@
 //
 
 
-struct SlotStats {
+public struct SlotStats {
   let used: Int
   let total: Int
 }

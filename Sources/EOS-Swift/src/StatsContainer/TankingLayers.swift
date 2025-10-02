@@ -5,19 +5,19 @@
 //  Created by Erik Hatfield on 9/6/25.
 //
 
-protocol TankingLayersProtocol<Hashable> {
+public protocol TankingLayersProtocol<Hashable> {
   associatedtype Hashable
   var hull: Hashable { get set }
   var armor: Hashable { get set }
   var shield: Hashable { get set }
 }
 
-class TankingLayers<T: Hashable>: TankingLayersProtocol {
-  var hull: T
-  var armor: T
-  var shield: T
+public class TankingLayers<T: Hashable>: TankingLayersProtocol {
+  public var hull: T
+  public var armor: T
+  public var shield: T
   
-  init(hull: T, armor: T, shield: T) {
+  public init(hull: T, armor: T, shield: T) {
     self.hull = hull
     self.armor = armor
     self.shield = shield
@@ -45,7 +45,7 @@ class TankingLayers<T: Hashable>: TankingLayersProtocol {
   }
 }
 
-class ItemHP: TankingLayers<Double> {
+public class ItemHP: TankingLayers<Double> {
   var total: Double {
     return self.hull + self.armor + self.shield
   }

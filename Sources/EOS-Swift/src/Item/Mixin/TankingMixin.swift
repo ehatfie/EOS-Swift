@@ -19,6 +19,7 @@ protocol BufferTankingMixinProtocol: BaseItemMixinProtocol {
 
 extension BufferTankingMixinProtocol {
   var hp: ItemHP {
+    print(".. attributes1 \(self.attributes)")
     let hull = self.attributes[AttrId.hp, default: 0]
     let armor = self.attributes[AttrId.armor_hp, default: 0]
     let shield = self.attributes[AttrId.shield_capacity, default: 0]
@@ -76,8 +77,12 @@ extension BufferTankingMixinProtocol {
   }
   
   func getEHP(damageProfile: DamageProfile?) -> ItemHP {
+    let fitDefault = self.fit?.defaultIncomingDamage
+    
     let maybeDamageProfile = damageProfile ?? self.fit?.defaultIncomingDamage
-    guard let actualDamageProfile = damageProfile else {
+    print("^^ maybeDamageProfile \(damageProfile) fitDefault \(fitDefault)")
+    guard let actualDamageProfile = damageProfile ?? fitDefault else {
+      print("^^ BTMP - getEHP: No damageProfile fit: \(fit)")
       return .init(hull: 0, armor: 0, shield: 0)
     }
     
@@ -98,7 +103,7 @@ extension BufferTankingMixinProtocol {
       layerResists: self.resists.shield,
       damageProfile: actualDamageProfile
     )
-    
+    print("++ returning h: \(hullEHP) a: \(armorEHP) s: \(shieldEHP)")
     return ItemHP(hull: hullEHP, armor: armorEHP, shield: shieldEHP)
   }
   
@@ -106,10 +111,12 @@ extension BufferTankingMixinProtocol {
   /// Calculate layer EHP according to passed data.
   /// If layer raw HP is None, None is returned.
   func getLayerEHP(layerHp: Double, layerResists: ResistProfile, damageProfile: DamageProfile) -> Double {
+    print("^^ BTMP - getLayerEHP")
     let tankMult = self.getTankingEfficiency(
       damageProfile: damageProfile,
       resists: layerResists
     )
+    print("^^ layerHp: \(layerHp) tankMult: \(tankMult)")
     return layerHp * tankMult
   }
   
@@ -209,10 +216,12 @@ class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   /// Calculate layer EHP according to passed data.
   /// If layer raw HP is None, None is returned.
   func getLayerEHP(layerHp: Double, layerResists: ResistProfile, damageProfile: DamageProfile) -> Double {
+    print("^^ BTM - getLayerEHP")
     let tankMult = self.getTankingEfficiency(
       damageProfile: damageProfile,
       resists: layerResists
     )
+    print("^^ layerHp: \(layerHp) tankMult: \(tankMult)")
     return layerHp * tankMult
   }
   
@@ -230,6 +239,7 @@ class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   }
   
   var hp: ItemHP {
+    print(".. attributes \(self.attributes)")
     let hull = self.attributes[AttrId.hp, default: 0]
     let armor = self.attributes[AttrId.armor_hp, default: 0]
     let shield = self.attributes[AttrId.shield_capacity, default: 0]

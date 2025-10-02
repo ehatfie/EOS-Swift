@@ -6,11 +6,15 @@
 //
 import Foundation
 
-protocol StatsServiceProtocol: StatServiceRegistersProtocol, StatServiceSlotsProtocol, StatServiceValuesProtocol {
+public protocol StatsServiceProtocol:
+  StatServiceRegistersProtocol,
+  StatServiceSlotsProtocol,
+  StatServiceValuesProtocol
+{
   
 }
 
-protocol StatServiceRegistersProtocol {
+public protocol StatServiceRegistersProtocol {
 //  var ddRegister: DamageDealerRegister { get set }
 //  var armorRepRegister: ArmorRepairerRegister { get set }
 //  var shieldRepRegister: ShieldRepairerRegister { get set }
@@ -23,7 +27,7 @@ protocol StatServiceRegistersProtocol {
 //  var launcherSlots: LauncherSlotRegister { get set }
 }
 
-protocol StatServiceSlotsProtocol: MaybeFitHaving {
+public protocol StatServiceSlotsProtocol: MaybeFitHaving {
   var highSlots: SlotStats { get }
   var midSlots: SlotStats { get }
   var lowSlots: SlotStats { get }
@@ -34,7 +38,7 @@ protocol StatServiceSlotsProtocol: MaybeFitHaving {
   func getSlotStats(container: any ItemContainerBaseProtocol, attrId: AttrId) -> SlotStats
 }
 
-protocol StatServiceValuesProtocol: MaybeFitHaving, StatServiceRegistersProtocol {
+public protocol StatServiceValuesProtocol: MaybeFitHaving, StatServiceRegistersProtocol {
   var hp: ItemHP { get }
   
   var resists: any TankingLayersProtocol { get }
@@ -55,14 +59,14 @@ extension StatServiceValuesProtocol {
   /// Fetch ship HP stats.
   /// Returns:
   /// TankingLayersTotal helper container instance. If ship data cannot be fetched, HP values will be None.
-  var hp: ItemHP {
+  public var hp: ItemHP {
     return self.fit?.ship?.hp ?? ItemHP(hull: 0.0, armor: 0.0, shield: 0.0)
   }
   /// Fetch ship resistances.
   /// Returns:
   /// TankingLayers helper container instance, whose attributes are
   /// DmgTypes helper container instances. If ship data cannot be fetched, resistance values will be None.
-  var resists: any TankingLayersProtocol {
+  public var resists: any TankingLayersProtocol {
     let empty = ResistProfile(0.0, thermal: 0.0, kinetic: 0.0, explosive: 0.0)!
     return self.fit?.ship?.resists ?? TankingLayers<ResistProfile>(hull: empty, armor: empty, shield: empty)
   }
@@ -78,25 +82,26 @@ extension StatServiceValuesProtocol {
        TankingLayersTotal helper container instance. If ship data cannot be
        fetched, EHP values will be None.
    */
-  func getEHP(damageProfile: DamageProfile? = nil) -> ItemHP {
+  public func getEHP(damageProfile: DamageProfile? = nil) -> ItemHP {
+    print("^^ getEHP fit: \(self.fit) ship: \(self.fit?.ship)")
     return self.fit?.ship?.getEHP(damageProfile: damageProfile) ?? ItemHP(hull: 0, armor: 0, shield: 0)
   }
   
-  var worstCaseEHP: ItemHP {
+  public var worstCaseEHP: ItemHP {
     self.fit?.ship?.worstCaseEHP ?? ItemHP(hull: 0, armor: 0, shield: 0)
   }
   
-  func getVolley(itemFilter: Any? = nil, targetResists: ResistProfile? = nil) -> DamageStats {
+  public func getVolley(itemFilter: Any? = nil, targetResists: ResistProfile? = nil) -> DamageStats {
     return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
     //return self.ddRegister.getVolley(itemFilter: itemFilter, targetResists: targetResists)
   }
   
-  func getDPS(itemFilter: Any? = nil, reload: Bool = false, targetResists: ResistProfile? = nil) -> DamageStats {
+  public func getDPS(itemFilter: Any? = nil, reload: Bool = false, targetResists: ResistProfile? = nil) -> DamageStats {
     DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
     //return self.ddRegister.getDps(itemFilter: itemFilter, reload: reload, targetResists: targetResists)
   }
   
-  func getArmorRps(damageProfile: DamageProfile, reload: Bool = false) -> Double {
+  public func getArmorRps(damageProfile: DamageProfile, reload: Bool = false) -> Double {
 
     if damageProfile is DefaultImpl {
       let dmgProfile = self.fit?.defaultIncomingDamage
@@ -107,7 +112,7 @@ extension StatServiceValuesProtocol {
     //return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
   }
   
-  func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double {
+  public func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double {
     if damageProfile is DefaultImpl {
       let dmgProfile = self.fit?.defaultIncomingDamage
       return 0.0
@@ -117,7 +122,7 @@ extension StatServiceValuesProtocol {
     //return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
   }
   
-  var agilityFactor: Double? {
+  public var agilityFactor: Double? {
     guard let ship = self.fit?.ship else {
       return nil
     }
@@ -130,7 +135,7 @@ extension StatServiceValuesProtocol {
     return agilityFactor
   }
   
-  var alignTime: Double? {
+  public var alignTime: Double? {
     guard let agilityFactor else {
       return nil
     }
@@ -139,7 +144,7 @@ extension StatServiceValuesProtocol {
 }
 
 extension StatServiceValuesProtocol {
-  var highSlots: SlotStats {
+  public var highSlots: SlotStats {
     guard let modules = fit?.modules.high else {
       return SlotStats(used: 0, total: 0)
     }
@@ -147,7 +152,7 @@ extension StatServiceValuesProtocol {
     return self.getSlotStats(container: modules, attrId: .hi_slots)
   }
   
-  var midSlots: SlotStats {
+  public var midSlots: SlotStats {
     guard let modules = fit?.modules.mid else {
       return SlotStats(used: 0, total: 0)
     }
@@ -155,7 +160,7 @@ extension StatServiceValuesProtocol {
     return self.getSlotStats(container: modules, attrId: .med_slots)
   }
   
-  var lowSlots: SlotStats {
+  public var lowSlots: SlotStats {
     guard let modules = fit?.modules.low else {
       return SlotStats(used: 0, total: 0)
     }
@@ -163,7 +168,7 @@ extension StatServiceValuesProtocol {
     return self.getSlotStats(container: modules, attrId: .low_slots)
   }
   
-  var rigSlots: SlotStats {
+  public var rigSlots: SlotStats {
     guard let modules = fit?.rigs else {
       return SlotStats(used: 0, total: 0)
     }
@@ -171,7 +176,7 @@ extension StatServiceValuesProtocol {
     return self.getSlotStats(container: modules, attrId: .rig_slots)
   }
   
-  var subsystemSlots: SlotStats {
+  public var subsystemSlots: SlotStats {
     guard let modules = fit?.subsystems else {
       return SlotStats(used: 0, total: 0)
     }
@@ -179,7 +184,7 @@ extension StatServiceValuesProtocol {
     return self.getSlotStats(container: modules, attrId: .subsystem_slot)
   }
   
-  var fighterSquads: SlotStats {
+  public var fighterSquads: SlotStats {
     return SlotStats(used: 0, total: 0)
 //    guard let modules = fit?.fighters else {
 //      return SlotStats(used: 0, total: 0)
@@ -189,15 +194,15 @@ extension StatServiceValuesProtocol {
   }
   
   
-  func getSlotStats(container: any ItemContainerBaseProtocol, attrId: AttrId) -> SlotStats {
+  public func getSlotStats(container: any ItemContainerBaseProtocol, attrId: AttrId) -> SlotStats {
     let used = container.length()
     let total = Int(self.fit?.ship?.attributes[attrId] ?? 0)
     return SlotStats(used: used, total: total)
   }
 }
 
-class StatService: StatsServiceProtocol {
-  weak var fit: Fit? = nil
+public class StatService: StatsServiceProtocol {
+  weak public var fit: Fit? = nil
   
   var ddRegister: DamageDealerRegister
   var armorRepRegister: ArmorRepairerRegister

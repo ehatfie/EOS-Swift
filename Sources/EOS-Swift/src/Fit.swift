@@ -28,8 +28,19 @@ protocol DefaultHaving {
 public class Fit: FitMessageBroker<MockSubscriber> {
   public var solarSystem: SolarSystem?
   weak var fleet: MockFleet?
-  
-  public var ship: Ship? // Access point for ship.
+  var shipDescriptor: ItemDescriptor<Ship>
+  public var ship: Ship? {
+    set {
+      if let newValue {
+        try? self.shipDescriptor.set1(item: newValue, parent: self)
+      }
+      
+    }
+    get {
+      return shipDescriptor.item
+    }
+    
+  }// Access point for ship.
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
   public var modules: ModuleRacks!
   var rigs: ItemSet<Rig>! //  Set for rigs.
@@ -42,15 +53,19 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   var subsystems: ItemSet<Subsystem>! // Set for subsystems.
   var effect_beacon: EffectBeacon? // Access point for effect beacons (e.g. wormhole effects).
   var restriction: RestrictionService!
-  var stats: StatService! //  All aggregated stats for fit are accessible via this access
+  public var stats: StatService! //  All aggregated stats for fit are accessible via this access
   
+  
+  var incomingDamageDefault: DamageProfile?
   //  point.
   var defaultIncomingDamage: DamageProfile? {
     set {
-      return
+      print("++ setting incoming damage default \(newValue)")
+      self.incomingDamageDefault = newValue
     }
     get {
-      nil
+      print("++ returning incoming damage default \(self.incomingDamageDefault)")
+      return self.incomingDamageDefault
     }
   }
   
@@ -59,7 +74,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     print("++ fit init solarSystem \(solarSystem)")
     self.solarSystem =  solarSystem
     self.fleet = fleet
-  
+    self.shipDescriptor = ItemDescriptor()
     super.init()
     
     self.skills = TypeUniqueSet(parent: self) //<Skill>(parent: self, containerOverride: nil)
@@ -87,6 +102,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     
     // Initialize defaults
     self.defaultIncomingDamage = DamageProfile(25, thermal: 25, kinetic: 25, explosive: 25)
+
     // As character object shouldn't change in any sane cases, initialize it
     // here. It has to be assigned after fit starts to track list of items
     // to make sure it's part of it
@@ -111,7 +127,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   }
   
   /// Run fit Validation
-  func validate(skipChecks: [Any]) throws {
+  public func validate(skipChecks: [Any]) throws {
     //self.restriction.validate()
     try self.restriction.validate(skipChecks: skipChecks)
   }
@@ -216,4 +232,26 @@ public class Fit: FitMessageBroker<MockSubscriber> {
       item.unload()
     }
   }
+}
+
+extension Fit: ItemContainerBaseProtocol {
+  public func handleItemAddition(item: ExpectedType, container: any ItemContainerBaseProtocol) throws {
+    
+  }
+  
+  public func subItemIterator(item: ExpectedType) -> AnyIterator<any BaseItemMixinProtocol> {
+    return AnyIterator({ nil })
+  }
+  
+  public typealias ExpectedType = Any
+  
+  public func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool {
+    true
+  }
+  
+  public func length() -> Int {
+    0
+  }
+  
+  
 }

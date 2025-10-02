@@ -15,7 +15,7 @@
  */
 
 // TODO: Implement
-class MutableAttributeMap {
+public class MutableAttributeMap {
   // New
   let dataSource: DataSource? = nil
 
@@ -84,7 +84,7 @@ class MutableAttributeMap {
     return []
   }
 
-  init() {
+  init(item: any BaseItemMixinProtocol) {
     self.modifiedAttributes = [:]
     /*
      # Actual container of calculated attributes.
@@ -121,6 +121,10 @@ class MutableAttributeMap {
     
      */
     return nil
+  }
+  
+  func removeAll() {
+    
   }
 }
 

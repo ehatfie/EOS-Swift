@@ -37,7 +37,7 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var runningEffectIds: Set<EffectId> { get set }
   var effectModeOverrides: [EffectId: EffectMode]? { get set }
   var effectTargets: String? { get set }
-  var attributes: [AttrId: Double] { get set } // will be a custom dictionary type
+  var attributes: MutableAttributeMap { get set } // will be a custom dictionary type
   var autocharges: ItemDict<AutoCharge>? { get set }
   
   var _state: StateI { get set }
@@ -144,7 +144,7 @@ extension BaseItemMixinProtocol {
     print("!! Default Load Implementation")
     // get a getter
     for (effectId, effect) in self.typeEffects {
-      //let autoChargeTypeId = effect.getAutoChargeTypeId(item: <#T##BaseItemMixin#>)
+      //let autoChargeTypeId = effect.getAutoChargeTypeId(item: )
     }
   }
   
@@ -248,6 +248,8 @@ extension BaseItemMixinProtocol {
 }
 
 open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
+  public var attributes: MutableAttributeMap
+  
   public var userModifiable: Bool
   
   public var typeId: Int64
@@ -260,7 +262,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   
   open var _state: StateI
   
-  public var attributes: [AttrId: Double] = [:]
+  //public var attributes: [AttrId: Double] = [:]
   public var autocharges: ItemDict<AutoCharge>? = nil
   
   public var fit: Fit? {
@@ -284,6 +286,8 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     self.ownerModifiable = false
     self.solsysCarrier = nil
     self.userModifiable = true
+    
+    //self.attributes = MutableAttributeMap(item: self)
   }
   
   public static func == (lhs: BaseItemMixin, rhs: BaseItemMixin) -> Bool {

@@ -19,7 +19,7 @@ protocol DamageTypeContainer {
 }
 
 /// Container for damage data stats.
-class DamageTypes: DamageTypeContainer, Hashable {
+public class DamageTypes: DamageTypeContainer, Hashable {
   var em: Double
   var thermal: Double
   var kinetic: Double
@@ -48,12 +48,12 @@ class DamageTypes: DamageTypeContainer, Hashable {
   }
 
   // MARK: - Equality & Hashing
-  static func == (lhs: DamageTypes, rhs: DamageTypes) -> Bool {
+  public static func == (lhs: DamageTypes, rhs: DamageTypes) -> Bool {
     lhs.em == rhs.em && lhs.thermal == rhs.thermal && lhs.kinetic == rhs.kinetic
       && lhs.explosive == rhs.explosive
   }
 
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
     hasher.combine(em)
     hasher.combine(thermal)
@@ -68,12 +68,12 @@ class DamageTypes: DamageTypeContainer, Hashable {
   }
 }
 
-class DamageTypesTotal: DamageTypes {
+public class DamageTypesTotal: DamageTypes {
   var total: Double {
     return self.em + self.thermal + self.kinetic + self.explosive
   }
 
-  override func makeIterator() -> AnyIterator<Double> {
+  public override func makeIterator() -> AnyIterator<Double> {
     var index = 0
     let values: [Double] = [
       self.em, self.thermal, self.kinetic, self.explosive, self.total,
@@ -86,7 +86,7 @@ class DamageTypesTotal: DamageTypes {
   }
 }
 
-class DamageStats: DamageTypesTotal {
+public class DamageStats: DamageTypesTotal {
   init?(
     em: Double,
     thermal: Double,
@@ -145,7 +145,7 @@ class DamageStats: DamageTypesTotal {
 }
 
 
-class DamageProfile: DamageTypes {
+public class DamageProfile: DamageTypes {
   init?(_ em: Double, thermal: Double, kinetic: Double, explosive: Double) {
     guard em >= 0, thermal >= 0, kinetic >= 0, explosive >= 0,
       em + thermal + kinetic + explosive > 0
@@ -157,7 +157,7 @@ class DamageProfile: DamageTypes {
   }
 }
 
-class ResistProfile: DamageTypes {
+public class ResistProfile: DamageTypes {
   init?(_ em: Double, thermal: Double, kinetic: Double, explosive: Double) {
     guard
       (em >= 0 && em <= 1),
