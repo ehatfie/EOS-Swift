@@ -42,7 +42,6 @@ class ChargeVolumeRestrictionRegister: BaseRestrictionRegisterProtocol {
   }
   
   func handleItemLoaded(message: ItemLoaded) {
-    print("++ CVR: itemLoaded")
     let messageItem = message.item
     if !(messageItem is Charge) { return }
     self.containers.insert(messageItem as! AnyHashable)

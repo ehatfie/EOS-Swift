@@ -20,7 +20,7 @@ extension HardpointEffectSlotRegisterProtocol {
   }
   
   var total: Int {
-    return Int(self.fit?.ship?.attributes[self.slotAttrId] ?? 0.0)
+    return Int(self.fit?.ship?.attributes![self.slotAttrId] ?? 0.0)
   }
   
 }

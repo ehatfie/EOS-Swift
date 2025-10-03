@@ -120,7 +120,6 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
     for message in messages {
       var m = message
       m.fit = self.fit
-      print("subscriber count for \(message.messageType) is \(self.subscribers[message.messageType]?.count)")
       for subscriber in self.subscribers[message.messageType] ?? [] {
         if let foo = subscriber as? any BaseSubscriberProtocol {
           foo.notify(message: m)

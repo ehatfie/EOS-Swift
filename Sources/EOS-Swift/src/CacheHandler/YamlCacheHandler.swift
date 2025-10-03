@@ -26,6 +26,7 @@ enum YamlFiles: String {
 public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
   @unchecked Sendable
 {
+  
   nonisolated public func getFingerprint() -> String {
     return ""
   }
@@ -57,12 +58,12 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
 
   }
 
-  nonisolated public func getAttribute(attributeId: AttrId) {
-
+  nonisolated public func getAttribute(attributeId: AttrId) -> Attribute? {
+    return attributeStore[attributeId.rawValue]
   }
 
-  nonisolated public func getEffect(effectId: EffectId) {
-
+  nonisolated public func getEffect(effectId: EffectId) -> Effect? {
+    return effectStore[Int64(effectId.rawValue)]
   }
 
   nonisolated public func getBuffTemplates(buffId: Int64) {

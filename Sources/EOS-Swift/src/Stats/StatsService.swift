@@ -126,8 +126,8 @@ extension StatServiceValuesProtocol {
     guard let ship = self.fit?.ship else {
       return nil
     }
-    guard let agility = ship.attributes[.agility],
-          let mass = ship.attributes[.mass] else {
+    guard let agility = ship.attributes![.agility],
+          let mass = ship.attributes![.mass] else {
       return nil
     }
     
@@ -196,7 +196,7 @@ extension StatServiceValuesProtocol {
   
   public func getSlotStats(container: any ItemContainerBaseProtocol, attrId: AttrId) -> SlotStats {
     let used = container.length()
-    let total = Int(self.fit?.ship?.attributes[attrId] ?? 0)
+    let total = Int(self.fit?.ship?.attributes![attrId] ?? 0)
     return SlotStats(used: used, total: total)
   }
 }

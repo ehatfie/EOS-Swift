@@ -11,7 +11,6 @@ struct SideEffectData {
 }
 
 class Booster: ImmutableStateMixinProtocol {
-
   let SIDE_EFFECT_STATE = StateI.offline
 
   var typeId: Int64
@@ -25,7 +24,7 @@ class Booster: ImmutableStateMixinProtocol {
 
   var effectTargets: String?
 
-  var attributes: [AttrId: Double] = [:]
+  var attributes: MutableAttributeMap?
 
   var _state: StateI
   var ownerModifiable: Bool
@@ -40,6 +39,7 @@ class Booster: ImmutableStateMixinProtocol {
     modifierDomain = .character
     ownerModifiable = false
     solsysCarrier = nil
+    attributes = MutableAttributeMap(item: self)
   }
   
   var autocharges: ItemDict<AutoCharge>?

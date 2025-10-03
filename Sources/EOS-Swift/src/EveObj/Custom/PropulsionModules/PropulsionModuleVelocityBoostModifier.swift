@@ -23,9 +23,9 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
 
     /// If attribute values of any necessary items are not available, do not calculate anything
     guard
-      let mass = ship.attributes[.mass],
-      let speedBoost = ship.attributes[.speed_factor],
-      let thrust = ship.attributes[.speed_boost_factor]
+      let mass = ship.attributes?[.mass],
+      let speedBoost = ship.attributes?[.speed_factor],
+      let thrust = ship.attributes?[.speed_boost_factor]
     else { return nil }
     let perc = (speedBoost * thrust) / mass
     let mult = 1 * perc / 100

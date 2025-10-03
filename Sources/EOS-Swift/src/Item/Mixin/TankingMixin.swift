@@ -20,9 +20,9 @@ protocol BufferTankingMixinProtocol: BaseItemMixinProtocol {
 extension BufferTankingMixinProtocol {
   var hp: ItemHP {
     print(".. attributes1 \(self.attributes)")
-    let hull = self.attributes[AttrId.hp, default: 0]
-    let armor = self.attributes[AttrId.armor_hp, default: 0]
-    let shield = self.attributes[AttrId.shield_capacity, default: 0]
+    let hull = self.attributes![AttrId.hp, default: 0]
+    let armor = self.attributes![AttrId.armor_hp, default: 0]
+    let shield = self.attributes![AttrId.shield_capacity, default: 0]
     
     return ItemHP(hull: hull, armor: armor, shield: shield)
   }
@@ -73,7 +73,9 @@ extension BufferTankingMixinProtocol {
   }
   
   func getResistByAttribute(attributeID: AttrId) -> Double {
-    return 1 - self.attributes[attributeID, default: 1]
+    let attributeValue = self.attributes![attributeID, default: 1]
+    print("^^ getResistByAttribute \(attributeID) \(attributeID.rawValue): \(attributeValue)")
+    return 1 - attributeValue
   }
   
   func getEHP(damageProfile: DamageProfile?) -> ItemHP {
@@ -126,6 +128,7 @@ extension BufferTankingMixinProtocol {
     let dealt = damageProfile.em + damageProfile.thermal + damageProfile.kinetic + damageProfile.explosive
     let absorbed = (damageProfile.em * resists.em) + (damageProfile.thermal * resists.thermal) + (damageProfile.kinetic * resists.kinetic) + (damageProfile.explosive * resists.explosive)
     let recieved = dealt - absorbed
+    print("^^ getTankingEfficiency: dealt: \(dealt) absorbed: \(absorbed) recieved: \(recieved)")
     return dealt / recieved
   }
   
@@ -182,7 +185,7 @@ class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   }
   
   func getResistByAttribute(attributeID: AttrId) -> Double {
-    return 1 - self.attributes[attributeID, default: 1]
+    return 1 - self.attributes![attributeID, default: 1]
   }
   
   func getEHP(damageProfile: DamageProfile?) -> ItemHP {
@@ -240,9 +243,9 @@ class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   
   var hp: ItemHP {
     print(".. attributes \(self.attributes)")
-    let hull = self.attributes[AttrId.hp, default: 0]
-    let armor = self.attributes[AttrId.armor_hp, default: 0]
-    let shield = self.attributes[AttrId.shield_capacity, default: 0]
+    let hull = self.attributes![AttrId.hp, default: 0]
+    let armor = self.attributes![AttrId.armor_hp, default: 0]
+    let shield = self.attributes![AttrId.shield_capacity, default: 0]
     
     return ItemHP(hull: hull, armor: armor, shield: shield)
   }

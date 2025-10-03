@@ -7,8 +7,8 @@
 
 public protocol BaseCacheHandlerProtocol: Sendable {
   func getType(typeId: Int64) -> ItemType?
-  func getAttribute(attributeId: AttrId)
-  func getEffect(effectId: EffectId)
+  func getAttribute(attributeId: AttrId) -> Attribute?
+  func getEffect(effectId: EffectId) -> Effect?
   func getBuffTemplates(buffId: Int64)
   func getFingerprint() -> String
   func updateCache(

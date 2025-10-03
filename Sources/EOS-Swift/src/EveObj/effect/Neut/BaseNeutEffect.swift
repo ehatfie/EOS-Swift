@@ -26,14 +26,14 @@ class BaseNeutEffect: Effect {
 
 class EnergyNeutralizerFalloff: BaseNeutEffect {
   override func getNeutAmount(item: any BaseItemMixinProtocol) -> Double? {
-    return item.attributes[AttrId.energy_neutralizer_amount, default: 0]
+    return item.attributes?[AttrId.energy_neutralizer_amount, default: 0]
   }
 }
 
 class EnergyNosferatuFalloff: BaseNeutEffect {
   override func getNeutAmount(item: any BaseItemMixinProtocol) -> Double? {
-    if let nosOvveride = item.attributes[AttrId.nos_override] {
-      return item.attributes[AttrId.power_transfer_amount, default: 0]
+    if let nosOvveride = item.attributes?[AttrId.nos_override] {
+      return item.attributes?[AttrId.power_transfer_amount, default: 0]
     }
                 
     return 0
@@ -42,6 +42,6 @@ class EnergyNosferatuFalloff: BaseNeutEffect {
 
 class EntityEnergyNeutralizerFallof: BaseNeutEffect {
   override func getNeutAmount(item: any BaseItemMixinProtocol) -> Double? {
-    return item.attributes[AttrId.energy_neutralizer_amount, default: 0]
+    return item.attributes?[AttrId.energy_neutralizer_amount, default: 0]
   }
 }

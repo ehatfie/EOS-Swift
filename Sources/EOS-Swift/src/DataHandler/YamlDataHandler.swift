@@ -71,13 +71,24 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       ).map { $0.1 }) ?? []
   }
 
-  public func getDogmaTypeAttributes() async -> [(Int64,DogmaTypeAttributeData)] {
+  public func getDogmaTypeAttributes() async -> [(Int64, TypeDogmaAttributeData)] {
     let fetcher = await YamlDataFetcher.shared
-    return
-      (try? await fetcher.readYamlAsync(
-        for: .typeDogma,
-        type: DogmaTypeAttributeData.self
-      )) ?? []
+    let foo = (try? await fetcher.readYamlAsync(
+      for: .typeDogma,
+      type: TypeDogmaAttributeDataOuter.self
+    )) ?? []
+    let bar = foo.flatMap { value in
+      return (value.0, value.1)
+    }
+    let bar1 = foo.map { value in
+      let value1 = value.1
+      return value1.dogmaAttributes.map { value2 in
+        return (value.0, value2)
+      }
+    }
+    
+    return bar1.flatMap { $0 }
+      
   }
 
   public func getDogmaEffects() async -> [DogmaEffectData] {
@@ -304,7 +315,7 @@ extension YamlDataHandler {
 
         returnValue.append((Int64(keyValue), result))
       } catch let err {
-        print("Decode error \(err) for \(type) decode2")
+        print("Decode error \(err) for \(type) decode")
       }
     }
     //print("decode2() -  took \(Date().timeIntervalSince(start))")

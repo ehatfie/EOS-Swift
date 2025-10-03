@@ -19,14 +19,14 @@ class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     var returnValue: Double = 0.0
     for item in self.resourceUsers {
       if let item = item as? any BaseItemMixinProtocol {
-        returnValue += item.attributes[.drone_bandwidth_used, default: 0.0]
+        returnValue += item.attributes![.drone_bandwidth_used, default: 0.0]
       }
     }
     return returnValue
   }
   
   var output: Double {
-    return self.fit?.ship?.attributes[.drone_bandwidth] ?? 0.0
+    return self.fit?.ship?.attributes![.drone_bandwidth] ?? 0.0
   }
   
   var resourceUsers: Set<AnyHashable> = []

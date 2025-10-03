@@ -22,13 +22,13 @@ extension ShipRegularResourceRegisterProtocol {
         continue
       }
       
-      returnValue += foo.attributes[self.useAttrId, default: 0.0]
+      returnValue += foo.attributes![self.useAttrId, default: 0.0]
     }
     return returnValue
   }
   
   var output: Double {
-    return self.fit?.ship?.attributes[self.outputAttrId] ?? 0.0
+    return self.fit?.ship?.attributes![self.outputAttrId] ?? 0.0
   }
   
   var users: Set<AnyHashable> {

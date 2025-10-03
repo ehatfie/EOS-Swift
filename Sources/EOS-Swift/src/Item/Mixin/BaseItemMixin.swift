@@ -37,7 +37,7 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var runningEffectIds: Set<EffectId> { get set }
   var effectModeOverrides: [EffectId: EffectMode]? { get set }
   var effectTargets: String? { get set }
-  var attributes: MutableAttributeMap { get set } // will be a custom dictionary type
+  var attributes: MutableAttributeMap? { get set } // will be a custom dictionary type
   var autocharges: ItemDict<AutoCharge>? { get set }
   
   var _state: StateI { get set }
@@ -138,7 +138,6 @@ extension BaseItemMixinProtocol {
       return true
     }
   }
-
 
   func load() {
     print("!! Default Load Implementation")
@@ -248,7 +247,7 @@ extension BaseItemMixinProtocol {
 }
 
 open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
-  public var attributes: MutableAttributeMap
+  public var attributes: MutableAttributeMap?
   
   public var userModifiable: Bool
   
@@ -287,7 +286,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     self.solsysCarrier = nil
     self.userModifiable = true
     
-    //self.attributes = MutableAttributeMap(item: self)
+    self.attributes = MutableAttributeMap(item: self)
   }
   
   public static func == (lhs: BaseItemMixin, rhs: BaseItemMixin) -> Bool {
@@ -415,7 +414,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
       let messages = MessageHelper.getItemUnloadedMessages(item: self)
       fit.publishBulk(messages: messages)
     }
-    self.attributes.removeAll()
+    self.attributes?.removeAll()
     self.clearAutocharges()
     self.itemType = nil
   }

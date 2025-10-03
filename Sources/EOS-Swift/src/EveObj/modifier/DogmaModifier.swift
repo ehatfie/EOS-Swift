@@ -86,7 +86,7 @@ class DogmaModifier: BaseModifierProtocol {
 
   func getModification(affectorItem: any BaseItemMixinProtocol) -> ModificationData? {
     guard let affectorAttributeId else { return nil } // throw??
-    let attributeValue = affectorItem.attributes[affectorAttributeId]
+    let attributeValue = affectorItem.attributes?[affectorAttributeId]
 
     return ModificationData(
       modOperator: self.modOperator,

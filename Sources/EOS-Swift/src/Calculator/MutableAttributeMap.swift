@@ -20,7 +20,7 @@ public class MutableAttributeMap {
   let dataSource: DataSource? = nil
 
   // self.__item = item
-  var modifiedAttributes: [Int64: MockAttribute] = [:]
+  var modifiedAttributes: [AttrId: Double] = [:]
   var overrideCallbacks: [Int64: Any]? = nil
   var capMap: [Int64: Int64] = [:]
 
@@ -28,6 +28,28 @@ public class MutableAttributeMap {
     return keys.count
   }
 
+  var keys: [Int64] {
+    /*
+     # Return union of attributes from base, modified and override dictionary
+     return set(chain(
+         self.__item._type_attrs, self.__modified_attrs,
+         self.__override_callbacks or {}))
+     */
+    return []
+  }
+
+  var items: [Attribute] {
+    // return set((attr_id, self.get(attr_id)) for attr_id in self.keys())
+    return []
+  }
+  
+  weak var item: (any BaseItemMixinProtocol)?
+
+  init(item: any BaseItemMixinProtocol) {
+    self.item = item
+    self.modifiedAttributes = [:]
+  }
+  
   /*
    def get(self, attr_id, default=None):
        # Almost copy-paste of __getitem__ due to performance reasons -
@@ -50,10 +72,10 @@ public class MutableAttributeMap {
                self.__modified_attrs[attr_id] = value
        return value
    */
-  // im guessing this should be returning an `Attribute`
-  func getValue(attributeId: Int64) -> MockAttribute? {
+  func getValue(attributeId: AttrId) -> Double? {
+    print("^^ MutableAttributeMap - getValue \(attributeId)")
     if let overrideCallbacks,
-      let callback = overrideCallbacks[attributeId]
+       let callback = overrideCallbacks[attributeId.rawValue]
     {
       print("TODO: getValue callback")
       return nil
@@ -63,41 +85,39 @@ public class MutableAttributeMap {
     guard let value = self.modifiedAttributes[attributeId] else {
       //
       // let value = self.calculate(attributeId)
-      return nil
+      do {
+        let value = try self.calculate(attributeId: attributeId)
+        return value
+      } catch let err {
+        print("!! calc error \(err)")
+        return nil
+      }
     }
 
     return value
   }
-
-  var keys: [Int64] {
-    /*
-     # Return union of attributes from base, modified and override dictionary
-     return set(chain(
-         self.__item._type_attrs, self.__modified_attrs,
-         self.__override_callbacks or {}))
-     */
-    return []
+  
+  subscript(_ attributeId: AttrId, default defaultValue: @autoclosure () -> Double) -> Double {
+      get {
+          // Return an appropriate subscript value here.
+        return self.getValue(attributeId: attributeId) ?? defaultValue()
+      }
+      set(newValue) {
+        return
+      }
+  }
+  
+  subscript(_ attributeId: AttrId) -> Double? {
+      get {
+          // Return an appropriate subscript value here.
+        return self.getValue(attributeId: attributeId)
+      }
+      set(newValue) {
+        return
+      }
   }
 
-  var items: [Int64] {
-    // return set((attr_id, self.get(attr_id)) for attr_id in self.keys())
-    return []
-  }
-
-  init(item: any BaseItemMixinProtocol) {
-    self.modifiedAttributes = [:]
-    /*
-     # Actual container of calculated attributes.
-             # Format: {attribute ID: value}
-             self.__modified_attrs = {}
-             # Override and cap maps are initialized as None to save memory, as they
-             # are not needed most of the time
-             self.__override_callbacks = None
-             self.__cap_map = None
-     */
-  }
-
-  func getItem() -> Int64? {
+  func getItem() -> Attribute? {
     /*
      if (
                  self.__override_callbacks is not None and
@@ -148,11 +168,16 @@ extension MutableAttributeMap {
   /// - Throws:
   ///   - `AttrMetadataError`: If metadata of attribute being calculated cannot be fetched.
   ///   - `BaseValueError`: If base value for attribute being calculated cannot be found.
-  func calculate(attributeId: AttrId) throws -> MockAttribute {
-    /*
-    
-     */
-    let item: BaseItemMixin? = nil
+  func calculate(attributeId: AttrId) throws -> Double? {
+    print("++ calculate \(attributeId) \(attributeId.rawValue)")
+    guard let item = self.item else {
+      print("++ calculate no item")
+      return nil
+    }
+    guard let attribute  = item.fit?.solarSystem?.source?.cacheHandler.getAttribute(attributeId: attributeId) else {
+      print("++ calculate no something fit: \(item.fit) system \(item.fit?.solarSystem) source \(item.fit?.solarSystem?.source) cacheHandler \(item.fit?.solarSystem?.source?.cacheHandler)")
+      return nil
+    }
     //attr = item._fit.solar_system.source.cache_handler.get_attr(attr_id)
     /*
      except (AttributeError, AttrFetchError) as e:
@@ -163,14 +188,13 @@ extension MutableAttributeMap {
                  logger.warning(msg)
                  raise AttrMetadataError(attr_id) from e
      */
-    guard let attribute = dataSource?.getAttribute(typeId: attributeId) else {
-      // throw
-      return .empty
-    }
-    guard let value = item?.typeAttributes[attributeId, default: Double(attribute.defaultValue)] else {
-      return .empty
-    }
-    
+//    guard let attribute = dataSource?.getAttribute(typeId: attributeId) else {
+//      // throw
+//      return .empty
+//    }
+
+    let value = item.typeAttributes[attributeId, default: Double(attribute.default_value)]
+    print("++ default value \(value)")
     var stack: [Int64: [Any]] = [:]
     var stackPenalized: [Int64: [Any]] = [:]
     var aggregateMin: [Int64: [Any]] = [:]
@@ -180,7 +204,7 @@ extension MutableAttributeMap {
     
     
     
-    return MockAttribute()
+    return value
   }
   /*
    def __calculate(self, attr_id):

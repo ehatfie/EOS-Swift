@@ -77,14 +77,13 @@ class ChargeGroupRestrictionRegister: BaseRestrictionRegisterProtocol, FitHaving
   }
   
   func handleItemLoaded(message: ItemLoaded) {
-    print("++ CGR - handleItemLoaded ")
     let messageItem = message.item
     if !(messageItem is Charge) { return }
     
     var allowedGroupIds: Set<Int64> = []
     
     for attributeId in ALLOWED_GROUP_ATTR_IDS1 {
-      guard let allowedGroupId = messageItem.attributes[attributeId] else { return }
+      guard let allowedGroupId = messageItem.attributes?[attributeId] else { return }
       allowedGroupIds.insert(Int64(allowedGroupId))
     }
     guard !allowedGroupIds.isEmpty else { return }

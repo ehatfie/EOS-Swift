@@ -8,6 +8,7 @@ import Foundation
 
 nonisolated
 class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
+
   public func updateCache(
     types: [ItemType],
     attributes: [Attribute],
@@ -50,8 +51,8 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
     nil
   }
   
-  func getAttribute(attributeId: AttrId) {
-    
+  func getAttribute(attributeId: AttrId) -> Attribute? {
+    nil
   }
 
   var cachePath: String
@@ -79,8 +80,8 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
     
   }
   
-  func getEffect(effectId: EffectId) {
-    
+  func getEffect(effectId: EffectId) -> Effect? {
+    nil
   }
   
   func getBuffTemplates(buffId: Int64) {

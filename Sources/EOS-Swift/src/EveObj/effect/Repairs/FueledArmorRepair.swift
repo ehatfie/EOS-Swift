@@ -11,6 +11,6 @@ class FueledArmorRepair: LocalArmorRepairEffect {
   }
   
   func getRepAmount(item: BaseItemMixin) -> Double? {
-    return item.attributes[AttrId.armor_dmg_amount, default: 0]
+    return item.attributes?[AttrId.armor_dmg_amount, default: 0]
   }
 }

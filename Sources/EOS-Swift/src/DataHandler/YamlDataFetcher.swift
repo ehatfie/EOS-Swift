@@ -148,7 +148,7 @@ class YamlDataFetcher: @unchecked Sendable {
 
         returnValue.append((Int64(keyValue), result))
       } catch let err {
-        print("Decode error \(err) for \(type) decode2")
+        print("Decode error \(err) for \(type) decode")
       }
     }
     //print("decode2() -  took \(Date().timeIntervalSince(start))")

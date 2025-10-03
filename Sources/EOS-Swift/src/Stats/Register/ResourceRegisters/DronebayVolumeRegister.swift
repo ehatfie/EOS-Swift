@@ -19,7 +19,7 @@ class DronebayVolumeRegister: BaseResourceRegisterProtocol {
     
     for item in self.resourceUsers {
       if let item = item as? any BaseItemMixinProtocol {
-        returnValue += item.attributes[.volume, default: 0.0]
+        returnValue += item.attributes![.volume, default: 0.0]
       }
     }
     
@@ -27,7 +27,7 @@ class DronebayVolumeRegister: BaseResourceRegisterProtocol {
   }
   
   var output: Double {
-    return self.fit?.ship?.attributes[.drone_capacity] ?? 0.0
+    return self.fit?.ship?.attributes![.drone_capacity] ?? 0.0
   }
   
   var resourceUsers: Set<AnyHashable> = []

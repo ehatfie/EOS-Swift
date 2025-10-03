@@ -69,7 +69,7 @@ class AncillaryRepAmountModifier: BasePythonModifier {
     if let charge = affectorItem as? Charge,
       charge.typeId == TypeId.naniteRepairPaste.rawValue
     {
-      value = affectorItem.attributes[.charged_armor_dmg_mult]
+      value = affectorItem.attributes?[.charged_armor_dmg_mult]
     } else {
       value = 1
     }

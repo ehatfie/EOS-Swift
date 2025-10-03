@@ -15,7 +15,7 @@ public protocol DataHandlerProtocol {
   
   func getEveGroups() async -> [EveGroupData]
   func getDogmaAttributes() async -> [DogmaAttributeData]
-  func getDogmaTypeAttributes() async -> [(Int64, DogmaTypeAttributeData)]
+  func getDogmaTypeAttributes() async -> [(Int64, TypeDogmaAttributeData)]
   func getDogmaEffects() async -> [DogmaEffectData]
   func getDogmaTypeEffects() async -> [DogmaTypeEffect]
   func getDebuffCollection() async -> [DBuffCollectionsData]
@@ -41,6 +41,15 @@ public struct EveGroupData: Codable, Sendable, Hashable {
 
 public struct DogmaTypeAttributeData: Codable, Sendable {
   let typeID: Int64
+  let attributeID: Int64
+  let value: Double
+}
+
+public struct TypeDogmaAttributeDataOuter: Codable, Sendable {
+  let dogmaAttributes: [TypeDogmaAttributeData]
+}
+
+public struct TypeDogmaAttributeData: Codable, Sendable {
   let attributeID: Int64
   let value: Double
 }

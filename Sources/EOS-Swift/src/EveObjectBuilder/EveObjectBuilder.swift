@@ -18,7 +18,9 @@ class EveObjectBuilder: @unchecked Sendable {
     let eveTypes = await dataHandler.getEveTypes()
     let eveGroups = await dataHandler.getEveGroups()
     let dogmaAttributes = await dataHandler.getDogmaAttributes()
-    let dogmaTypeAttributes = await dataHandler.getDogmaTypeAttributes()
+    let dogmaTypeAttributes = await dataHandler.getDogmaTypeAttributes().map {
+      ($0.0, DogmaTypeAttributeData(typeID: $0.0, attributeID: $0.1.attributeID, value: $0.1.value))
+    }
     let dogmaEffects = await dataHandler.getDogmaEffects()
     let dogmaTypeEffects = await dataHandler.getDogmaTypeEffects()
     let dbuffCollections = await dataHandler.getDebuffCollection()
@@ -73,7 +75,11 @@ class EveObjectBuilder: @unchecked Sendable {
 
     for (typeId, row) in dogmaTypeAttributes {
       var attributesForType = typesAttributes[typeId, default: [:]]
-      attributesForType[AttrId(rawValue: row.attributeID)!] = Double(row.value)
+      guard let attrId = AttrId(rawValue: row.attributeID) else { continue }
+      attributesForType[attrId] = Double(row.value)
+      if row.attributeID == 272 {
+        print("++ attribute value \(row.value)")
+      }
       typesAttributes[typeId] = attributesForType
     }
 

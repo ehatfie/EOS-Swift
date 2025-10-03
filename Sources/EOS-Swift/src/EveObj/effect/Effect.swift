@@ -228,14 +228,14 @@ extension Effect {
   }
   
   static func safeGetAttributeValue(item: any BaseItemMixinProtocol, attributeID: AttrId) -> Double {
-    return item.attributes[attributeID, default: 0]
+    return item.attributes![attributeID, default: 0]
   }
   
   func getForcedInactiveTime(item: any BaseItemMixinProtocol) -> Double {
     guard let dischargeAttributeID else {
       return 0.0
     }
-    let timeMS = item.attributes[AttrId(rawValue: dischargeAttributeID)!, default: 0]
+    let timeMS = item.attributes![AttrId(rawValue: dischargeAttributeID)!, default: 0]
     return timeMS / 1000
   }
   
