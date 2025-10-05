@@ -28,6 +28,7 @@ extension BufferTankingMixinProtocol {
   }
   
   var resists: TankingLayers<ResistProfile> {
+    print("++ get resists")
     let hull: ResistProfile = ResistProfile(
       self.getResistByAttribute(.em_dmg_resonance),
       thermal: self.getResistByAttribute(.therm_dmg_resonance),

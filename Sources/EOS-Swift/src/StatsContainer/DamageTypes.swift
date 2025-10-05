@@ -20,10 +20,10 @@ protocol DamageTypeContainer {
 
 /// Container for damage data stats.
 public class DamageTypes: DamageTypeContainer, Hashable {
-  var em: Double
-  var thermal: Double
-  var kinetic: Double
-  var explosive: Double
+  public var em: Double
+  public var thermal: Double
+  public var kinetic: Double
+  public var explosive: Double
 
   init(
     em: Double,

@@ -16,11 +16,9 @@ class MockSolarSystem: SolarSystemProtocol {
 public class SolarSystem: MaybeFitHaving {
   var source: Source? {
     get {
-      print("++ getSource \(self.Source)")
       return self.Source
     }
     set {
-      print("++ set source to \(newValue?.alias)")
       let oldSource = self.Source
       if newValue == oldSource {
         return
