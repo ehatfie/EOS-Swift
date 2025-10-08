@@ -6,14 +6,14 @@
 //
 
 
-protocol BaseResourceRegisterProtocol: BaseStatsRegisterProtocol {
+public protocol BaseResourceRegisterProtocol: BaseStatsRegisterProtocol {
   var used: Double { get }
   var output: Double { get }
   var users: Set<AnyHashable> { get } // any BaseItemMixinProtocol ??
 }
 
 // TODO: Move
-protocol EffectsSubscriberProtocol {
+public protocol EffectsSubscriberProtocol {
   func handleEffectsStarted(message: EffectsStarted)
   func handleEffectsStopped(message: EffectsStopped)
   
@@ -21,7 +21,7 @@ protocol EffectsSubscriberProtocol {
 }
 
 extension EffectsSubscriberProtocol {
-  func notify(message: any Message) {
+  public func notify(message: any Message) {
     switch message {
     case let m as EffectsStarted:
       handleEffectsStarted(message: m)

@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/7/25.
 //
 
-protocol BaseStatsRegisterProtocol: BaseSubscriberProtocol, EffectsSubscriberProtocol {
+public protocol BaseStatsRegisterProtocol: BaseSubscriberProtocol, EffectsSubscriberProtocol {
   var fit: Fit? { get set }
   
 //  func handleEffectsStarted(message: EffectsStarted)

@@ -7,12 +7,12 @@
 import Foundation
 
 /// Container for coordinate data.
-class Coordinates {
-  var x: CGFloat
-  var y: CGFloat
-  var z: CGFloat
+public class Coordinates {
+  public var x: CGFloat
+  public var y: CGFloat
+  public var z: CGFloat
   
-  init(x: CGFloat, y: CGFloat, z: CGFloat) {
+  public init(x: CGFloat, y: CGFloat, z: CGFloat) {
     self.x = x
     self.y = y
     self.z = z
@@ -20,8 +20,8 @@ class Coordinates {
 }
 
 /// Container for orientation data.
-class Orientation: Coordinates {
-  override init (x: CGFloat, y: CGFloat, z: CGFloat) {
+public class Orientation: Coordinates {
+  public override init (x: CGFloat, y: CGFloat, z: CGFloat) {
     super.init(x: x, y: y, z: z)
     // maybe throw if one coordinate isnt 0
     

@@ -87,7 +87,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     print("++ item.container \(item.typeId) set \(item.container)")
     //print("handleItemAddition \()")
     guard let fit = item.fit else {
-      print("++ Item no fit")
+      print("++ Item no fit1")
       return
     }
     

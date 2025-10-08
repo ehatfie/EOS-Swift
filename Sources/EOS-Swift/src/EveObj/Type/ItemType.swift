@@ -28,6 +28,7 @@ public class ItemType {
     self.typeId = typeId
     self.groupId = groupId
     self.categoryId = categoryId
+    //print("** ItemType init \(typeId) \(attributes)")
     self.attributes = attributes
     self.effects = effects
     self.defaultEffect = defaultEffect

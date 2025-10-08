@@ -160,8 +160,11 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
     effects: [Effect],
     buffTemplates: [BuffTemplate],
   ) {
-    for each in types {
-      typeStore[each.typeId] = each
+    for row in types {
+      if row.typeId == 2929 {
+        print(":: updateMemoryCache2 \(row.typeId) has effects \(row.effects.count)")
+      }
+      typeStore[row.typeId] = row
     }
     
     for row in attributes {

@@ -5,31 +5,31 @@
 //  Created by Erik Hatfield on 9/10/25.
 //
 
-class ShieldRepairerRegister: BaseRepairRegisterProtocol {
-  static func == (lhs: ShieldRepairerRegister, rhs: ShieldRepairerRegister) -> Bool {
+public class ShieldRepairerRegister: BaseRepairRegisterProtocol {
+  public static func == (lhs: ShieldRepairerRegister, rhs: ShieldRepairerRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
   
   typealias MessageType = ItemEffectsMessage
   
-  var fit: Fit?
+  public var fit: Fit?
   
-  var handlerMap: [Int64 : CallbackHandler]
+  public var handlerMap: [Int64 : CallbackHandler]
   
-  var localRepairers: [Int64 : RepairerData] = [:]
-  var localRep: Set<RepairerData> = []
+  public var localRepairers: [Int64 : RepairerData] = [:]
+  public var localRep: Set<RepairerData> = []
   
-  init(fit: Fit? = nil) {
+  public init(fit: Fit? = nil) {
     self.fit = fit
     self.handlerMap = [:]
     fit?.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
-  func notify(message: any Message) {
+  public func notify(message: any Message) {
     switch message {
     case let message as EffectsStarted:
       self.handleEffectsStarted(message: message)
@@ -40,7 +40,7 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   }
   
   // TODO
-  func getRps(
+  public func getRps(
     item: (any BufferTankingMixinProtocol)?,
     damageProfile: DamageProfile?,
     reload: Bool
@@ -79,7 +79,7 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
     return rps
   }
   
-  func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStarted(message: EffectsStarted) {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? LocalShieldRepairEffect {
@@ -89,7 +89,7 @@ class ShieldRepairerRegister: BaseRepairRegisterProtocol {
     }
   }
   
-  func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? LocalShieldRepairEffect {

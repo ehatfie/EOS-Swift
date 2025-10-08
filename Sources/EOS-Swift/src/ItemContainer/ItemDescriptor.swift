@@ -51,7 +51,7 @@ class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHa
   }
   
   func set1(item: T, parent: any ItemContainerBaseProtocol) throws {
-    print("++ ItemDescriptor set")
+    print("++ ItemDescriptor set1 \(item.typeId)")
     let oldItem = self.item
     if let oldItem {
       self.handleItemRemoval(oldItem)
@@ -72,26 +72,27 @@ class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHa
     
   }
   
-  override func handleItemAddition(item: T, container: any ItemContainerBaseProtocol) throws {
-    print("++ ItemDescriptor handleItemAddition")
-    guard item.container == nil else {
-      fatalError("Item already assigned to another container")
-    }
-    print("++ handleItemAddition \(item.typeId)")
-    item.container = container
-    print("++ item.container \(item.typeId) set \(item.container)")
-    //print("handleItemAddition \()")
-    guard let fit = item.fit else {
-      print("++ Item no fit")
-      return
-    }
-    
-    for subItem in subItemIterator(item: item) {
-      print("++ subItem1 for \(item.typeId) is \(subItem.typeId)")
-      let messages = MessageHelper.getItemAddedMessages(item: subItem)
-      fit.publishBulk(messages: messages)
-      subItem.load()
-    }
-  }
-  
 }
+
+//fileprivate extension ItemDescriptor {
+//  override func handleItemAddition(item: T, container: any ItemContainerBaseProtocol) throws {
+//    print("++ ItemDescriptor handleItemAddition \(item.typeId)")
+//    guard item.container == nil else {
+//      fatalError("++ Item already assigned to another container")
+//    }
+//    item.container = container
+//    print("++ item.container \(item.typeId) set \(item.container)")
+//    //print("handleItemAddition \()")
+//    guard let fit = item.fit else {
+//      print("++ Item no fit2 \(item.typeId)")
+//      return
+//    }
+//    
+//    for subItem in subItemIterator(item: item) {
+//      print("++ subItem1 for \(item.typeId) is \(subItem.typeId)")
+//      let messages = MessageHelper.getItemAddedMessages(item: subItem)
+//      fit.publishBulk(messages: messages)
+//      subItem.load()
+//    }
+//  }
+//}

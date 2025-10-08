@@ -9,16 +9,16 @@ protocol BaseRepairRegisterProtocol: BaseStatsRegisterProtocol {
   
 }
 
-struct RepairerData: Hashable {
-  static func == (lhs: RepairerData, rhs: RepairerData) -> Bool {
+public struct RepairerData: Hashable {
+  static public func == (lhs: RepairerData, rhs: RepairerData) -> Bool {
     return lhs.effect == rhs.effect
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(self)
   }
   
-  let item: any BaseItemMixinProtocol
-  let effect: BaseRepairEffect
+  public let item: any BaseItemMixinProtocol
+  public let effect: BaseRepairEffect
 }
 

@@ -38,3 +38,19 @@ func makeMissileDamageEffect() -> Effect {
     modifiers: dogmaModifiers
   )
 }
+
+
+/*
+ EffectFactory.register_class_by_id(
+     ChainLightning,
+     EffectId.chain_lightning)
+ EffectFactory.register_class_by_id(
+     ProjectileFired,
+     EffectId.projectile_fired)
+ EffectFactory.register_class_by_id(
+     TargetDisintegratorAttack,
+     EffectId.target_disintegrator_attack)
+ EffectFactory.register_class_by_id(
+     TargetAttack,
+     EffectId.target_attack)
+ */

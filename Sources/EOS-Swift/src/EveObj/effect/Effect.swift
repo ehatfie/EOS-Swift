@@ -141,10 +141,15 @@ public class Effect: Hashable {
   
 
   // TODO: After model definitions
-  func getCharge(item: any BaseItemMixinProtocol) {
+  func getCharge(item: any BaseItemMixinProtocol) -> Charge? {
     if let autoChargeTypeId = self.getAutoChargeTypeId(item: item) {
       //item.autocharges.get(self.id)
+      print("!! not returning autocharge but should")
+      item.autocharges?.getItem(key: self.effectId as AnyHashable)
     } else {
+      if let item = item as? Module {
+        return item.charge.item
+      }
       // check if item has Module?
       //return item.charge
     }
@@ -159,6 +164,7 @@ public class Effect: Hashable {
          except AttributeError:
              return None
      */
+    return nil
   }
   
   func getCyclesUntilReload(item: any BaseItemMixinProtocol) -> Double? {

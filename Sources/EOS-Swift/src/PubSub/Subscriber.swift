@@ -22,9 +22,9 @@
              return
          handler(self, msg)
  */
-typealias CallbackHandler = () -> Void
+public typealias CallbackHandler = () -> Void
 /// Base class for subscribers.
-protocol BaseSubscriber {
+public protocol BaseSubscriber {
     /// Dictionary mapping message types to their handlers.
     var handlerMap: [Int64: CallbackHandler] { get }
 

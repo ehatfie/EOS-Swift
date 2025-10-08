@@ -6,16 +6,16 @@
 //
 
 
-class DroneBandwidthRegister: BaseResourceRegisterProtocol {
-  static func == (lhs: DroneBandwidthRegister, rhs: DroneBandwidthRegister) -> Bool {
+public class DroneBandwidthRegister: BaseResourceRegisterProtocol {
+  public static func == (lhs: DroneBandwidthRegister, rhs: DroneBandwidthRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
   
-  var used: Double {
+  public var used: Double {
     var returnValue: Double = 0.0
     for item in self.resourceUsers {
       if let item = item as? any BaseItemMixinProtocol {
@@ -25,25 +25,25 @@ class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     return returnValue
   }
   
-  var output: Double {
+  public var output: Double {
     return self.fit?.ship?.attributes![.drone_bandwidth] ?? 0.0
   }
   
-  var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<AnyHashable> = []
   
-  var users: Set<AnyHashable> {
+  public var users: Set<AnyHashable> {
     self.resourceUsers
   }
   
-  weak var fit: Fit?
+  weak public var fit: Fit?
   
-  init(fit: Fit) {
+  public init(fit: Fit) {
     self.fit = fit
     
     self.fit?.subscribe(subscriber: self, for: [.StatesActivatedLoaded, .StatesDeactivatedLoaded])
   }
 
-  func handleStatesActivatedLoaded(message: StatesActivatedLoaded) {
+  public func handleStatesActivatedLoaded(message: StatesActivatedLoaded) {
     guard
       message.item is Drone,
       message.states.contains(.online),
@@ -54,7 +54,7 @@ class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     self.resourceUsers.insert(message.item as! AnyHashable)
   }
   
-  func handleStatesDeactivatedLoaded(message: StatesDeactivatedLoaded) {
+  public func handleStatesDeactivatedLoaded(message: StatesDeactivatedLoaded) {
     guard
       message.item is Drone,
       message.states.contains(.online) else {
@@ -64,7 +64,7 @@ class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     self.resourceUsers.remove(message.item as! AnyHashable)
   }
   
-  func notify(message: any Message) {
+  public func notify(message: any Message) {
     switch message {
     case let m as StatesActivatedLoaded:
       handleStatesActivatedLoaded(message: m)
@@ -76,7 +76,7 @@ class DroneBandwidthRegister: BaseResourceRegisterProtocol {
   
   
   // Not actually used
-  func handleEffectsStarted(message: EffectsStarted) { }
-  func handleEffectsStopped(message: EffectsStopped) { }
+  public func handleEffectsStarted(message: EffectsStarted) { }
+  public func handleEffectsStopped(message: EffectsStopped) { }
   
 }

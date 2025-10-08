@@ -117,6 +117,7 @@ public class Module:
     super.init(typeId: typeId, state: state)
     if let charge = charge {
       do {
+        print("++ pre-charge set")
         try self.charge.set(item: charge, parent: self)
       } catch let error {
         print("++ module init set charge error \(error)")

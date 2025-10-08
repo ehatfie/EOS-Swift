@@ -5,22 +5,22 @@
 //  Created by Erik Hatfield on 9/10/25.
 //
 
-class ArmorRepairerRegister: BaseRepairRegisterProtocol {
+public class ArmorRepairerRegister: BaseRepairRegisterProtocol {
   typealias MessageType = ItemEffectsMessage
   
-  var localRepairers: [Int64 : RepairerData] = [:]
+  public var localRepairers: [Int64 : RepairerData] = [:]
   
-  var fit: Fit?
+  public var fit: Fit?
   
-  var handlerMap: [Int64 : CallbackHandler] = [:]
+  public var handlerMap: [Int64 : CallbackHandler] = [:]
   
-  init(fit: Fit) {
+  public init(fit: Fit) {
     self.fit = fit
     //let set = Set<(any BaseItemMixinProtocol, Effect)>()
     fit.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
-  func getRps(item: (any BaseItemMixinProtocol)?, damageProfile: DamageProfile?, reload: Bool) -> Double {
+  public func getRps(item: (any BaseItemMixinProtocol)?, damageProfile: DamageProfile?, reload: Bool) -> Double {
     var rps: Double = 0.0
     for (repItem, repEffect) in self.localRepairers {
       
@@ -28,7 +28,7 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
     return 0.0
   }
   
-  func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStarted(message: EffectsStarted) {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       guard let effect = itemEffects[effectId] else { continue }
@@ -38,11 +38,11 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
     }
   }
   
-  func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     
   }
   
-  func notify(message: any Message) {
+  public func notify(message: any Message) {
     switch message {
     case is EffectsStarted:
       handleEffectsStarted(message: message as! EffectsStarted)
@@ -55,11 +55,11 @@ class ArmorRepairerRegister: BaseRepairRegisterProtocol {
 
 extension ArmorRepairerRegister {
 
-  static func == (lhs: ArmorRepairerRegister, rhs: ArmorRepairerRegister) -> Bool {
+  public static func == (lhs: ArmorRepairerRegister, rhs: ArmorRepairerRegister) -> Bool {
     return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
   

@@ -9,6 +9,8 @@ import Foundation
 import Yams
 
 public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
+
+  
   
   public init() {
 
@@ -24,6 +26,7 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       (try? await fetcher.readYamlAsync(for: .typeIDs, type: TypeData.self))
       ?? []
     print("++ getEveTypes results \(results.count)")
+    
     return results.compactMap { value -> EveTypeData? in
       let typeId = value.0
       let data = value.1
@@ -71,23 +74,25 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       ).map { $0.1 }) ?? []
   }
 
-  public func getDogmaTypeAttributes() async -> [(Int64, TypeDogmaAttributeData)] {
+  public func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData] {
     let fetcher = await YamlDataFetcher.shared
     let foo = (try? await fetcher.readYamlAsync(
       for: .typeDogma,
       type: TypeDogmaAttributeDataOuter.self
     )) ?? []
+    
     let bar = foo.flatMap { value in
       return (value.0, value.1)
     }
+    
     let bar1 = foo.map { value in
       let value1 = value.1
       return value1.dogmaAttributes.map { value2 in
         return (value.0, value2)
       }
     }
-    
-    return bar1.flatMap { $0 }
+    return []
+    //return bar1.flatMap { $0 }
       
   }
 
@@ -105,18 +110,19 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
     var rows: [DogmaTypeEffect] = []
     let result =
       (try? await fetcher.readYamlAsync(
-        for: .typeDogmaInfo,
-        type: TypeDogmaData.self
+        for: .typeDogma,
+        type: TypeDogmaAttributeDataOuter.self
       )) ?? []
-
+    print("++ getDogmaTypeEffects \(result.count) ")
+    
     rows = result.flatMap { (typeId, typeData) in
-      return typeData.dogmaEffects.map {
+      return typeData.dogmaEffects?.map {
         DogmaTypeEffect(
           typeId: typeId,
           effectID: $0.effectID,
           isDefault: $0.isDefault
         )
-      }
+      } ?? []
     }
 
     //let bar = foo.map { DogmaTypeEffect(typeId: $0.0, effectID: <#T##Int64#>, isDefault: <#T##Bool#>)}

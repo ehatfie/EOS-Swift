@@ -50,7 +50,7 @@ public class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
     self.keyedItems.removeAll()
   }
   
-  func getItem(key: T, defaultValue: (any BaseItemMixinProtocol)? = nil) -> (any BaseItemMixinProtocol)? {
+  func getItem(key: AnyHashable, defaultValue: (any BaseItemMixinProtocol)? = nil) -> (any BaseItemMixinProtocol)? {
     return self.keyedItems[key] ?? defaultValue ?? nil
   }
   

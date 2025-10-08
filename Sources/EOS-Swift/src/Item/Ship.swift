@@ -14,8 +14,8 @@ public class Ship:
   SolarSystemItemMixinProtocol
 {
   
-  var coordinate: Coordinates = Coordinates(x: 0, y: 0, z: 0)
-  var orientation: Orientation = Orientation(x: 1, y: 0, z: 0)
+  public var coordinate: Coordinates = Coordinates(x: 0, y: 0, z: 0)
+  public var orientation: Orientation = Orientation(x: 1, y: 0, z: 0)
 
   public override init(typeId: Int64, state: StateI = .offline) {
     super.init(typeId: typeId, state: state)

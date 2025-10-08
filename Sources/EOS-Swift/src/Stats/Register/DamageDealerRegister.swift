@@ -1,21 +1,21 @@
-class DamageDealerRegister: BaseStatsRegisterProtocol {
-  static func == (lhs: DamageDealerRegister, rhs: DamageDealerRegister) -> Bool {
+public class DamageDealerRegister: BaseStatsRegisterProtocol {
+  public static func == (lhs: DamageDealerRegister, rhs: DamageDealerRegister) -> Bool {
     return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
   typealias MessageType = ItemEffectsMessage
 
-  var handlerMap: [Int64 : CallbackHandler] = [:]
+  public var handlerMap: [Int64 : CallbackHandler] = [:]
   
-  weak var fit: Fit?
-  var damageDealers: [Int64: any DamageDealerMixinProtocol] = [:]
+  weak public var fit: Fit?
+  public var damageDealers: [Int64: any DamageDealerMixinProtocol] = [:]
   
-  init(fit: Fit) {
+  public init(fit: Fit) {
     self.fit = fit
     fit.subscribe(subscriber: self, for: [MessageTypeEnum.EffectsStarted, .EffectsStopped])
   }
   
-  func getVolley(itemFilter: Any?, targetResists: ResistProfile?) -> DamageStats {
+  public func getVolley(itemFilter: Any?, targetResists: ResistProfile?) -> DamageStats {
     var damageStats: [DamageStats?] = []
     for item in ddIterator(itemFilter: nil) {
       damageStats.append(item.getVolley(targetResists: targetResists))
@@ -25,11 +25,11 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     
   }
   
-  func ddIterator(itemFilter: Any?) -> AnyIterator<any DamageDealerMixinProtocol> {
+  public func ddIterator(itemFilter: Any?) -> AnyIterator<any DamageDealerMixinProtocol> {
     let values = Array(self.damageDealers.values).map { value in
       value as any DamageDealerMixinProtocol
     }
-    
+    print("++- ddIterator has \(values.count) items")
     var index = 0
     return AnyIterator {
       guard index < values.count else { return nil }
@@ -38,7 +38,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     }
   }
 
-  func notify(message: any Message) {
+  public func notify(message: any Message) {
     switch message {
       case let message as EffectsStarted:
       self.handleEffectsStarted(message: message)
@@ -49,7 +49,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     }
   }
   
-  func getDps(
+  public func getDps(
     itemFilter: Any?,
     reload: Bool,
     targetResists: ResistProfile?
@@ -60,22 +60,33 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
         dpsValues.append(dps)
       }
     }
-    
-    return DamageStats.combined(dpsValues) ?? DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    let combined = DamageStats.combined(dpsValues)
+    print("++ getDPS \(dpsValues.count) values combined to \(combined)")
+    return combined ?? DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
   
-  func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStarted(message: EffectsStarted) {
+    
     let itemEffects = message.item.typeEffects
+    print("++ handleEffectsStarted \(message.item.typeId) \(message.effectIds) itemEffects \(itemEffects)")
+    
+//    for (key, value) in itemEffects {
+//      print("++ \(key) value type \(type(of: value))")
+//    }
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
         if let foo = message.item as? (any DamageDealerMixinProtocol) {
           self.damageDealers[Int64(effectId.rawValue)] = foo
+        } else {
+          print("not DamageDealerMixinProtocol")
         }
+      } else {
+        
       }
     }
   }
   
-  func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
@@ -84,7 +95,7 @@ class DamageDealerRegister: BaseStatsRegisterProtocol {
     }
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
 }

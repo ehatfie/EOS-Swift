@@ -15,11 +15,11 @@ public protocol StatsServiceProtocol:
 }
 
 public protocol StatServiceRegistersProtocol {
-//  var ddRegister: DamageDealerRegister { get set }
-//  var armorRepRegister: ArmorRepairerRegister { get set }
-//  var shieldRepRegister: ShieldRepairerRegister { get set }
-//  var cpu: CPURegister { get set }
-//  var powerGrid: PowergridRegister { get set }
+  var ddRegister: DamageDealerRegister { get set }
+  var armorRepRegister: ArmorRepairerRegister { get set }
+  var shieldRepRegister: ShieldRepairerRegister { get set }
+  var cpu: CPURegister { get set }
+  var powerGrid: PowergridRegister { get set }
 //  var calibration: CalibrationRegister { get set }
 //  var dronebay: DronebayVolumeRegister { get set }
 //  var droneBandwidth: DroneBandwidthRegister { get set }
@@ -93,24 +93,25 @@ extension StatServiceValuesProtocol {
   }
   
   public func getVolley(itemFilter: Any? = nil, targetResists: ResistProfile? = nil) -> DamageStats {
-    return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
-    //return self.ddRegister.getVolley(itemFilter: itemFilter, targetResists: targetResists)
+    //return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    return self.ddRegister.getVolley(itemFilter: itemFilter, targetResists: targetResists)
   }
   
   public func getDPS(itemFilter: Any? = nil, reload: Bool = false, targetResists: ResistProfile? = nil) -> DamageStats {
-    DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
-    //return self.ddRegister.getDps(itemFilter: itemFilter, reload: reload, targetResists: targetResists)
+    //DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    
+    return self.ddRegister.getDps(itemFilter: itemFilter, reload: reload, targetResists: targetResists)
   }
   
   public func getArmorRps(damageProfile: DamageProfile, reload: Bool = false) -> Double {
 
     if damageProfile is DefaultImpl {
       let dmgProfile = self.fit?.defaultIncomingDamage
-      return 0.0
-      //return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
+      //return 0.0
+      return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
     }
-    return 0.0
-    //return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
+    //return 0.0
+    return self.armorRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
   }
   
   public func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double {
@@ -119,8 +120,8 @@ extension StatServiceValuesProtocol {
       return 0.0
       //return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
     }
-    return 0.0
-    //return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
+    //return 0.0
+    return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)
   }
   
   public var agilityFactor: Double? {
@@ -205,16 +206,16 @@ extension StatServiceValuesProtocol {
 public class StatService: StatsServiceProtocol {
   weak public var fit: Fit? = nil
   
-  var ddRegister: DamageDealerRegister
-  var armorRepRegister: ArmorRepairerRegister
-  var shieldRepRegister: ShieldRepairerRegister
-  var cpu: CPURegister
-  var powerGrid: PowergridRegister
-  var calibration: CalibrationRegister
-  var dronebay: DronebayVolumeRegister
-  var droneBandwidth: DroneBandwidthRegister
-  var turretSlots: TurretSlotRegister
-  var launcherSlots: LauncherSlotRegister
+  public var ddRegister: DamageDealerRegister
+  public var armorRepRegister: ArmorRepairerRegister
+  public var shieldRepRegister: ShieldRepairerRegister
+  public var cpu: CPURegister
+  public var powerGrid: PowergridRegister
+  public var calibration: CalibrationRegister
+  public var dronebay: DronebayVolumeRegister
+  public var droneBandwidth: DroneBandwidthRegister
+  public var turretSlots: TurretSlotRegister
+  public var launcherSlots: LauncherSlotRegister
   
   // var launchedDrones: LaunchedDroneRegister
   // var fighterSquadsSupport: FighterSquadSupportRegister

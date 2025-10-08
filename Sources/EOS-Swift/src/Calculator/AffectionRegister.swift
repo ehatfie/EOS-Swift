@@ -10,7 +10,8 @@ struct AffecteeInfo: Hashable {
   }
   
   func hash(into hasher: inout Hasher) {
-    hasher.combine(self)
+    hasher.combine(ObjectIdentifier(item))
+    hasher.combine(ObjectIdentifier(effect))
   }
   
   let item: any BaseItemMixinProtocol
@@ -23,7 +24,10 @@ struct AffecteeDomain: Hashable {
   }
   
   func hash(into hasher: inout Hasher) {
-    hasher.combine(self)
+    if let fit = fit {
+      hasher.combine(ObjectIdentifier(fit))
+    }
+    hasher.combine(ObjectIdentifier(effect))
   }
   
   let fit: Fit?
@@ -55,7 +59,8 @@ struct AffectorSpec: Hashable {
   }
   
   func hash(into hasher: inout Hasher) {
-    hasher.combine(self)
+    hasher.combine(modifier)
+    hasher.combine(ObjectIdentifier(itemType))
   }
 }
 

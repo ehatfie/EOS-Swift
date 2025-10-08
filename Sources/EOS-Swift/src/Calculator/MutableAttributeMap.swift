@@ -87,13 +87,14 @@ public class MutableAttributeMap {
       // let value = self.calculate(attributeId)
       do {
         let value = try self.calculate(attributeId: attributeId)
+        print("++ getValue returning calculated value \(value)")
         return value
       } catch let err {
         print("!! calc error \(err)")
         return nil
       }
     }
-
+    print("++ getValue returning")
     return value
   }
   
@@ -192,9 +193,12 @@ extension MutableAttributeMap {
 //      // throw
 //      return .empty
 //    }
-
+    if attributeId == .cpu_output {
+      print("")
+    }
     let value = item.typeAttributes[attributeId, default: Double(attribute.default_value)]
-    print("++ default value \(value)")
+    print("++ got type attributes \(item.typeAttributes[.cpu_output])")
+    //print("++ default value \(value)")
     var stack: [Int64: [Any]] = [:]
     var stackPenalized: [Int64: [Any]] = [:]
     var aggregateMin: [Int64: [Any]] = [:]
@@ -203,7 +207,7 @@ extension MutableAttributeMap {
     //item._fit.solar_system.source.cache_handler.get_attr(attr_id)
     
     
-    
+    print("++ returning value \(value)")
     return value
   }
   /*

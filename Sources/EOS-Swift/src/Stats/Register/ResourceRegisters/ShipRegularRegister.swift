@@ -6,16 +6,18 @@
 //
 import Foundation
 
-protocol ShipRegularResourceRegisterProtocol: BaseResourceRegisterProtocol, EffectsSubscriberProtocol {
+public protocol ShipRegularResourceRegisterProtocol: BaseResourceRegisterProtocol, EffectsSubscriberProtocol {
   var outputAttrId: AttrId { get }
   var useEffectId: EffectId { get }
   var useAttrId: AttrId { get }
+  var usedI: Double { get }
   
   var resourceUsers: Set<AnyHashable> { get set }
 }
 
 extension ShipRegularResourceRegisterProtocol {
-  var used: Double {
+  public var usedI: Double {
+    print("++ ShipRegularResourceRegisterProtocol used")
     var returnValue: Double = 0.0
     for item in self.resourceUsers {
       guard let foo = item as? any BaseItemMixinProtocol else {
@@ -27,48 +29,55 @@ extension ShipRegularResourceRegisterProtocol {
     return returnValue
   }
   
-  var output: Double {
-    return self.fit?.ship?.attributes![self.outputAttrId] ?? 0.0
+  public var used: Double {
+    return usedI
   }
   
-  var users: Set<AnyHashable> {
+  public var output: Double {
+    print("++ ShipRegularResourceRegisterProtocol output")
+    let val = self.fit?.ship?.attributes![self.outputAttrId] ?? 0.0
+    print("++ ShipRegularResourceRegisterProtocol output return")
+    return val
+  }
+  
+  public var users: Set<AnyHashable> {
     return self.resourceUsers
   }
 }
 
-protocol RoundedShipRegularResourceRegisterProtocol: ShipRegularResourceRegisterProtocol, Equatable {
+public protocol RoundedShipRegularResourceRegisterProtocol: ShipRegularResourceRegisterProtocol, Equatable {
   
 }
 
-extension RoundedShipRegularResourceRegisterProtocol {
-  var used: Double {
-    round(used)
+public extension RoundedShipRegularResourceRegisterProtocol {  
+  public var used: Double {
+    round(usedI)
   }
 }
 
-class CalibrationRegister: ShipRegularResourceRegisterProtocol {
-  static func == (lhs: CalibrationRegister, rhs: CalibrationRegister) -> Bool {
+public class CalibrationRegister: ShipRegularResourceRegisterProtocol {
+  public static func == (lhs: CalibrationRegister, rhs: CalibrationRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
 
-  var outputAttrId: AttrId = .upgrade_capacity
-  var useEffectId: EffectId = .rig_slot
-  var useAttrId: AttrId = .upgrade_cost
+  public var outputAttrId: AttrId = .upgrade_capacity
+  public var useEffectId: EffectId = .rig_slot
+  public var useAttrId: AttrId = .upgrade_cost
   
-  var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<AnyHashable> = []
   
-  weak var fit: Fit?
+  weak public var fit: Fit?
   
-  init(fit: Fit) {
+  public init(fit: Fit) {
     self.fit = fit
     
     fit.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
   }
   
-  func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStarted(message: EffectsStarted) {
     let foo =  message.effectIds.contains(self.useEffectId)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
     
@@ -78,29 +87,29 @@ class CalibrationRegister: ShipRegularResourceRegisterProtocol {
     self.resourceUsers.insert(message.item as! AnyHashable)
   }
   
-  func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     if message.effectIds.contains(self.useEffectId) {
       self.resourceUsers.remove(message.item as! AnyHashable)
     }
   }
 }
 
-class CPURegister: RoundedShipRegularResourceRegisterProtocol {
-  static func == (lhs: CPURegister, rhs: CPURegister) -> Bool {
+public class CPURegister: RoundedShipRegularResourceRegisterProtocol {
+  public static func == (lhs: CPURegister, rhs: CPURegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
   
-  var outputAttrId: AttrId = .cpu_output
-  var useEffectId: EffectId = .online
-  var useAttrId: AttrId = .cpu
+  public var outputAttrId: AttrId = .cpu_output
+  public var useEffectId: EffectId = .online
+  public var useAttrId: AttrId = .cpu
   
-  var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<AnyHashable> = []
   
-  weak var fit: Fit?
+  weak public var fit: Fit?
   
   init(fit: Fit) {
     self.fit = fit
@@ -108,7 +117,7 @@ class CPURegister: RoundedShipRegularResourceRegisterProtocol {
     fit.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
   }
   
-  func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     let foo =  message.effectIds.contains(self.useEffectId)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
     
@@ -118,36 +127,36 @@ class CPURegister: RoundedShipRegularResourceRegisterProtocol {
     self.resourceUsers.insert(message.item as! AnyHashable)
   }
   
-  func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStarted(message: EffectsStarted) {
     if message.effectIds.contains(self.useEffectId) {
       self.resourceUsers.remove(message.item as! AnyHashable)
     }
   }
 }
 
-class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
-  static func == (lhs: PowergridRegister, rhs: PowergridRegister) -> Bool {
+public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
+  public static func == (lhs: PowergridRegister, rhs: PowergridRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
   
-  var outputAttrId: AttrId = .power_output
-  var useEffectId: EffectId = .online
-  var useAttrId: AttrId = .power
+  public var outputAttrId: AttrId = .power_output
+  public var useEffectId: EffectId = .online
+  public var useAttrId: AttrId = .power
   
-  var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<AnyHashable> = []
 
-  weak var fit: Fit?
+  weak public var fit: Fit?
   
-  init(fit: Fit) {
+  public init(fit: Fit) {
     self.fit = fit
     fit.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
   }
   
-  func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     let foo =  message.effectIds.contains(self.useEffectId)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
     
@@ -157,7 +166,7 @@ class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
     self.resourceUsers.insert(message.item as! AnyHashable)
   }
   
-  func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStarted(message: EffectsStarted) {
     if message.effectIds.contains(self.useEffectId) {
       self.resourceUsers.remove(message.item as! AnyHashable)
     }

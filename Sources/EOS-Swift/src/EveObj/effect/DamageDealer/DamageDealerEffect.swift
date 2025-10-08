@@ -5,13 +5,49 @@
 //  Created by Erik Hatfield on 9/6/25.
 //
 
+protocol DamageDealerEffectProtocol: Effect {
+  func getVolley(for item: any BaseItemMixinProtocol) -> DamageStats
+  func getDps(item: any BaseItemMixinProtocol, reload: Bool) -> DamageStats
+  func getAppliedVolley(item: any BaseItemMixinProtocol, targetData: Any, reload: Bool) -> DamageStats?
+  func getAppliedDps(item: any BaseItemMixinProtocol, targetData: Any, reload: Bool) -> DamageStats?
+}
 
-class DamageDealerEffect: Effect {
-  open func getVolley(for item: any BaseItemMixinProtocol) -> DamageStats {
+extension DamageDealerEffectProtocol {
+  func getVolley(for item: any BaseItemMixinProtocol) -> DamageStats {
     return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
   
   func getDps(item: any BaseItemMixinProtocol, reload: Bool) -> DamageStats {
+    guard let cycleParameters = self.getCycleParameters(item: item, reload: reload) else {
+      return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    }
+    let volley = self.getVolley(for: item)
+    let averageTime: Double = 1.0
+    
+    return DamageStats(
+      em: volley.em,
+      thermal: volley.thermal,
+      kinetic: volley.kinetic,
+      explosive: volley.explosive,
+      mult: 1 / averageTime
+    )!
+  }
+  
+  func getAppliedVolley(item: any BaseItemMixinProtocol, targetData: Any, reload: Bool) -> DamageStats? {
+    return nil
+  }
+  
+  func getAppliedDps(item: any BaseItemMixinProtocol, targetData: Any, reload: Bool) -> DamageStats? {
+    return nil
+  }
+}
+
+public class DamageDealerEffect: Effect {
+  open func getVolley(for item: any BaseItemMixinProtocol) -> DamageStats {
+    return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+  }
+  
+  public func getDps(item: any BaseItemMixinProtocol, reload: Bool) -> DamageStats {
     guard let cycleParameters = self.getCycleParameters(item: item, reload: reload) else {
       return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
     }

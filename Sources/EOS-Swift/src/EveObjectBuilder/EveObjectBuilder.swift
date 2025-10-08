@@ -4,6 +4,7 @@
 //
 //  Created by Erik Hatfield on 9/24/25.
 //
+import Foundation
 
 class EveObjectBuilder: @unchecked Sendable {
 
@@ -15,16 +16,36 @@ class EveObjectBuilder: @unchecked Sendable {
       [BuffTemplate]
     )
   {
+    
+    print("++ eveBuilder run")
+    var start = Date()
     let eveTypes = await dataHandler.getEveTypes()
+    print("++ evetypes took \(Date().timeIntervalSince(start))s")
+    start = Date()
     let eveGroups = await dataHandler.getEveGroups()
+    print("++ eveGroups took \(Date().timeIntervalSince(start))s")
+    start = Date()
     let dogmaAttributes = await dataHandler.getDogmaAttributes()
-    let dogmaTypeAttributes = await dataHandler.getDogmaTypeAttributes().map {
-      ($0.0, DogmaTypeAttributeData(typeID: $0.0, attributeID: $0.1.attributeID, value: $0.1.value))
-    }
+    print("++ dogmaAttributes took \(Date().timeIntervalSince(start))s")
+    start = Date()
+    let dogmaTypeAttributes = await dataHandler.getDogmaTypeAttributes()
+    print("** dogmaTypeAttributes took \(Date().timeIntervalSince(start))s to get \(dogmaTypeAttributes.count)")
+    
+    start = Date()
     let dogmaEffects = await dataHandler.getDogmaEffects()
+    print("++ dogmaEffects took \(Date().timeIntervalSince(start))s")
+    
+    start = Date()
     let dogmaTypeEffects = await dataHandler.getDogmaTypeEffects()
+    print("++ dogmaTypeEffects took \(Date().timeIntervalSince(start))s")
+    
+    start = Date()
     let dbuffCollections = await dataHandler.getDebuffCollection()
+    print("++ dbuffCollections took \(Date().timeIntervalSince(start))s")
+    
+    start = Date()
     let skillReqs = await dataHandler.getSkillReqs()
+    print("++ skillReqs tok \(Date().timeIntervalSince(start))s")
     // let typeFighterAbils = await dataHandler.getTypeFighterAbils()
 
     return await convert(
@@ -42,7 +63,7 @@ class EveObjectBuilder: @unchecked Sendable {
     typeData: [EveTypeData],
     eveGroups: [EveGroupData],
     dogmaTypeEffects: [DogmaTypeEffect],
-    dogmaTypeAttributes: [(Int64, DogmaTypeAttributeData)],
+    dogmaTypeAttributes: [DogmaTypeAttributeData],
     skillReqs: [TypeSkillReq],
     dogmaAttributes: [DogmaAttributeData],
     dogmaEffects: [DogmaEffectData]
@@ -66,21 +87,24 @@ class EveObjectBuilder: @unchecked Sendable {
 
     var typesEffects: [Int64: Set<EffectId>] = [:]
     for (row) in dogmaTypeEffects {
+      guard let effectID = EffectId(rawValue: Int(row.effectID)) else {
+        continue
+      }
       typesEffects[row.typeId, default: []].insert(
-        EffectId(rawValue: Int(row.effectID))!
+        effectID
       )
     }
-
+    print("++ typesEffects has 2929 \(typesEffects[2929] != nil)")
     var typesAttributes: [Int64: [AttrId: Double]] = [:]
-
-    for (typeId, row) in dogmaTypeAttributes {
-      var attributesForType = typesAttributes[typeId, default: [:]]
+    print("** convert got \(dogmaTypeAttributes.count) dogmaTypeAttributes")
+    for row in dogmaTypeAttributes {
+      var attributesForType = typesAttributes[row.typeID, default: [:]]
       guard let attrId = AttrId(rawValue: row.attributeID) else { continue }
       attributesForType[attrId] = Double(row.value)
-      if row.attributeID == 272 {
-        print("++ attribute value \(row.value)")
-      }
-      typesAttributes[typeId] = attributesForType
+//      if row.attributeID == 272 {
+//        print("++ attribute value \(row.value)")
+//      }
+      typesAttributes[row.typeID] = attributesForType
     }
 
     //var typesAbilitiesData: [Int64: [A]]
@@ -136,9 +160,31 @@ class EveObjectBuilder: @unchecked Sendable {
           affectorAttrId: AttrId(rawValue: value.modifyingAttributeID ?? -1)
         )
       }
-
-      effects.append(
-        Effect(
+      
+      guard let effectID = EffectId(rawValue: Int(effectData.effectID)) else {
+        effects.append(
+          Effect(
+            effectId: effectData.effectID,
+            categoryID: EffectCategoryId(rawValue: effectData.effectCategory),
+            isOffensive: effectData.isOffensive,
+            isAssistance: effectData.isAssistance,
+            durationAttributeID: effectData.durationAttributeID,
+            dischargeAttributeID: effectData.dischargeAttributeID,
+            rangeAttributeID: effectData.rangeAttributeID,
+            falloffAttributeID: effectData.falloffAttributeID,
+            trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
+            fittingUseUsageChanceAttributeID: effectData
+              .fittingUsageChanceAttributeID,
+            resistanceAttributeId: effectData.resistanceAttributeID,
+            buildStatus: .none,
+            modifiers: modifiers ?? []
+          )
+        )
+        continue
+      }
+      switch effectID {
+      case .projectile_fired:
+        ProjectileFiredEffect(
           effectId: effectData.effectID,
           categoryID: EffectCategoryId(rawValue: effectData.effectCategory),
           isOffensive: effectData.isOffensive,
@@ -154,7 +200,27 @@ class EveObjectBuilder: @unchecked Sendable {
           buildStatus: .none,
           modifiers: modifiers ?? []
         )
-      )
+      default:
+        effects.append(
+          Effect(
+            effectId: effectData.effectID,
+            categoryID: EffectCategoryId(rawValue: effectData.effectCategory),
+            isOffensive: effectData.isOffensive,
+            isAssistance: effectData.isAssistance,
+            durationAttributeID: effectData.durationAttributeID,
+            dischargeAttributeID: effectData.dischargeAttributeID,
+            rangeAttributeID: effectData.rangeAttributeID,
+            falloffAttributeID: effectData.falloffAttributeID,
+            trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
+            fittingUseUsageChanceAttributeID: effectData
+              .fittingUsageChanceAttributeID,
+            resistanceAttributeId: effectData.resistanceAttributeID,
+            buildStatus: .none,
+            modifiers: modifiers ?? []
+          )
+        )
+      }
+
     }
     print("++ Converted effects: \(effects.count) from \(dogmaEffects.count)")
     // Convert types
@@ -168,25 +234,32 @@ class EveObjectBuilder: @unchecked Sendable {
       }
       effectMap[effectId] = e
     }
-
+    
+    print("** converted type attributes \(typesAttributes.count)")
     for row in typeData {
       let typeID = row.typeID
       let defaultEffectTypeId = typesDefaultEffectMap[typeID]
       let defaultEffect: Effect?
       
-      if let defaultEffectTypeId {
-        defaultEffect = effectMap[EffectId(rawValue: Int(defaultEffectTypeId))!]
+      if let defaultEffectTypeId, let effectId = EffectId(rawValue: Int(defaultEffectTypeId)) {
+        defaultEffect = effectMap[effectId]
       } else {
         defaultEffect = nil
       }
+      let effects = typesEffects[typeID, default: []]
+      var ourEffectMap: [EffectId: Effect] = [:]
       
+      for effect in effects {
+        ourEffectMap[effect] = effectMap[effect]
+      }
+
       itemType.append(
         ItemType(
           typeId: typeID,
           groupId: row.groupID!,
           categoryId: keyedGroups[row.groupID!]?.categoryID ?? 0,
           attributes: typesAttributes[typeID, default: [:]],
-          effects: effectMap,
+          effects: ourEffectMap,
           defaultEffect: defaultEffect,
           abilitiesData: [:],
           requiredSkills: typesSkillReqData[typeID, default: [:]]

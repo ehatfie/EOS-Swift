@@ -25,47 +25,47 @@ extension HardpointEffectSlotRegisterProtocol {
   
 }
 
-class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
-  static func == (lhs: HardpointEffectSlotRegister, rhs: HardpointEffectSlotRegister) -> Bool {
+public class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
+  public static func == (lhs: HardpointEffectSlotRegister, rhs: HardpointEffectSlotRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
   }
   
-  func hash(into hasher: inout Hasher) {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(self))
   }
   
-  var slotEffectId: EffectId = .hardpoint_modifier_effect
-  var slotAttrId: AttrId = .hi_slot_modifier
+  public var slotEffectId: EffectId = .hardpoint_modifier_effect
+  public var slotAttrId: AttrId = .hi_slot_modifier
   
-  var slotUsers: Set<AnyHashable> = []
+  public var slotUsers: Set<AnyHashable> = []
   
-  var users: Set<AnyHashable> {
+  public var users: Set<AnyHashable> {
     return slotUsers
   }
   
-  weak var fit: Fit?
+  weak public var fit: Fit?
   
-  init(fit: Fit) {
+  public init(fit: Fit) {
     self.fit = fit
     
     self.fit?.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
   }
   
-  func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStarted(message: EffectsStarted) {
     if message.effectIds.contains(slotEffectId) {
       self.slotUsers.insert(message.item as! AnyHashable)
     }
   }
   
-  func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     if !message.effectIds.contains(slotEffectId) {
       self.slotUsers.remove(message.item as! AnyHashable)
     }
   }
 }
 
-class TurretSlotRegister: HardpointEffectSlotRegister {
-  override init(fit: Fit) {
+public class TurretSlotRegister: HardpointEffectSlotRegister {
+  override public init(fit: Fit) {
     super.init(fit: fit)
     
     self.slotEffectId = .turret_fitted
@@ -73,8 +73,8 @@ class TurretSlotRegister: HardpointEffectSlotRegister {
   }
 }
 
-class LauncherSlotRegister: HardpointEffectSlotRegister {
-  override init(fit: Fit) {
+public class LauncherSlotRegister: HardpointEffectSlotRegister {
+  override public init(fit: Fit) {
     super.init(fit: fit)
     
     self.slotEffectId = .launcher_fitted

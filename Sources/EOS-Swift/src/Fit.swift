@@ -32,6 +32,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   public var ship: Ship? {
     set {
       if let newValue {
+        print("++ set ship to \(ship?.typeId)")
         try? self.shipDescriptor.set1(item: newValue, parent: self)
       }
       
