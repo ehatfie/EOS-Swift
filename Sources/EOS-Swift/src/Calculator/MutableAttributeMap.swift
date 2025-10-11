@@ -327,14 +327,15 @@ extension MutableAttributeMap {
     
     for (key, value) in aggregateMax {
       let modOperator = key.values.0
-          let maxResult = value.max(by: { one, two in
-            one.0 < two.0 && one.1 != two.1
-          })! as (Double, Bool)
+      let maxResult = value.max(by: { one, two in
+        one.0 < two.0 && one.1 != two.1
+      })! as (Double, Bool)
       if maxResult.1 {
         stackPenalized[modOperator, default: []].append(maxResult.0)
       } else {
         stack[modOperator, default: []].append(maxResult.0)
       }
+    }
     /*
      for container, aggregate_func, sort_func in (
          (aggregate_min, min, lambda i: (i[0], i[1])),
