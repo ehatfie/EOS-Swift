@@ -259,7 +259,7 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
         trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
         fittingUseUsageChanceAttributeID: effectData
           .fittingUsageChanceAttributeID,
-        resistanceAttributeId: effectData.resistanceAttributeID,
+        resistanceAttributeID: effectData.resistanceAttributeID,
         buildStatus: .none,
         modifiers: modifiers ?? []
       )

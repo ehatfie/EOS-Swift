@@ -7,14 +7,14 @@
 
 /// Define base functionality for all modifier types.
 /// Modifiers are part of effects; one modifier describes one modification when it should be applied, on which items, how to apply it, and so on.
-protocol BaseModifierProtocol {
+protocol BaseModifierProtocol: AnyObject, Equatable {
   var affecteeFilter: ModAffecteeFilter? { get }
   var modDomain: ModDomain? { get }
   var affecteeFilterExtraArg: Int64? { get }
   var affecteeDomain: ModDomain? { get }
   var affecteeAtributeId: AttrId? { get }
 
-  func getModification(affectorItem: any BaseItemMixinProtocol) -> ModificationData?
+  func getModification(affectorItem: any BaseItemMixinProtocol) -> GetModResponse?
 
   func validateBase() -> Bool
   func validateCommon() -> Bool
@@ -23,6 +23,12 @@ protocol BaseModifierProtocol {
   func validateAffecteeFilterDomainGroup() -> Bool
   func validateAffecteeFilterDomainSkillRequirement() -> Bool
   func validateAffecteeFilterOwnerSkillRequirement() -> Bool
+}
+
+extension BaseModifierProtocol where Self: Equatable {
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    return lhs.modDomain == rhs.modDomain
+  }
 }
 
 extension BaseModifierProtocol {

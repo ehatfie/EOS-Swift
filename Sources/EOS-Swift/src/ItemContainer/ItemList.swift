@@ -217,7 +217,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     return self.list[index]
   }
   
-  func iterator() -> IndexingIterator<[T?]> {
+  public func iterator() -> IndexingIterator<[T?]> {
     return list.makeIterator()
   }
   

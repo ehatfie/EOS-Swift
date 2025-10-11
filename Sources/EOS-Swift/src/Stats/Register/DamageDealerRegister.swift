@@ -16,6 +16,7 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
   }
   
   public func getVolley(itemFilter: Any?, targetResists: ResistProfile?) -> DamageStats {
+    print("** getVolley")
     var damageStats: [DamageStats?] = []
     for item in ddIterator(itemFilter: nil) {
       damageStats.append(item.getVolley(targetResists: targetResists))
@@ -66,13 +67,9 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
   }
   
   public func handleEffectsStarted(message: EffectsStarted) {
-    
     let itemEffects = message.item.typeEffects
-    print("++ handleEffectsStarted \(message.item.typeId) \(message.effectIds) itemEffects \(itemEffects)")
+    print("&& DDR handleEffectsStarted \(message.item.typeId) \(message.effectIds) itemEffects \(itemEffects)")
     
-//    for (key, value) in itemEffects {
-//      print("++ \(key) value type \(type(of: value))")
-//    }
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
         if let foo = message.item as? (any DamageDealerMixinProtocol) {

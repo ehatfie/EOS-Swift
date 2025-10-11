@@ -51,15 +51,18 @@ struct AffecteeDomain: Hashable {
  */
 
 struct AffectorSpec: Hashable {
-  var modifier: AffectorModifier
-  var itemType: any BaseItemMixinProtocol
+  public var modifier: any BaseModifierProtocol
+  public var effect: Effect
+  public var itemType: any BaseItemMixinProtocol
+  
+  //'item', 'effect', 'modifier'
   
   static func == (lhs: AffectorSpec, rhs: AffectorSpec) -> Bool {
-    return lhs.modifier == rhs.modifier
+    return lhs.modifier.affecteeDomain == rhs.modifier.affecteeDomain
   }
   
   func hash(into hasher: inout Hasher) {
-    hasher.combine(modifier)
+    hasher.combine(ObjectIdentifier(modifier))
     hasher.combine(ObjectIdentifier(itemType))
   }
 }

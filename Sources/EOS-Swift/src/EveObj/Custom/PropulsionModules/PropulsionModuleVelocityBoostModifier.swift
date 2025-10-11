@@ -17,7 +17,7 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
   }
 
   override func getModification(affectorItem: any BaseItemMixinProtocol)
-    -> ModificationData?
+    -> GetModResponse?
   {
     guard let ship = affectorItem.fit?.ship else { return nil }
 
@@ -30,9 +30,9 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
     let perc = (speedBoost * thrust) / mass
     let mult = 1 * perc / 100
 
-    return ModificationData(
+    return GetModResponse(
       modOperator: .post_mul,
-      attributeValue: mult,
+      modValue: mult,
       aggregateMode: .stack,
       aggregateKey: nil
     )

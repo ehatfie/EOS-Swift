@@ -13,6 +13,31 @@
  access to modified attribute values.
 
  */
+let PENALTY_IMMUNE_CATEGORY_IDS: Set<TypeCategoryId> = Set([
+  TypeCategoryId.charge,
+  TypeCategoryId.skill,
+  TypeCategoryId.implant,
+  TypeCategoryId.subsystem
+])
+
+let PENALIZABLE_OPERATORS: Set<ModOperator> = [
+  ModOperator.pre_mul,
+  ModOperator.post_mul,
+  ModOperator.post_percent,
+  ModOperator.pre_div,
+  ModOperator.post_div
+]
+  
+/*
+ TypeCategoryId.ship,
+ # Tuple with penalizable operators
+ PENALIZABLE_OPERATORS = (
+     ModOperator.pre_mul,
+     ModOperator.post_mul,
+     ModOperator.post_percent,
+     ModOperator.pre_div,
+     ModOperator.post_div)
+ */
 
 // TODO: Implement
 public class MutableAttributeMap {
@@ -35,12 +60,25 @@ public class MutableAttributeMap {
          self.__item._type_attrs, self.__modified_attrs,
          self.__override_callbacks or {}))
      */
-    return []
+    var returnValues: Set<Int64> = Set(modifiedAttributes.keys.map (\.rawValue))
+    
+    if let item = self.item {
+      let typeAttrs = Set(item.typeAttributes.keys.map(\.rawValue))
+      returnValues = returnValues.union(typeAttrs)
+    }
+    let overrideCallbacks = Set((self.overrideCallbacks ?? [:]).keys)
+    returnValues = returnValues.union(overrideCallbacks)
+    return Array(returnValues)
   }
 
-  var items: [Attribute] {
+  var items: [(AttrId, Double)] {
+    let foo: [(AttrId, Double)] = keys.compactMap { value -> (AttrId, Double)? in
+      guard let attrId = AttrId(rawValue: value) else { return nil }
+      guard let val = self.getValue(attributeId: attrId) else { return nil }
+      return (attrId, val)
+    }
     // return set((attr_id, self.get(attr_id)) for attr_id in self.keys())
-    return []
+    return foo
   }
   
   weak var item: (any BaseItemMixinProtocol)?
@@ -83,8 +121,6 @@ public class MutableAttributeMap {
     }
 
     guard let value = self.modifiedAttributes[attributeId] else {
-      //
-      // let value = self.calculate(attributeId)
       do {
         let value = try self.calculate(attributeId: attributeId)
         print("++ getValue returning calculated value \(value)")
@@ -179,33 +215,141 @@ extension MutableAttributeMap {
       print("++ calculate no something fit: \(item.fit) system \(item.fit?.solarSystem) source \(item.fit?.solarSystem?.source) cacheHandler \(item.fit?.solarSystem?.source?.cacheHandler)")
       return nil
     }
-    //attr = item._fit.solar_system.source.cache_handler.get_attr(attr_id)
-    /*
-     except (AttributeError, AttrFetchError) as e:
-                 msg = (
-                     'unable to fetch metadata for attribute {}, '
-                     'requested for item type {}'
-                 ).format(attr_id, item._type_id)
-                 logger.warning(msg)
-                 raise AttrMetadataError(attr_id) from e
-     */
-//    guard let attribute = dataSource?.getAttribute(typeId: attributeId) else {
-//      // throw
-//      return .empty
-//    }
     if attributeId == .cpu_output {
       print("")
     }
     let value = item.typeAttributes[attributeId, default: Double(attribute.default_value)]
     print("++ got type attributes \(item.typeAttributes[.cpu_output])")
     //print("++ default value \(value)")
-    var stack: [Int64: [Any]] = [:]
-    var stackPenalized: [Int64: [Any]] = [:]
-    var aggregateMin: [Int64: [Any]] = [:]
-    var aggregateMax: [Int64: [Any]] = [:]
+    var stack: [ModOperator: [Double]] = [:]
+    var stackPenalized: [ModOperator: [Double]] = [:]
+    var aggregateMin: [TwoKey<ModOperator, AnyHashable>: [(Double, Bool)]] = [:]
+    var aggregateMax: [TwoKey<ModOperator, AnyHashable>: [(Double, Bool)]] = [:]
     // get the items related fit and its attached solarsystem and its attached calculator and call a function
     //item._fit.solar_system.source.cache_handler.get_attr(attr_id)
+
     
+    let foo = item.fit?.solarSystem?.calculator.getModifications(affecteeItem: item, affecteeAttributeId: attributeId) ?? []
+    
+      // Normalize operations to just three types: assignments, additions, reduced multiplications
+    for value in foo {
+      guard let modOperator = value.modOperator else {
+         continue
+      }
+      
+      guard var modValue = value.attributeValue else {
+        continue
+      }
+      
+      guard let res = value.resistValue else {
+        continue
+      }
+      
+      guard let affectorItem = value.affectorItem else {
+        continue
+      }
+      
+      guard let normalizationFunc = normalizers[modOperator] else {
+        print("++ malformed")
+        continue
+      }
+      
+      guard let aggregateKey = value.aggregateKey else {
+        continue
+      }
+      
+      modValue = normalizationFunc(modValue) * res
+      
+      let penalize: Bool =
+        !attribute.stackable &&
+        !PENALTY_IMMUNE_CATEGORY_IDS.contains(
+          TypeCategoryId(rawValue: affectorItem.itemType!.categoryId)!
+        ) &&
+        PENALIZABLE_OPERATORS.contains(modOperator)
+      
+      guard let modAggregateMode = value.aggregateMode else {
+        continue
+      }
+
+      if modAggregateMode == .stack {
+        if penalize {
+          stackPenalized[modOperator, default: []].append(modValue)
+        } else {
+          stack[modOperator, default: []].append(modValue)
+        }
+      } else if modAggregateMode == .minimum {
+        let key: TwoKey<ModOperator, AnyHashable> = TwoKey(
+          values: (modOperator, aggregateKey)
+        )
+        aggregateMin[key, default: []].append((modValue, penalize))
+      } else if modAggregateMode == .maximum {
+        let key: TwoKey<ModOperator, AnyHashable> = TwoKey(
+          values: (modOperator, aggregateKey)
+        )
+        aggregateMax[key, default: []].append((modValue, penalize))
+      }
+    }
+    
+    var minClosure: (Double, Bool) -> Bool = { one, two in
+      return false
+    }
+    
+    var closure2: (Double, Bool) -> Bool = { one, two in
+      return false//(one, !two)
+    }
+
+//    let maxResult = aggregateMax.max(by: { one, two in
+//      one.value.0 > two.value.0 && one.value.1 != two.value.1
+////      if one.value.0 == two.value.0 {
+////        if one.value.1 == true {
+////          return two.value.1 == false
+////        } else {
+////          return two.value.1 == false
+////        }
+////      } else {
+////        return one.value.0 > one.value.0
+////      }
+//      //one.value.0 < two.value.0 && one.value.1 == two.value.1
+//    })! as (key: TwoKey<ModOperator, AnyHashable>, value: (Double, Bool))
+//     
+    
+    for (key, value) in aggregateMin {
+      let modOperator = key.values.0
+          let minResult = value.min(by: { one, two in
+            one.0 < two.0 && one.1 == two.1
+          })! as (Double, Bool)
+      if minResult.1 {
+        stackPenalized[modOperator, default: []].append(minResult.0)
+      } else {
+        stack[modOperator, default: []].append(minResult.0)
+      }
+    }
+    
+    for (key, value) in aggregateMax {
+      let modOperator = key.values.0
+          let maxResult = value.max(by: { one, two in
+            one.0 < two.0 && one.1 != two.1
+          })! as (Double, Bool)
+      if maxResult.1 {
+        stackPenalized[modOperator, default: []].append(maxResult.0)
+      } else {
+        stack[modOperator, default: []].append(maxResult.0)
+      }
+    /*
+     for container, aggregate_func, sort_func in (
+         (aggregate_min, min, lambda i: (i[0], i[1])),
+         (aggregate_max, max, lambda i: (i[0], not i[1]))
+     ):
+         for k, v in container.items():
+             mod_operator = k[0]
+             
+             mod_value, penalize = aggregate_func(v, key=sort_func)
+             if penalize:
+                 stack_penalized.setdefault(mod_operator, []).append(
+                     mod_value)
+             else:
+                 stack.setdefault(mod_operator, []).append(mod_value)
+     */
     
     print("++ returning value \(value)")
     return value
@@ -342,3 +486,109 @@ extension MutableAttributeMap {
        return value
    */
 }
+
+
+  /*
+   # Map which helps to normalize modifications
+   NORMALIZATION_MAP = {
+       ModOperator.pre_assign: lambda value: value, (value) -> { value }
+       ModOperator.pre_mul: lambda value: value - 1, (value) -> { value - 1 }
+       ModOperator.pre_div: lambda value: 1 / value - 1, (value) -> { 1 / value - 1 }
+       ModOperator.mod_add: lambda value: value, (value) -> { value }
+       ModOperator.mod_sub: lambda value: -value, (value) -> { value * -1 }
+       ModOperator.post_mul: lambda value: value - 1, (value) -> { value - 1 }
+       ModOperator.post_mul_immune: lambda value: value - 1, (value) -> { value - 1 }
+       ModOperator.post_div: lambda value: 1 / value - 1, (value) -> { 1 / value - 1 }
+       ModOperator.post_percent: lambda value: value / 100, (value) -> { value / 100 }
+       ModOperator.post_assign: lambda value: value}, (value) -> { value }
+   */
+
+
+func normalize(modOperator: ModOperator, value: Double) -> Double {
+  switch modOperator {
+  case .pre_assign: return value
+  case .pre_mul: return value - 1
+  case .pre_div: return 1 / value - 1
+  case .mod_add: return value
+  case .mod_sub: return -value
+  case .post_mul: return value - 1
+  case .post_div: return 1 / value - 1
+  case .post_percent: return value / 100
+  case .post_assign: return value
+  default: return value
+  }
+}
+
+
+func normalize2(modOperator: ModOperator, value: Double) -> ((Double) -> Double) {
+  switch modOperator {
+  case .pre_assign: return { $0 }
+  case .pre_mul: return { $0 }
+  case .pre_div: return { 1 / $0 - 1 }
+  case .mod_add: return { $0 }
+  case .mod_sub: return { -$0 }
+  case .post_mul: return { $0 - 1 }
+  case .post_div: return { 1 / $0 - 1 }
+  case .post_percent: return { $0 / 100 }
+  case .post_assign: return { $0 }
+  default: return { $0 }
+  }
+}
+
+nonisolated(unsafe) let normalizers: [ModOperator: (Double) -> Double] = [
+  .pre_assign: { $0 },
+  .pre_mul: { $0 },
+  .pre_div: { 1 / $0 - 1 },
+  .mod_add: { $0 },
+  .mod_sub: { -$0 },
+  .post_mul: { $0 - 1 },
+  .post_div: { 1 / $0 - 1 },
+  .post_percent: { $0 / 100 },
+  .post_assign: { $0 }
+]
+let ASSIGNMENT_OPERATORS: [ModOperator] = [.pre_assign, .post_assign]
+let ADDITION_OPERATORS: [ModOperator] = [.mod_add, .mod_sub]
+let MULTIPLICATION_OPERATORS: [ModOperator] = [
+  .pre_mul, .pre_div, .post_mul, .post_mul_immune, .post_div, .post_percent
+]
+let LIMITED_PRECISION_ATTR_IDS: [AttrId] = [
+    AttrId.cpu,
+    AttrId.power,
+    AttrId.cpu_output,
+    AttrId.power_output]
+
+/*
+ ASSIGNMENT_OPERATORS = (
+     ModOperator.pre_assign,
+     ModOperator.post_assign)
+ ADDITION_OPERATORS = (
+     ModOperator.mod_add,
+     ModOperator.mod_sub)
+ MULTIPLICATION_OPERATORS = (
+     ModOperator.pre_mul,
+     ModOperator.pre_div,
+     ModOperator.post_mul,
+     ModOperator.post_mul_immune,
+     ModOperator.post_div,
+     ModOperator.post_percent)
+ */
+
+
+// appropriated from https://stackoverflow.com/questions/24131323/in-swift-can-i-use-a-tuple-as-the-key-in-a-dictionary
+struct TwoKey<T:Hashable, U:Hashable> : Hashable {
+  let values : (T, U)
+
+  var hashValue : Int {
+      get {
+          let (a,b) = values
+          return a.hashValue &* 31 &+ b.hashValue
+      }
+  }
+  
+  // comparison function for conforming to Equatable protocol
+  static func ==(lhs: TwoKey<T,U>, rhs: TwoKey<T,U>) -> Bool {
+    return lhs.values == rhs.values
+  }
+}
+
+

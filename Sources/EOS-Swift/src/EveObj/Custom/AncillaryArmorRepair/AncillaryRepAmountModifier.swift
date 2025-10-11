@@ -20,9 +20,11 @@ class BasePythonModifier: BasePythonModifierProtocol {
 
   var affecteeAtributeId: AttrId?
 
+  // this could be a PythonModifier type only?
   func getModification(affectorItem: any BaseItemMixinProtocol)
-    -> ModificationData?
+    -> GetModResponse?
   {
+    
     return nil
   }
 
@@ -63,7 +65,7 @@ class AncillaryRepAmountModifier: BasePythonModifier {
   }
 
   override func getModification(affectorItem: any BaseItemMixinProtocol)
-    -> ModificationData?
+    -> GetModResponse?
   {
     let value: Double?
     if let charge = affectorItem as? Charge,
@@ -74,9 +76,9 @@ class AncillaryRepAmountModifier: BasePythonModifier {
       value = 1
     }
 
-    return ModificationData(
+    return GetModResponse(
       modOperator: .post_mul_immune,
-      attributeValue: value,
+      modValue: value,
       aggregateMode: .stack,
       aggregateKey: nil
     )

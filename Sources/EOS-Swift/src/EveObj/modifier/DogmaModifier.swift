@@ -16,7 +16,7 @@ class BaseModifier: BaseModifierProtocol {
 
   var affecteeAtributeId: AttrId?
 
-  func getModification(affectorItem: any BaseItemMixinProtocol) -> ModificationData? {
+  func getModification(affectorItem: any BaseItemMixinProtocol) -> GetModResponse? {
     return nil
   }
 
@@ -84,16 +84,24 @@ class DogmaModifier: BaseModifierProtocol {
     )
   }
 
-  func getModification(affectorItem: any BaseItemMixinProtocol) -> ModificationData? {
+  func getModification(affectorItem: any BaseItemMixinProtocol) -> GetModResponse? {
     guard let affectorAttributeId else { return nil } // throw??
     let attributeValue = affectorItem.attributes?[affectorAttributeId]
 
-    return ModificationData(
+    return GetModResponse(
       modOperator: self.modOperator,
-      attributeValue: attributeValue,
+      modValue: attributeValue,
       aggregateMode: self.aggregateMode,
       aggregateKey: self.aggregateKey
     )
+    /*
+     var modOperator: ModOperator?
+     let modValue: Double?
+     let resistValue: Double?
+     let attributeValue: Double?
+     let aggregateMode: ModAggregateMode?
+     let aggregateKey: AnyHashable?
+     */
   }
   
   var valid: Bool {
@@ -108,11 +116,14 @@ class DogmaModifier: BaseModifierProtocol {
 }
 
 struct ModificationData {
-  //self.operator, value, self.aggregate_mode, self.aggregate_key
+ 
   var modOperator: ModOperator?
+  let modValue: Double?
+  let resistValue: Double?
   let attributeValue: Double?
   let aggregateMode: ModAggregateMode?
   let aggregateKey: AnyHashable?
+  let affectorItem: (any BaseItemMixinProtocol)?
 }
 
 public struct BuffTemplate {

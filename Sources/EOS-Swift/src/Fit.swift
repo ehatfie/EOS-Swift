@@ -182,7 +182,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     }.flatMap { $0 }
     
     let boosters = fit!.boosters.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
       return [item] + children
     }.flatMap { $0 }
 

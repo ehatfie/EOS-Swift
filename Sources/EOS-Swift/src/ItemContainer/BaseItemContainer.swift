@@ -102,11 +102,11 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
   public func subItemIterator(item: T) -> AnyIterator<any BaseItemMixinProtocol> {
     var index = 0
     var values = [any BaseItemMixinProtocol]()
-    let iterResult = item.childItemIterator(skipAutoItems: true)?.map({ $0 })
+    let iterResult = item.childItemIterator(skipAutoItems: true).map({ $0 })
     let castIterResult = (iterResult as? [any BaseItemMixinProtocol] ?? [])
     values = [item] + castIterResult
     
-    if let iterResult, iterResult.count != castIterResult.count {
+    if iterResult.count != castIterResult.count {
       print("++ child item iterator values count mismatch \(iterResult.count) vs \(castIterResult.count)")
       print("++ iterResult: \(iterResult) values \(values)")
     }

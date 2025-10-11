@@ -90,6 +90,9 @@ class EveObjectBuilder: @unchecked Sendable {
       guard let effectID = EffectId(rawValue: Int(row.effectID)) else {
         continue
       }
+      if effectID == .projectile_fired {
+        print("++ found projectile fired for \(row.typeId)")
+      }
       typesEffects[row.typeId, default: []].insert(
         effectID
       )
@@ -175,7 +178,7 @@ class EveObjectBuilder: @unchecked Sendable {
             trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
             fittingUseUsageChanceAttributeID: effectData
               .fittingUsageChanceAttributeID,
-            resistanceAttributeId: effectData.resistanceAttributeID,
+            resistanceAttributeID: effectData.resistanceAttributeID,
             buildStatus: .none,
             modifiers: modifiers ?? []
           )
@@ -196,7 +199,7 @@ class EveObjectBuilder: @unchecked Sendable {
           trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
           fittingUseUsageChanceAttributeID: effectData
             .fittingUsageChanceAttributeID,
-          resistanceAttributeId: effectData.resistanceAttributeID,
+          resistanceAttributeID: effectData.resistanceAttributeID,
           buildStatus: .none,
           modifiers: modifiers ?? []
         )
@@ -214,7 +217,7 @@ class EveObjectBuilder: @unchecked Sendable {
             trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
             fittingUseUsageChanceAttributeID: effectData
               .fittingUsageChanceAttributeID,
-            resistanceAttributeId: effectData.resistanceAttributeID,
+            resistanceAttributeID: effectData.resistanceAttributeID,
             buildStatus: .none,
             modifiers: modifiers ?? []
           )

@@ -62,6 +62,7 @@ public class Effect: Hashable {
   let falloffAttributeID: Int64?
   let trackingSpeedAttributeID: Int64?
   let fittingUseUsageChanceAttributeID: Int64?
+  let resistanceAttributeID: Int64?
   let buildStatus: EffectBuildStatus?  //EffectBuildStatus
   var modifiers: [any BaseModifierProtocol]  // Modifier
 
@@ -76,7 +77,7 @@ public class Effect: Hashable {
     falloffAttributeID: Int64? = nil,
     trackingSpeedAttributeID: Int64? = nil,
     fittingUseUsageChanceAttributeID: Int64? = nil,
-    resistanceAttributeId: Int64? = nil,
+    resistanceAttributeID: Int64? = nil,
     buildStatus: EffectBuildStatus? = nil,
     modifiers: [any BaseModifierProtocol] = []
   ) {
@@ -90,8 +91,24 @@ public class Effect: Hashable {
     self.falloffAttributeID = falloffAttributeID
     self.trackingSpeedAttributeID = trackingSpeedAttributeID
     self.fittingUseUsageChanceAttributeID = fittingUseUsageChanceAttributeID
+    self.resistanceAttributeID = resistanceAttributeID
     self.buildStatus = buildStatus
     self.modifiers = modifiers
+    /*
+     self.id = effect_id
+     self.category_id = category_id
+     self.is_offensive = bool(is_offensive)
+     self.is_assistance = bool(is_assistance)
+     self.duration_attr_id = duration_attr_id
+     self.discharge_attr_id = discharge_attr_id
+     self.range_attr_id = range_attr_id
+     self.falloff_attr_id = falloff_attr_id
+     self.tracking_speed_attr_id = tracking_speed_attr_id
+     self.fitting_usage_chance_attr_id = fitting_usage_chance_attr_id
+     self.resist_attr_id = resist_attr_id
+     self.build_status = build_status
+     self.modifiers = modifiers
+     */
   }
 
   var isProjectable: Bool {

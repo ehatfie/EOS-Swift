@@ -46,7 +46,7 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var solsysCarrier: Ship? { get set }
   var fit: Fit? { get }
   
-  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>?
+  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>
   
   var isLoaded: Bool { get }
   func load()
@@ -65,14 +65,22 @@ extension BaseItemMixinProtocol {
     hasher.combine(ObjectIdentifier(self))
   }
   
-  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
     print("!! default childItemIterator impl")
+    var values: [(any BaseItemMixinProtocol)?] = []
+    var index: Int = 0
+    
     if !skipAutoItems {
-//      for item in self.autocharges!.lazy.map(\.value) {
-//
-//      }
+      if let autocharges = self.autocharges {
+        values.append(contentsOf: autocharges.values())
+      }
     }
-    return nil
+    
+    return AnyIterator {
+      guard index < values.count else { return nil }
+      defer { index += 1 }
+      return values[index]
+    }
   }
   
   func childItemIter(skipAutoitems: Bool = false) {
@@ -298,15 +306,49 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
-    print("++ baseItemMixin childItemIterator")
+    print("++ open baseItemMixin childItemIterator")
+    /*
+     if not skip_autoitems:
+         for item in self.autocharges.values():
+             yield item
+     
+     try:
+         child_item_iter = super()._child_item_iter
+     except AttributeError:
+         pass
+     else:
+         for item in child_item_iter(skip_autoitems=skip_autoitems):
+             yield item
+     */
+    var values: [(any BaseItemMixinProtocol)?] = []
+    var index: Int = 0
+    
     if !skipAutoItems {
-//      for item in self.autocharges!.lazy.map(\.value) {
-//
-//      }
+      if let autocharges = self.autocharges {
+        values.append(contentsOf: autocharges.values())
+      }
     }
-    return nil
-    //return super.childItemIterator(skipAutoItems: skipAutoItems)
+    
+    return AnyIterator {
+      guard index < values.count else { return nil }
+      defer { index += 1 }
+      return values[index]
+    }
   }
+  
+  /*
+   let charge = self.charge.item
+   let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
+   let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
+   let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
+   var index: Int = 0
+   print("++ module childItemIterator value count \(values.count) with \(values)")
+   return AnyIterator {
+     guard index < values.count else { return nil }
+     defer { index += 1 }
+     return values[index]
+   }
+   */
   
   func childItemIter(skipAutoitems: Bool = false)  {
     if !skipAutoitems {

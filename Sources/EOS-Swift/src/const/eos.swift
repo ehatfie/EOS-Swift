@@ -120,7 +120,7 @@ public enum ModDomain: Int, CaseIterable {
   }
 }
 
-enum ModOperator: Int, CaseIterable {
+enum ModOperator: Int, CaseIterable, Sendable, Hashable {
 
   /*
    Contains possible modifier operator types.
@@ -152,6 +152,12 @@ enum ModOperator: Int, CaseIterable {
     case 7: self = .post_assign
     default: return nil
     }
+  }
+}
+
+extension ModOperator {
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(rawValue)
   }
 }
 

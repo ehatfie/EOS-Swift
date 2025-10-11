@@ -5,7 +5,6 @@
 //  Created by Erik Hatfield on 9/11/25.
 //
 
-
 /*
  Service which supports attribute calculation.
 
@@ -14,37 +13,51 @@
  attribute map to calculate modified attribute values.
  */
 
-
+//self.operator, value, self.aggregate_mode, self.aggregate_key
+struct GetModResponse {
+  var modOperator: ModOperator?
+  let modValue: Double?
+  let aggregateMode: ModAggregateMode?
+  let aggregateKey: AnyHashable?
+}
 
 class CalculationService: BaseSubscriber {
 
-  
-  var handlerMap: [Int64 : CallbackHandler] = [:]
-  
+  var handlerMap: [Int64: CallbackHandler] = [:]
+
   weak var solarSystem: SolarSystem?
-  var affections: AffectionRegister? = nil // AffectionRegister
-  var projections: ProjectionRegister? = nil // ProjectionRegister
+  var affections: AffectionRegister? = nil  // AffectionRegister
+  var projections: ProjectionRegister? = nil  // ProjectionRegister
   // Format: {projector: {modifiers}}
   var warfareBuffs = KeyedStorage()
-  
+
   // Container with affector specs which will receive messages
   // Format: {message type: set(affector specs)}
   var subscribedAffectors = KeyedStorage()
-  
+
   init(solarSystem: SolarSystem) {
     self.solarSystem = solarSystem
   }
-  
+
   func notify(_ message: any Message) {
-    
+
   }
-  
+
   /// Get modifications of affectee attribute on affectee item.
   /// - Parameters:
   ///   - affecteeItem: Item, for which we're getting modifications.
   ///   - affecteeAttributeId: Affectee attribute ID; only modifications which influence attribute with this ID will be returned.
-  func getModifications(affecteeItem: any BaseItemMixinProtocol, affecteeAttributeId: AttrId) -> [ModificationData] {
+  func getModifications(
+    affecteeItem: any BaseItemMixinProtocol,
+    affecteeAttributeId: AttrId
+  ) -> [ModificationData] {
     var returnValues: [ModificationData] = []
+
+    /*
+     this function returns an object of
+     mod_op, mod_value, resist_value,
+     mod_aggregate_mode, mod_aggregate_key,
+     affector_item*/
     /*
      # Use list because we can have multiple tuples with the same values
              # as valid configuration
@@ -79,31 +92,62 @@ class CalculationService: BaseSubscriber {
                      affector_item))
              return mods
      */
-    
+
     guard let affections = self.affections else { return [] }
-    
-    guard let affectorSet = affections.getAffectorSpecs(affecteeItem: affecteeItem) else {
+
+    guard
+      let affectorSet = affections.getAffectorSpecs(affecteeItem: affecteeItem)
+    else {
       print("No affectorSpecs")
       return []
     }
-    
+
     let affectorSpecs = affectorSet.compactMap { $0 as? AffectorSpec }
     guard affectorSpecs.count == affectorSet.count else {
-      print("mismatch affector count \(affectorSpecs.count) vs \(affectorSet.count)")
+      print(
+        "mismatch affector count \(affectorSpecs.count) vs \(affectorSet.count)"
+      )
       return []
     }
-    
+
     for affectorSpec in affectorSpecs {
       let affectorModifier = affectorSpec.modifier
       let affectorItem = affectorSpec.itemType
-      
+
       guard affectorModifier.affecteeAtributeId == affecteeAttributeId else {
         continue
       }
-      //let foo = affectorModifier.getModification
-      
-    }
+      let modifier = affectorModifier.getModification(
+        affectorItem: affectorItem
+      )
     
+      // get resistance value
+      let resistAttrId = affectorSpec.effect.resistanceAttributeID
+      let carrierItem = affecteeItem.solsysCarrier
+      let resistValue: Double
+      
+      if let resistAttrId, let carrierItem,
+        let resistAttr = AttrId(rawValue: resistAttrId)
+      {
+        resistValue = carrierItem.attributes?[resistAttr] ?? 1
+      } else {
+        resistValue = 1
+      }
+
+      returnValues.append(
+        ModificationData(
+          modOperator: modifier?.modOperator,
+          modValue: modifier?.modValue ?? 0,
+          resistValue: resistValue,
+          attributeValue: nil,
+          aggregateMode: modifier?.aggregateMode,
+          aggregateKey: modifier?.aggregateKey,
+          affectorItem: affectorItem
+        )
+      )
+
+    }
+
     return returnValues
   }
 }
