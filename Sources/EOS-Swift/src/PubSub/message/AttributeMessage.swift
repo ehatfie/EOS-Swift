@@ -6,8 +6,6 @@
 //
 
 struct AttributesValueChanged: AttributeMessage {
-  var item: any BaseItemMixinProtocol
-  
   var fit: Fit?
   let messageType: MessageTypeEnum = .AttributeValueChanged
   let attributeChanges: [BaseItemMixin: [AttrId]] 
