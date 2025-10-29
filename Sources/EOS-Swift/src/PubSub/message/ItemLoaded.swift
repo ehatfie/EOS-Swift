@@ -50,8 +50,7 @@ public struct EffectsStarted: ItemMessage {
   public var fit: Fit? = nil
   public let messageType: MessageTypeEnum = .EffectsStarted
   public let item: any BaseItemMixinProtocol
-  public
-  let effectIds: Set<EffectId> // [EffectId]
+  public let effectIds: Set<EffectId> // [EffectId]
 }
 
 public struct EffectsStopped: ItemMessage {

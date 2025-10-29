@@ -17,7 +17,7 @@ public protocol ShipRegularResourceRegisterProtocol: BaseResourceRegisterProtoco
 
 extension ShipRegularResourceRegisterProtocol {
   public var usedI: Double {
-    print("++ ShipRegularResourceRegisterProtocol used")
+    //print("++ ShipRegularResourceRegisterProtocol used")
     var returnValue: Double = 0.0
     for item in self.resourceUsers {
       guard let foo = item as? any BaseItemMixinProtocol else {
@@ -34,9 +34,9 @@ extension ShipRegularResourceRegisterProtocol {
   }
   
   public var output: Double {
-    print("++ ShipRegularResourceRegisterProtocol output")
+    //print("++ ShipRegularResourceRegisterProtocol output")
     let val = self.fit?.ship?.attributes![self.outputAttrId] ?? 0.0
-    print("++ ShipRegularResourceRegisterProtocol output return")
+    //print("++ ShipRegularResourceRegisterProtocol output return")
     return val
   }
   

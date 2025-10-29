@@ -18,7 +18,7 @@ public class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   
   public var fit: Fit?
   
-  public var handlerMap: [Int64 : CallbackHandler]
+  public var handlerMap: [Int64: CallbackHandler]
   
   public var localRepairers: [Int64 : RepairerData] = [:]
   public var localRep: Set<RepairerData> = []

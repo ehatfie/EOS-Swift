@@ -81,7 +81,7 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
   }
 
   /// Unregister subscriber from passed message types
-  func unsubscribe(subscriber: SubscriberType, from messageTypes: [MessageTypeEnum])
+  func unsubscribe(subscriber: any BaseSubscriberProtocol, from messageTypes: [MessageTypeEnum])
   {
     var messageTypesToRemove: Set<MessageTypeEnum> = []
 
