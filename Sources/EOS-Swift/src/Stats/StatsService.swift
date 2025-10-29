@@ -20,11 +20,11 @@ public protocol StatServiceRegistersProtocol {
   var shieldRepRegister: ShieldRepairerRegister { get set }
   var cpu: CPURegister { get set }
   var powerGrid: PowergridRegister { get set }
-//  var calibration: CalibrationRegister { get set }
+  var calibration: CalibrationRegister { get set }
 //  var dronebay: DronebayVolumeRegister { get set }
 //  var droneBandwidth: DroneBandwidthRegister { get set }
-//  var turretSlots: TurretSlotRegister { get set }
-//  var launcherSlots: LauncherSlotRegister { get set }
+  var turretSlots: TurretSlotRegister { get set }
+  var launcherSlots: LauncherSlotRegister { get set }
 }
 
 public protocol StatServiceSlotsProtocol: MaybeFitHaving {
