@@ -559,10 +559,10 @@ let LIMITED_PRECISION_ATTR_IDS: Set<AttrId> = [
 
 
 // appropriated from https://stackoverflow.com/questions/24131323/in-swift-can-i-use-a-tuple-as-the-key-in-a-dictionary
-struct TwoKey<T:Hashable, U:Hashable> : Hashable {
+public struct TwoKey<T:Hashable, U:Hashable> : Hashable {
   let values : (T, U)
 
-  var hashValue : Int {
+  public var hashValue : Int {
       get {
           let (a,b) = values
           return a.hashValue &* 31 &+ b.hashValue
@@ -570,7 +570,7 @@ struct TwoKey<T:Hashable, U:Hashable> : Hashable {
   }
   
   // comparison function for conforming to Equatable protocol
-  static func ==(lhs: TwoKey<T,U>, rhs: TwoKey<T,U>) -> Bool {
+  static public func ==(lhs: TwoKey<T,U>, rhs: TwoKey<T,U>) -> Bool {
     return lhs.values == rhs.values
   }
 }

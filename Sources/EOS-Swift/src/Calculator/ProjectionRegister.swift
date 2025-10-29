@@ -5,12 +5,21 @@
 //  Created by Erik Hatfield on 9/15/25.
 //
 
+struct Projector: Hashable {
+  static func == (lhs: Projector, rhs: Projector) -> Bool {
+    return lhs.effect == rhs.effect && lhs.item == rhs.item
+  }
+  
+  let item: BaseItemMixin
+  let effect: Effect
+}
+
 /// Keeps track of various projection-related connections.
 class ProjectionRegister {
-  var projectors: Set<BaseItemMixin> = []
+  var projectors: Set<Projector> = []
   
   var carrierProjectors: KeyedStorage = KeyedStorage()
-  var carrierlessProjectors: Set<BaseItemMixin> = []
+  var carrierlessProjectors: Set<Projector> = []
   var projectorTargets: KeyedStorage = KeyedStorage()
   var targetProjectors: KeyedStorage = KeyedStorage()
 
@@ -20,7 +29,7 @@ class ProjectionRegister {
     return self.projectorTargets.dictionary[projector, default: []]
   }
   
-  func getTargetProjectors(targetItem: any BaseItemMixinProtocol) -> Set<AnyHashable> {
+  public func getTargetProjectors(targetItem: any BaseItemMixinProtocol) -> Set<AnyHashable> {
     return self.targetProjectors.dictionary[targetItem as! BaseItemMixin, default: []]
   }
   
@@ -28,7 +37,7 @@ class ProjectionRegister {
     return self.carrierProjectors.dictionary[carrierItem as! BaseItemMixin, default: []]
   }
   
-  func getProjectors() -> Set<BaseItemMixin> {
+  func getProjectors() -> Set<Projector> {
     return self.projectors
   }
   
@@ -41,7 +50,7 @@ class ProjectionRegister {
     
     guard let carrierItem = item.solsysCarrier else {
       print("++ no solsysCarrier")
-      self.carrierlessProjectors.insert(item)
+      //self.carrierlessProjectors.insert(Projector(item: item, effect: <#T##Effect#>))
       return
     }
 
@@ -49,18 +58,18 @@ class ProjectionRegister {
     //let carrierItem = projector.itemType
   }
   
-  func unregisterProjector(projector: any BaseItemMixinProtocol) {
+  func unregisterProjector(projector: Projector) {
     print("PR - unregisterProjector()")
-    guard let item = projector as? BaseItemMixin else {
+    guard let item = projector.item as? BaseItemMixin else {
       print("++ no item")
       return
     }
     
-    self.projectors.remove(item)
+    self.projectors.remove(projector)
     
     guard let carrierItem = item.solsysCarrier else {
       print("++ no solsysCarrier")
-      self.carrierlessProjectors.remove(item)
+      self.carrierlessProjectors.remove(projector)
       return
     }
     self.carrierProjectors.removeDataEntry(key: carrierItem as AnyHashable, data: item)
@@ -86,11 +95,11 @@ class ProjectionRegister {
   
   func registerSolsysItem(solsysItem: Ship) {
     print("PR - registerSolsysItem()")
-    var projectors: Set<BaseItemMixin> = []
+    var projectors: Set<Projector> = []
     
     for projector in self.carrierlessProjectors {
       // if projector.item._solsys_carrier is solsys_item:
-      guard let itemCarrier = projector.solsysCarrier else {
+      guard let itemCarrier = projector.item.solsysCarrier else {
         continue
       }
       
@@ -107,7 +116,7 @@ class ProjectionRegister {
   
   func unregisterSolsysItem(solsysItem: Ship) {
     print("PR - unregisterSolsysItem()")
-    var projectors = self.carrierProjectors.dictionary[solsysItem, default: []] as! Set<BaseItemMixin>
+    var projectors = self.carrierProjectors.dictionary[solsysItem, default: []] as! Set<Projector>
     
     if !projectors.isEmpty {
       for projector in projectors {

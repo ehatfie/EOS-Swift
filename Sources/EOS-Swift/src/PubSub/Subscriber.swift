@@ -26,7 +26,7 @@ public typealias CallbackHandler = () -> Void
 /// Base class for subscribers.
 public protocol BaseSubscriber {
     /// Dictionary mapping message types to their handlers.
-    var handlerMap: [Int64: CallbackHandler] { get }
+    var handlerMap: [MessageTypeEnum: CallbackHandler] { get }
 
     /// Notifies the subscriber about a message using its handler map.
     func notify(_ message: any Message)

@@ -11,17 +11,20 @@ protocol HardpointEffectSlotRegisterProtocol: BaseSlotRegisterProtocol {
   var slotAttrId: AttrId { get }
   
   var slotUsers: Set<AnyHashable> { get set }
+  
+  var used: Int { get }
+  var total: Int { get }
 }
 
 extension HardpointEffectSlotRegisterProtocol {
   
-  var used: Int {
-    return slotUsers.count
-  }
-  
-  var total: Int {
-    return Int(self.fit?.ship?.attributes![self.slotAttrId] ?? 0.0)
-  }
+//  public var used: Int {
+//    return slotUsers.count
+//  }
+//  
+//  public var total: Int {
+//    return Int(self.fit?.ship?.attributes![self.slotAttrId] ?? 0.0)
+//  }
   
 }
 
@@ -44,6 +47,14 @@ public class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
   }
   
   weak public var fit: Fit?
+  
+  public var used: Int {
+    return slotUsers.count
+  }
+  
+  public var total: Int {
+    return Int(self.fit?.ship?.attributes![self.slotAttrId] ?? 0.0)
+  }
   
   public init(fit: Fit) {
     self.fit = fit
