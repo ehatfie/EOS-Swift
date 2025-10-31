@@ -73,7 +73,7 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
         if let foo = message.item as? (any DamageDealerMixinProtocol) {
-          self.damageDealers[Int64(effectId.rawValue)] = foo
+          self.damageDealers[effectId] = foo
         } else {
           print("not DamageDealerMixinProtocol")
         }
@@ -87,7 +87,7 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
-        self.damageDealers[Int64(effectId.rawValue)] = nil
+        self.damageDealers[effectId] = nil
       }
     }
   }

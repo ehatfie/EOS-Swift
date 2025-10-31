@@ -50,7 +50,7 @@ public struct EffectsStarted: ItemMessage {
   public var fit: Fit? = nil
   public let messageType: MessageTypeEnum = .EffectsStarted
   public let item: any BaseItemMixinProtocol
-  public let effectIds: Set<EffectId> // [EffectId]
+  public let effectIds: Set<Int64> // [EffectId]
 }
 
 public struct EffectsStopped: ItemMessage {
@@ -58,7 +58,7 @@ public struct EffectsStopped: ItemMessage {
   public let messageType: MessageTypeEnum = .EffectsStopped
   public let item: any BaseItemMixinProtocol
   
-  public let effectIds: Set<EffectId>
+  public let effectIds: Set<Int64>
 }
 
 public struct EffectsApplied: ItemMessage {
@@ -75,7 +75,7 @@ public struct EffectsUnapplied: ItemMessage {
   public let messageType: MessageTypeEnum = .EffectsUnapplied
   public let item: any BaseItemMixinProtocol
   
-  public  let effectIds: Set<EffectId>
+  public  let effectIds: Set<Int64>
   public let targetItems: [any BaseItemMixinProtocol]
 }
 
@@ -84,7 +84,7 @@ public struct EffectApplied: ItemMessage {
   public let messageType: MessageTypeEnum = .EffectsUnapplied
   public let item: any BaseItemMixinProtocol
   
-  public let effectId: EffectId
+  public let effectId: Int64
   public let targetItems: [any BaseItemMixinProtocol]
 }
 
@@ -93,6 +93,6 @@ public struct EffectUnapplied: ItemMessage {
   public let messageType: MessageTypeEnum = .EffectsUnapplied
   public let item: any BaseItemMixinProtocol
   
-  public let effectId: EffectId
+  public let effectId: Int64
   public let targetItems: [any BaseItemMixinProtocol]
 }

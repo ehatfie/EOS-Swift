@@ -8,10 +8,10 @@
 import Foundation
 import Yams
 
+public let allowedGroups: Set<Int64> = [27, 77, 508, 89, 55, 372]
+
 public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
 
-  
-  
   public init() {
 
   }
@@ -26,12 +26,13 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       (try? await fetcher.readYamlAsync(for: .typeIDs, type: TypeData.self))
       ?? []
     print("++ getEveTypes results \(results.count)")
-    
     return results.compactMap { value -> EveTypeData? in
       let typeId = value.0
       let data = value.1
+      guard let groupID = data.groupID, allowedGroups.contains(groupID) else { return nil }
       if typeId == 2929 {
         print(EveTypeData(
+          name: data.name!.en!,
           typeID: typeId,
           groupID: data.groupID,
           capacity: data.capacity,
@@ -41,6 +42,7 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
         ))
       }
       return EveTypeData(
+        name: data.name!.en!,
         typeID: typeId,
         groupID: data.groupID,
         capacity: data.capacity,
@@ -91,7 +93,15 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
         return (value.0, value2)
       }
     }
-    return []
+    let res = bar1.flatMap { $0 }
+    
+    return res.map {
+      DogmaTypeAttributeData(
+        typeID: $0.0,
+        attributeID: $0.1.attributeID,
+        value: $0.1.value
+      )
+    }
     //return bar1.flatMap { $0 }
       
   }

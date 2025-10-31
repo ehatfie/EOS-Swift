@@ -160,7 +160,7 @@ public class Module:
     }
   }
   
-  override func addAutoCharge(effectId: EffectId, autoChargeTypeId: Int64) {
+  override func addAutoCharge(effectId: Int64, autoChargeTypeId: Int64) {
     if self.autocharges == nil {
       self.autocharges = ItemDict<AutoCharge>(parent: self, containerOverride: self)
     }

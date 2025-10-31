@@ -34,8 +34,8 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   
   var container: (any ItemContainerBaseProtocol)? { get set }
   
-  var runningEffectIds: Set<EffectId> { get set }
-  var effectModeOverrides: [EffectId: EffectMode]? { get set }
+  var runningEffectIds: Set<Int64> { get set }
+  var effectModeOverrides: [Int64: EffectMode]? { get set }
   var effectTargets: String? { get set }
   var attributes: MutableAttributeMap? { get set } // will be a custom dictionary type
   var autocharges: ItemDict<AutoCharge>? { get set }
@@ -116,13 +116,15 @@ extension BaseItemMixinProtocol {
     return self.itemType?.attributes ?? [:]
   }
   
-  var typeEffects: [EffectId: Effect] {
+  var typeEffects: [Int64: Effect] {
     // return self.type.effects
     self.itemType?.effects ?? [:]
   }
   
   var typeDefaultEffect: Any? {
-    return self.itemType?.defaultEffect
+    let itemTypeDefaultEffect = self.itemType?.defaultEffect
+    print(":: typeDefaultEffect is \(itemTypeDefaultEffect), hasItemType \(self.itemType != nil)")
+    return itemTypeDefaultEffect
   }
   
   var typeDefaultEffectId: Int64? {
@@ -160,18 +162,24 @@ extension BaseItemMixinProtocol {
   
   }
   
-  var effects: [EffectId: EffectData] {
-    var effects: [EffectId: EffectData] = [:]
+  var effects: [Int64: EffectData] {
+    var effects: [Int64: EffectData] = [:]
     
     for (key, value) in self.typeEffects {
-      let effectMode = self.getEffectMode(effectId: key)
-      let status = self.runningEffectIds.contains(key)
-      effects[key] = EffectData(effect: value, mode: effectMode, status: status)
+//      let effectMode = self.getEffectMode(effectId: key)
+//      let status = self.runningEffectIds.contains(key)
+//      effects[key] = EffectData(effect: value, mode: effectMode, status: status)
     }
     return effects
   }
-  
-  func getEffectMode(effectId: EffectId) -> EffectMode {
+  /*
+   """"""
+   if self.__effect_mode_overrides is None:
+       return DEFAULT_EFFECT_MODE
+   return self.__effect_mode_overrides.get(effect_id, DEFAULT_EFFECT_MODE)
+   */
+  /// Get effect's run mode for this item.
+  func getEffectMode(effectId: Int64) -> EffectMode {
     if self.effectModeOverrides == nil {
       return .full_compliance
     }
@@ -183,13 +191,16 @@ extension BaseItemMixinProtocol {
     return effectModeOverrides[effectId, default: .full_compliance]
   }
   
-  func setEffectMode(effectId: EffectId, effectMode: EffectMode) {
+  func setEffectMode(effectId: Int64, effectMode: EffectMode) {
+    print("++ setEffectMode \(effectId) effectMode \(effectMode)")
     self.setEffectsModes(effectsModes: [effectId: effectMode])
   }
   
 //  def _set_effects_modes(self, effects_modes):
-  func setEffectsModes(effectsModes: [EffectId: EffectMode]) {
+  func setEffectsModes(effectsModes: [Int64: EffectMode]) {
+    print("++ setEffectModes \(effectsModes)")
     for (effectId, effectMode) in effectsModes {
+      print("++ checking effectsModes effectId \(effectId) effectMode \(effectMode)")
       if effectMode == .full_compliance {
         guard let effectModeOverrides else {
           continue
@@ -263,8 +274,8 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   public var itemType: ItemType?
   weak public var container: (any ItemContainerBaseProtocol)? = nil
   
-  public var runningEffectIds: Set<EffectId> = []
-  public var effectModeOverrides: [EffectId: EffectMode]? = nil
+  public var runningEffectIds: Set<Int64> = []
+  public var effectModeOverrides: [Int64: EffectMode]? = nil
   public var effectTargets: String? = nil
   
   open var _state: StateI
@@ -295,6 +306,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     self.userModifiable = true
     
     self.attributes = MutableAttributeMap(item: self)
+    
   }
   
   public static func == (lhs: BaseItemMixin, rhs: BaseItemMixin) -> Bool {
@@ -382,10 +394,23 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     return self.itemType?.attributes ?? [:]
   }
   
-  var typeEffects: [EffectId: Effect] {
+  var typeEffects: [Int64: Effect] {
     // return self.type.effects
+    /*
+     effects = {}
+     for effect_id, effect in self._type_effects.items():
+         mode = self.get_effect_mode(effect_id)
+         status = effect_id in self._running_effect_ids
+         effects[effect_id] = EffectData(effect, mode, status)
+     return effects
+     */
+    var returnValues = [Int64: Effect]()
     
-    return self.itemType?.effects ?? [:]
+    for value in (self.itemType?.effects ?? [:]) {
+      
+    }
+    
+    return returnValues
   }
   
   var typeDefaultEffect: Effect? {
@@ -434,7 +459,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     }
     
     self.itemType = result
-    
+    print("++ load itemType result \(result.name)")
     if let fit = fit {
       let messages = MessageHelper.getItemLoadedMessages(item: self)
       fit.publishBulk(messages: messages)
@@ -461,18 +486,18 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     self.itemType = nil
   }
   
-  var effects: [EffectId: EffectData] {
-    var effects: [EffectId: EffectData] = [:]
+  var effects: [Int64: EffectData] {
+    var effects: [Int64: EffectData] = [:]
     
-    for (key, value) in self.typeEffects {
-      let effectMode = self.getEffectMode(effectId: key)
-      let status = self.runningEffectIds.contains(key)
-      effects[key] = EffectData(effect: value, mode: effectMode, status: status)
-    }
+//    for (key, value) in self.typeEffects {
+//      let effectMode = self.getEffectMode(effectId: key)
+//      let status = self.runningEffectIds.contains(key)
+//      effects[key] = EffectData(effect: value, mode: effectMode, status: status)
+//    }
     return effects
   }
   
-  func getEffectMode(effectId: EffectId) -> EffectMode {
+  func getEffectMode(effectId: Int64) -> EffectMode {
     if self.effectModeOverrides == nil {
       return .full_compliance
     }
@@ -484,12 +509,12 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     return effectModeOverrides[effectId, default: .full_compliance]
   }
   
-  func setEffectMode(effectId: EffectId, effectMode: EffectMode) {
+  func setEffectMode(effectId: Int64, effectMode: EffectMode) {
     self.setEffectsModes(effectsModes: [effectId: effectMode])
   }
   
 //  def _set_effects_modes(self, effects_modes):
-  func setEffectsModes(effectsModes: [EffectId: EffectMode]) {
+  func setEffectsModes(effectsModes: [Int64: EffectMode]) {
     for (effectId, effectMode) in effectsModes {
       if effectMode == .full_compliance {
         guard let effectModeOverrides else {
@@ -528,7 +553,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   
  
   
-  func addAutoCharge(effectId: EffectId, autoChargeTypeId: Int64) {
+  func addAutoCharge(effectId: Int64, autoChargeTypeId: Int64) {
     //
   }
   

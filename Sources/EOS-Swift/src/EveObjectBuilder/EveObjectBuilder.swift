@@ -85,16 +85,16 @@ class EveObjectBuilder: @unchecked Sendable {
       typesDefaultEffectMap[row.typeId] = row.effectID
     }
 
-    var typesEffects: [Int64: Set<EffectId>] = [:]
+    var typesEffects: [Int64: Set<Int64>] = [:]
     for (row) in dogmaTypeEffects {
-      guard let effectID = EffectId(rawValue: Int(row.effectID)) else {
-        continue
-      }
-      if effectID == .projectile_fired {
-        print("++ found projectile fired for \(row.typeId)")
-      }
+//      guard let effectID = EffectId(rawValue: Int(row.effectID)) else {
+//        continue
+//      }
+//      if effectID == .projectile_fired {
+//        print("++ found projectile fired for \(row.typeId)")
+//      }
       typesEffects[row.typeId, default: []].insert(
-        effectID
+        row.effectID
       )
     }
     print("++ typesEffects has 2929 \(typesEffects[2929] != nil)")
@@ -164,7 +164,7 @@ class EveObjectBuilder: @unchecked Sendable {
         )
       }
       
-      guard let effectID = EffectId(rawValue: Int(effectData.effectID)) else {
+      guard let effectID = EffectId(rawValue: effectData.effectID) else {
         effects.append(
           Effect(
             effectId: effectData.effectID,
@@ -229,13 +229,13 @@ class EveObjectBuilder: @unchecked Sendable {
     // Convert types
 
     var itemType: [ItemType] = []
-    var effectMap: [EffectId: Effect] = [:]
+    var effectMap: [Int64: Effect] = [:]
     for e in effects {
-      guard let effectId = EffectId(rawValue: Int(e.effectId)) else {
-        //print("++ no effect for effectId \(e.effectId)")
-        continue
-      }
-      effectMap[effectId] = e
+//      guard let effectId = EffectId(rawValue: Int(e.effectId)) else {
+//        //print("++ no effect for effectId \(e.effectId)")
+//        continue
+//      }
+      effectMap[e.effectId] = e
     }
     
     print("** converted type attributes \(typesAttributes.count)")
@@ -243,21 +243,32 @@ class EveObjectBuilder: @unchecked Sendable {
       let typeID = row.typeID
       let defaultEffectTypeId = typesDefaultEffectMap[typeID]
       let defaultEffect: Effect?
-      
-      if let defaultEffectTypeId, let effectId = EffectId(rawValue: Int(defaultEffectTypeId)) {
-        defaultEffect = effectMap[effectId]
+//      if let defaultEffectTypeId {
+//        if let effectId = EffectId(rawValue: Int(defaultEffectTypeId)) {
+//          
+//        } else {
+//          print("** item named \(row.name) has defaultEffectTypeID \(defaultEffectTypeId) but doesnt make an EffectID")
+//        }
+//      } else {
+//        print("** \(row.name) has no defaultEffectTypeID")
+//      }
+      if let defaultEffectTypeId {
+        defaultEffect = effectMap[defaultEffectTypeId]
       } else {
         defaultEffect = nil
       }
       let effects = typesEffects[typeID, default: []]
-      var ourEffectMap: [EffectId: Effect] = [:]
+      var ourEffectMap: [Int64: Effect] = [:]
       
       for effect in effects {
         ourEffectMap[effect] = effectMap[effect]
       }
-
+      let typeEffectIds = typesEffects[typeID, default: []]
+      // effects=tuple(effect_map[eid] for eid in type_effect_ids),
+      let effects1 = typeEffectIds.compactMap { effectMap[$0] }
       itemType.append(
         ItemType(
+          name: row.name,
           typeId: typeID,
           groupId: row.groupID!,
           categoryId: keyedGroups[row.groupID!]?.categoryID ?? 0,

@@ -7,11 +7,11 @@
 
 
 protocol BaseTargetableMixinProtocol {
-  func getEffectTargets(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]?
+  func getEffectTargets(effectIds: [Int64]) -> [(Int64, [any BaseItemMixinProtocol])]?
 }
 
 class BaseTargetableMixin: BaseTargetableMixinProtocol {
-  func getEffectTargets(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]? {
+  func getEffectTargets(effectIds: [Int64]) -> [(Int64, [any BaseItemMixinProtocol])]? {
     return nil
   }
 }
@@ -22,8 +22,8 @@ protocol SingleTargetableMixinProtocol: BaseTargetableMixinProtocol {
 
 extension SingleTargetableMixinProtocol where Self: BaseItemMixinProtocol {
   
-  func getEffectTargets(effectIds: [EffectId]) -> [(EffectId, [any BaseItemMixinProtocol])]? {
-    var effectTargets: [EffectId: [any BaseItemMixinProtocol]] = [:]
+  func getEffectTargets(effectIds: [Int64]) -> [(Int64, [any BaseItemMixinProtocol])]? {
+    var effectTargets: [Int64: [any BaseItemMixinProtocol]] = [:]
     
     if let target {
       for effectId in effectIds {

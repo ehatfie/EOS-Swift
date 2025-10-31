@@ -78,7 +78,7 @@ public class CalibrationRegister: ShipRegularResourceRegisterProtocol {
   }
   
   public func handleEffectsStarted(message: EffectsStarted) {
-    let foo =  message.effectIds.contains(self.useEffectId)
+    let foo =  message.effectIds.contains(self.useEffectId.rawValue)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
     
     guard foo && bar else {
@@ -88,7 +88,7 @@ public class CalibrationRegister: ShipRegularResourceRegisterProtocol {
   }
   
   public func handleEffectsStopped(message: EffectsStopped) {
-    if message.effectIds.contains(self.useEffectId) {
+    if message.effectIds.contains(self.useEffectId.rawValue) {
       self.resourceUsers.remove(message.item as! AnyHashable)
     }
   }
@@ -117,18 +117,20 @@ public class CPURegister: RoundedShipRegularResourceRegisterProtocol {
     fit.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
   }
   
-  public func handleEffectsStopped(message: EffectsStopped) {
-    let foo =  message.effectIds.contains(self.useEffectId)
+  public func handleEffectsStarted(message: EffectsStarted) {
+    let isOnline =  message.effectIds.contains(self.useEffectId.rawValue)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
-    
-    guard foo && bar else {
+    print("&& handleEffectsStarted \(message.item.typeId) \(message.item.itemType?.name) \(isOnline) \(bar)")
+    guard isOnline && bar else {
       return
     }
     self.resourceUsers.insert(message.item as! AnyHashable)
+    print("++ ShipRegularRegister handleEffectsStarted resource users \(resourceUsers.count)")
   }
   
-  public func handleEffectsStarted(message: EffectsStarted) {
-    if message.effectIds.contains(self.useEffectId) {
+  public func handleEffectsStopped(message: EffectsStopped) {
+    
+    if message.effectIds.contains(self.useEffectId.rawValue) {
       self.resourceUsers.remove(message.item as! AnyHashable)
     }
   }
@@ -157,7 +159,7 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
   }
   
   public func handleEffectsStopped(message: EffectsStopped) {
-    let foo =  message.effectIds.contains(self.useEffectId)
+    let foo =  message.effectIds.contains(self.useEffectId.rawValue)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
     
     guard foo && bar else {
@@ -167,7 +169,7 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
   }
   
   public func handleEffectsStarted(message: EffectsStarted) {
-    if message.effectIds.contains(self.useEffectId) {
+    if message.effectIds.contains(self.useEffectId.rawValue) {
       self.resourceUsers.remove(message.item as! AnyHashable)
     }
   }

@@ -702,7 +702,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   /// Get local affector specs for passed item and effects.
-  func generateLocalAffectorSpecs(item: any BaseItemMixinProtocol, effectIds: [EffectId]) -> Set<AffectorSpec> {
+  func generateLocalAffectorSpecs(item: any BaseItemMixinProtocol, effectIds: [Int64]) -> Set<AffectorSpec> {
     var affectorSpecs: Set<AffectorSpec> = []
     /*
      affector_specs = set()
@@ -717,7 +717,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   /// Get projected affector specs for passed item and effects.
-  func generateProjectedAffectorSpecs(item: any BaseItemMixinProtocol, effectIds: [EffectId]) -> Set<AffectorSpec> {
+  func generateProjectedAffectorSpecs(item: any BaseItemMixinProtocol, effectIds: [Int64]) -> Set<AffectorSpec> {
     var affectorSpecs: Set<AffectorSpec> = []
     let itemEffects = item.typeEffects
     
@@ -789,7 +789,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
      */
   }
   
-  func generateProjectors(item: any BaseItemMixinProtocol, effectIds: [EffectId]) -> Set<Projector> {
+  func generateProjectors(item: any BaseItemMixinProtocol, effectIds: [Int64]) -> Set<Projector> {
     var projectors: Set<Projector> = []
     let itemEffects = item.typeEffects
     

@@ -63,13 +63,13 @@ public class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
   }
   
   public func handleEffectsStarted(message: EffectsStarted) {
-    if message.effectIds.contains(slotEffectId) {
+    if message.effectIds.contains(slotEffectId.rawValue) {
       self.slotUsers.insert(message.item as! AnyHashable)
     }
   }
   
   public func handleEffectsStopped(message: EffectsStopped) {
-    if !message.effectIds.contains(slotEffectId) {
+    if !message.effectIds.contains(slotEffectId.rawValue) {
       self.slotUsers.remove(message.item as! AnyHashable)
     }
   }

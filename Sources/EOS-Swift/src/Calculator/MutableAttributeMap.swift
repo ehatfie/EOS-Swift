@@ -259,6 +259,7 @@ extension MutableAttributeMap {
     }
     var value = item.typeAttributes[attributeId, default: Double(attribute.default_value)]
     print("++ got type attributes \(item.typeAttributes[.cpu_output])")
+    
     //print("++ default value \(value)")
     var stack: [ModOperator: [Double]] = [:]
     var stackPenalized: [ModOperator: [Double]] = [:]
@@ -267,10 +268,9 @@ extension MutableAttributeMap {
     // get the items related fit and its attached solarsystem and its attached calculator and call a function
     //item._fit.solar_system.source.cache_handler.get_attr(attr_id)
 
-    
     let foo = item.fit?.solarSystem?.calculator.getModifications(affecteeItem: item, affecteeAttributeId: attributeId) ?? []
-    
-      // Normalize operations to just three types: assignments, additions, reduced multiplications
+    print("+++ modifications \(foo.count)")
+
     for value in foo {
       guard let modOperator = value.modOperator else {
          continue
@@ -288,6 +288,7 @@ extension MutableAttributeMap {
         continue
       }
       
+      // Normalize operations to just three types: assignments, additions, reduced multiplications
       guard let normalizationFunc = normalizers[modOperator] else {
         print("++ malformed")
         continue
@@ -297,8 +298,11 @@ extension MutableAttributeMap {
         continue
       }
       
+      // Resistance attribute actually defines resonance, where 1 means 0%
+      // resistance and 0 means 100% resistance
       modValue = normalizationFunc(modValue) * res
       
+      // Decide if modification should be stacking penalized or not
       let penalize: Bool =
         !attribute.stackable &&
         !PENALTY_IMMUNE_CATEGORY_IDS.contains(
@@ -330,6 +334,7 @@ extension MutableAttributeMap {
     }
     
     var minClosure: (Double, Bool) -> Bool = { one, two in
+      
       return false
     }
     
@@ -389,7 +394,6 @@ extension MutableAttributeMap {
     print("++ returning value \(value)")
     
     for (modOperator, modValues) in stackPenalized {
-      
       let penalizedValue = self.penalizeValues(modValues: modValues)
       stack[modOperator, default: []].append(penalizedValue)
     }
@@ -430,6 +434,8 @@ extension MutableAttributeMap {
     if LIMITED_PRECISION_ATTR_IDS.contains(attributeId) {
       value = round(value * 100) / 100
     }
+    
+    print("+++ calculate \(attributeId) \(attributeId.rawValue) value \(value)")
     return value
   }
   

@@ -20,8 +20,8 @@ struct ItemEffectsMessage: Hashable {
   }
   
   let item: any BaseItemMixinProtocol
-  let effectIds: [EffectId]
-  let itemEffects: [EffectId: Effect]
+  let effectIds: [Int64]
+  let itemEffects: [Int64: Effect]
   
   public func hash(into hasher: inout Hasher) {
     hasher.combine(item)

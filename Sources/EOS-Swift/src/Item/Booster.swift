@@ -18,9 +18,9 @@ class Booster: ImmutableStateMixinProtocol {
 
   var container: (any ItemContainerBaseProtocol)?
 
-  var runningEffectIds: Set<EffectId> = []
+  var runningEffectIds: Set<Int64> = []
 
-  var effectModeOverrides: [EffectId: EffectMode]?
+  var effectModeOverrides: [Int64: EffectMode]?
 
   var effectTargets: String?
 
@@ -47,8 +47,8 @@ class Booster: ImmutableStateMixinProtocol {
   func clearAutocharges() { }
   
 
-  var sideEffectChances: [EffectId: Double] {
-    var sideEffectChances: [EffectId: Double] = [:]
+  var sideEffectChances: [Int64: Double] {
+    var sideEffectChances: [Int64: Double] = [:]
     for (effectId, effect) in self.typeEffects {
       if effect.state != SIDE_EFFECT_STATE {
         continue
@@ -61,7 +61,7 @@ class Booster: ImmutableStateMixinProtocol {
     return sideEffectChances
   }
 
-  var sideEffects: [EffectId: SideEffectData] {
+  var sideEffects: [Int64: SideEffectData] {
     var chances = self.sideEffectChances
     let effectIds = Array(chances.keys)
     let statuses = EffectStatusResolver.resolveEffectsStatus(
@@ -69,7 +69,7 @@ class Booster: ImmutableStateMixinProtocol {
       effectIds: effectIds,
       stateOverride: SIDE_EFFECT_STATE
     )
-    var sideEffects: [EffectId: SideEffectData] = [:]
+    var sideEffects: [Int64: SideEffectData] = [:]
     for (effectId, chance) in chances {
       guard let status = statuses[effectId] else {
         continue
@@ -80,7 +80,8 @@ class Booster: ImmutableStateMixinProtocol {
     return sideEffects
   }
 
-  func setSideEffectStatus(effectId: EffectId, status: Bool) {
+  func setSideEffectStatus(effectId: Int64, status: Bool) {
+    print("++ setSideEffectStatus effectId: \(effectId) status: \(status)")
     guard self.sideEffectChances.keys.contains(effectId) else {
       return
     }

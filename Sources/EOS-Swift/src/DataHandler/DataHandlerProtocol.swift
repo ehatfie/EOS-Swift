@@ -24,6 +24,7 @@ public protocol DataHandlerProtocol {
 }
 
 public struct EveTypeData: Codable, Sendable {
+  public let name: String
   public let typeID: Int64
   public let groupID: Int64?
   public let capacity: Double?
@@ -32,6 +33,7 @@ public struct EveTypeData: Codable, Sendable {
   public let volume: Double?
 
   public init(
+    name: String,
     typeID: Int64,
     groupID: Int64?,
     capacity: Double?,
@@ -39,6 +41,7 @@ public struct EveTypeData: Codable, Sendable {
     radius: Double?,
     volume: Double?
   ) {
+    self.name = name
     self.typeID = typeID
     self.groupID = groupID
     self.capacity = capacity
@@ -68,6 +71,7 @@ public struct DogmaTypeAttributeData: Codable, Sendable {
     self.attributeID = attributeID
     self.value = value
   }
+
 }
 
 public struct TypeDogmaAttributeDataOuter: Codable, Sendable {

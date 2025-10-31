@@ -118,6 +118,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
   /// Put item to first free slot in container.
   /// If container doesn't have free slots, append item to the end of the container.
   public func equip(item: any BaseItemMixinProtocol) {
+    print("++ equip item \(item.itemType?.name)")
     guard self.checkClass(item: item, allowNil: false) else {
       return
     }

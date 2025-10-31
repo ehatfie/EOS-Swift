@@ -6,25 +6,28 @@
 //
 
 public class ItemType {
+  let name: String
   let typeId: Int64
   let groupId: Int64
   let categoryId: Int64
   let attributes: [AttrId: Double]
-  let effects: [EffectId: Effect]
+  let effects: [Int64: Effect]
   let defaultEffect: Effect?
   let abilitiesData: [Int64: (Double, Int)]
   let requiredSkills: [Int64: Int64]
 
   init(
+    name: String,
     typeId: Int64,
     groupId: Int64,
     categoryId: Int64,
     attributes: [AttrId: Double],
-    effects: [EffectId: Effect],
+    effects: [Int64: Effect],
     defaultEffect: Effect?,
     abilitiesData: [Int64: (Double, Int)],
     requiredSkills: [Int64: Int64] = [:]
   ) {
+    self.name = name
     self.typeId = typeId
     self.groupId = groupId
     self.categoryId = categoryId
@@ -45,8 +48,8 @@ public class ItemType {
   
   func maxState() -> StateI {
     var maxState: StateI = .offline
-    for effect in effects.values {
-      maxState = max(maxState, effect.state)
+    for effect in effects {
+      maxState = max(maxState, effect.value.state)
     }
     return maxState
   }

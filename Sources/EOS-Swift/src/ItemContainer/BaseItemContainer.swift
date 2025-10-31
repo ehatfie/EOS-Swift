@@ -82,7 +82,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     guard item.container == nil else {
       fatalError("Item already assigned to another container")
     }
-    print("++ handleItemAddition \(item.typeId)")
+    print("++ handleItemAddition \(item.typeId) \(item.itemType?.name)")
     item.container = container
     print("++ item.container \(item.typeId) set \(item.container)")
     //print("handleItemAddition \()")
