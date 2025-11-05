@@ -108,10 +108,11 @@ class MessageHelper {
     var newRunningEffectIds: Set<Int64> = []
     let effectStatus = EffectStatusResolver.resolveEffectsStatus(item: item)
     for (effectId, status) in effectStatus {
-      print(":: checking effectId \(effectId) status \(status)")
+      
       if status {
         newRunningEffectIds.insert(effectId)
       }
+      print(":: checking effectId \(effectId) \(EffectId(rawValue: effectId)) status \(status) running \(newRunningEffectIds.count)")
     }
     
     let startIds = newRunningEffectIds.subtracting(item.runningEffectIds)
@@ -129,6 +130,8 @@ class MessageHelper {
         for (effectId, targetItems) in results ?? [] {
           messages.append(EffectApplied(item: item, effectId: effectId, targetItems: targetItems))
         }
+      } else {
+        print("no foo")
       }
     }
     

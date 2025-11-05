@@ -65,7 +65,7 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
     return self as? Fit
   }
   
-  var subscribers: [MessageTypeEnum: Set<AnyHashable>] = [:]
+  public var subscribers: [MessageTypeEnum: Set<AnyHashable>] = [:]
 
   init() {
     self.subscribers = [:]

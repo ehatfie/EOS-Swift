@@ -25,7 +25,10 @@ protocol DefaultHaving {
   //static var defaultVal: Self.Type { get }
 }
 
+
+
 public class Fit: FitMessageBroker<MockSubscriber> {
+  var id: Int64 = 0
   public var solarSystem: SolarSystem?
   weak var fleet: MockFleet?
   var shipDescriptor: ItemDescriptor<Ship>
@@ -222,7 +225,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     }
   }
   
-  func loadItems() {
+  public func loadItems() {
     for item in self.itemIterator(skipAutoitems: true) {
       item.load()
     }
@@ -237,7 +240,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
 
 extension Fit: ItemContainerBaseProtocol {
   public func handleItemAddition(item: ExpectedType, container: any ItemContainerBaseProtocol) throws {
-    
+    print("!! default handle item addition")
   }
   
   public func subItemIterator(item: ExpectedType) -> AnyIterator<any BaseItemMixinProtocol> {

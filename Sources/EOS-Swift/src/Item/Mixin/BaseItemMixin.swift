@@ -118,7 +118,8 @@ extension BaseItemMixinProtocol {
   
   var typeEffects: [Int64: Effect] {
     // return self.type.effects
-    self.itemType?.effects ?? [:]
+    let effects = itemType?.effects ?? [:]
+    return self.itemType?.effects ?? [:]
   }
   
   var typeDefaultEffect: Any? {
@@ -161,15 +162,25 @@ extension BaseItemMixinProtocol {
     let fit = self.fit
   
   }
-  
+
+  /// Expose item's effects with item-specific data.
+  ///
+  /// Returns:
+  /// - Map in format {effect ID: (effect, effect run mode, effect run status)}.
+
   var effects: [Int64: EffectData] {
     var effects: [Int64: EffectData] = [:]
     
     for (key, value) in self.typeEffects {
-//      let effectMode = self.getEffectMode(effectId: key)
-//      let status = self.runningEffectIds.contains(key)
-//      effects[key] = EffectData(effect: value, mode: effectMode, status: status)
+      let effectMode = self.getEffectMode(effectId: key)
+      let status = self.runningEffectIds.contains(key)
+      effects[key] = EffectData(effect: value, mode: effectMode, status: status)
     }
+    
+    if self.typeId == 2301 {
+      print(":: effects in \(effects) for item \(itemType?.name)")
+    }
+    
     return effects
   }
   /*
@@ -218,8 +229,8 @@ extension BaseItemMixinProtocol {
     }
     
     if let fit = self.fit {
-      // msgs = MsgHelper.get_effects_status_update_msgs(self)
-      // fit.publish_bulk(msgs)
+      let messages = MessageHelper.getEffectsStatusUpdateMessages(item: self)
+      fit.publishBulk(messages: messages)
     }
     
   }

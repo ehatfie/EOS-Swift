@@ -4,6 +4,23 @@
 //
 //  Created by Erik Hatfield on 9/11/25.
 //
+
+
+struct Key1: Hashable {
+  //affecteeDomain, affecteeItem.itemType?.groupId
+  static func == (lhs: Key1, rhs: Key1) -> Bool {
+    return lhs.hashValue == rhs.hashValue
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(affecteeDomain)
+    hasher.combine(groupID)
+  }
+  
+  let affecteeDomain: ModDomain
+  let groupID: Int64
+}
+
 struct AffecteeInfo: Hashable {
   static func == (lhs: AffecteeInfo, rhs: AffecteeInfo) -> Bool {
     return lhs.effect == rhs.effect
@@ -58,12 +75,17 @@ struct AffectorSpec: Hashable {
   //'item', 'effect', 'modifier'
   
   static func == (lhs: AffectorSpec, rhs: AffectorSpec) -> Bool {
-    return lhs.modifier.affecteeDomain == rhs.modifier.affecteeDomain
+    let one = (lhs.itemType as! BaseItemMixin) == (rhs.itemType as! BaseItemMixin)
+    return lhs.modifier.affecteeDomain == rhs.modifier.affecteeDomain && lhs.effect == rhs.effect && one
   }
   
   func hash(into hasher: inout Hasher) {
-    hasher.combine(ObjectIdentifier(modifier))
-    hasher.combine(ObjectIdentifier(itemType))
+//    if let modifier = modifier as Hashable {
+//      hasher.combine(modifier)
+//    }
+    hasher.combine(modifier)
+    hasher.combine(effect)
+    hasher.combine(itemType)
   }
 }
 
@@ -168,26 +190,31 @@ class AffectionRegister {
   }
   
   func getAffectorSpecs(affecteeItem: any BaseItemMixinProtocol) -> Set<AnyHashable>? {
+   
     let affecteeFit = affecteeItem.fit
     var affectorSpecs = Set<AnyHashable>()
     var affectorStorage = self.affectorsItemActive
     var key: AnyHashable = affecteeItem as! AnyHashable
     
     let value = affectorStorage.dictionary[key, default: Set<AnyHashable>()]
+    
     affectorSpecs.insert(value)
     guard let affecteeDomain = affecteeItem.modifierDomain else {
       return nil
     }
     // Domain
     affectorStorage = self.affectorsDomainGroup
-    let foo = (affecteeFit, affecteeDomain)
+    let foo = affecteeDomain//(affecteeFit, affecteeDomain)
     key = foo as! AnyHashable
     let default1 = Set<AnyHashable>()
     affectorSpecs.insert(affectorStorage.dictionary[key, default: default1])
     
     // Domain and group
     affectorStorage = self.affectorsDomainGroup
-    key = (affecteeFit, affecteeDomain, affecteeItem.itemType?.groupId) as! AnyHashable
+    key = Key1(
+      affecteeDomain: affecteeDomain,
+      groupID: affecteeItem.itemType!.groupId
+    )/*(affecteeDomain, affecteeItem.itemType?.groupId) as! AnyHashable*/
     affectorSpecs.insert(affectorStorage.dictionary[key, default: default1])
     
     // Domain and skill requirement
@@ -201,13 +228,21 @@ class AffectionRegister {
       key = (affecteeFit, affecteeDomain, affecteeStorageRequirementTypeId) as! AnyHashable
       affectorSpecs.insert(affectorStorage.dictionary[key, default: default1])
     }
-    
+    print("++ AffectionRegister.getAffectorSpecs for \(affecteeItem.itemType?.name) got \(affectorSpecs.count)")
+    if let affectorSpec = affectorSpecs.first as? AffectorSpec {
+      print("++ AffectionRegister.getAffectorSpecs is \(affectorSpec.modifier.affecteeAtributeId) \(affectorSpec.itemType.itemType?.name)")
+    } else if affectorSpecs.count == 1 {
+      print("++ AffectionRegister.getAffectorSpecs couldnt convert \(affectorSpecs.first)")
+    }
     return affectorSpecs
   }
   
   /// Add passed affectee item to the register.
   /// We track affectee items to efficiently update attributes when set of items influencing them changes.
   func registerAffecteeItem(affecteeItem: BaseItemMixin) {
+    if affecteeItem.itemType?.name == "EM Shield Hardener II" {
+      print("^^ registerAffecteeItem \(affecteeItem.itemType?.name)")
+    }
    // self.affectees.insert(AffecteeInfo)
     self.affectees.insert(affecteeItem)
     guard let affecteeFit = affecteeItem.fit else {
@@ -403,14 +438,15 @@ class AffectionRegister {
       return []
     }
     // Domain
-    var key: AnyHashable = (affecteeFit, affecteeDomain) as! AnyHashable
+    var key: AnyHashable = (affecteeDomain) as! AnyHashable
     var storage = self.affecteesDomain
     storages.append((key, storage))
     
     // Domain and group
     let affecteeGroupId = affecteeItem.itemType?.groupId
     if let affecteeGroupId {
-      key = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
+      key = Key1(affecteeDomain: affecteeDomain, groupID: affecteeGroupId)
+      //key = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
       storage = self.affecteesDomainGroup
       storages.append((key, storage))
     }
@@ -433,11 +469,84 @@ class AffectionRegister {
 
   }
   
+  /*
+   def __activate_special_affector_specs(self, affectee_fit, affectee_item):
+        """Activate special affector specs which should affect passed item."""
+        awaiting_to_activate = set()
+        for affector_spec in self.__affectors_item_awaiting.get(
+            affectee_fit, ()
+        ):
+            affectee_domain = affector_spec.modifier.affectee_domain
+            # Ship
+            if (
+                affectee_domain == ModDomain.ship and
+                isinstance(affectee_item, Ship)
+            ):
+                awaiting_to_activate.add(affector_spec)
+            # Character
+            elif (
+                affectee_domain == ModDomain.character and
+                isinstance(affectee_item, Character)
+            ):
+                awaiting_to_activate.add(affector_spec)
+            # Self
+            elif (
+                affectee_domain == ModDomain.self and
+                affectee_item is affector_spec.item
+            ):
+                awaiting_to_activate.add(affector_spec)
+        # Move awaiting affector specs from awaiting storage to active storage
+        if awaiting_to_activate:
+            self.__affectors_item_awaiting.rm_data_set(
+                affectee_fit, awaiting_to_activate)
+            self.__affectors_item_active.add_data_set(
+                affectee_item, awaiting_to_activate)
+        # Other
+        other_to_activate = set()
+        for affector_item, affector_specs in (
+            self.__affectors_item_other.items()
+        ):
+            if affectee_item in affector_item._others:
+                other_to_activate.update(affector_specs)
+        # Just add affector specs to active storage, 'other' affector specs
+        # should never be removed from 'other'-specific storage
+        if other_to_activate:
+            self.__affectors_item_active.add_data_set(
+                affectee_item, other_to_activate)
+   */
+  
   /// Activate special affector specs which should affect passed item.
   func activateSpecialAffectorSpecs(affecteeFit: Fit, affecteeItem: any BaseItemMixinProtocol) {
     var awaitingToActivate: Set<AffectorSpec> = []
-    let key = affecteeFit as! AnyHashable
-    for affectorSpec in self.affectorsItemAwaiting.dictionary[affecteeFit as! AnyHashable, default: []]
+    print("++ activateSpecialAffectorSpecs \(affecteeItem.itemType?.name) \(self.affectorsItemAwaiting.dictionary.count)")
+    let key = affecteeFit.id
+    
+    /*
+     for affector_spec in self.__affectors_item_awaiting.get(
+         affectee_fit, ()
+     ):
+         affectee_domain = affector_spec.modifier.affectee_domain
+         # Ship
+         if (
+             affectee_domain == ModDomain.ship and
+             isinstance(affectee_item, Ship)
+         ):
+             awaiting_to_activate.add(affector_spec)
+         # Character
+         elif (
+             affectee_domain == ModDomain.character and
+             isinstance(affectee_item, Character)
+         ):
+             awaiting_to_activate.add(affector_spec)
+         # Self
+         elif (
+             affectee_domain == ModDomain.self and
+             affectee_item is affector_spec.item
+         ):
+             awaiting_to_activate.add(affector_spec)
+     */
+    
+    for affectorSpec in self.affectorsItemAwaiting.dictionary[affecteeFit.id, default: []]
       .compactMap({ $0 as? AffectorSpec })
     {
       let affecteeDomain = affectorSpec.modifier.affecteeDomain

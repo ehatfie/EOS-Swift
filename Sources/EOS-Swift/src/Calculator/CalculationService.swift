@@ -44,8 +44,6 @@
 
  */
 
-
-
 //self.operator, value, self.aggregate_mode, self.aggregate_key
 struct GetModResponse {
   var modOperator: ModOperator?
@@ -97,12 +95,32 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
     self.handlerMap = [:]
     
     self.handlerMap = [
-      .FleetFitAdded: { }
+      .FleetFitAdded: { },
+      .EffectsStarted: { },
+      .EffectsStopped: { },
+      .ItemLoaded: { },
+      .ItemUnloaded: { },
     ]
+    
+    self.affections = AffectionRegister()
   }
 
   func notify(_ message: any Message) {
-
+    switch message {
+    case let message as EffectsStarted:
+      self.handleEffectsStarted(message: message)
+    case let message as EffectsStopped:
+      self.handleEffectsStopped(message: message)
+    case let message as ItemLoaded:
+      self.handleItemLoaded(message: message)
+    case let message as ItemUnloaded:
+      self.handleItemUnloaded(message: message)
+    case let message as FleetFitAdded:
+      self.handleFleetFitAdded(message: message)
+    case let message as FleetFitRemoved:
+      self.handleFleetFitRemoved(message: message)
+    default: break
+    }
   }
 
   /// Get modifications of affectee attribute on affectee item.
@@ -113,6 +131,9 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
     affecteeItem: any BaseItemMixinProtocol,
     affecteeAttributeId: AttrId
   ) -> [ModificationData] {
+    if affecteeAttributeId == .shield_em_dmg_resonance {
+      print("++ getModifications for \(affecteeAttributeId)")
+    }
     var returnValues: [ModificationData] = []
 
     /*
@@ -155,8 +176,14 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
              return mods
      */
 
-    guard let affections = self.affections else { return [] }
-
+    guard let affections = self.affections else {
+      return []
+    }
+    
+    if affecteeItem.itemType?.name == "EM Shield Hardener II" && affecteeAttributeId == .shield_em_dmg_resonance {
+      print("")
+    }
+    
     guard
       let affectorSet = affections.getAffectorSpecs(affecteeItem: affecteeItem)
     else {
@@ -165,18 +192,30 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
     }
 
     let affectorSpecs = affectorSet.compactMap { $0 as? AffectorSpec }
-    guard affectorSpecs.count == affectorSet.count else {
+    
+    guard affectorSpecs.count == (affectorSet.count - 1) else {
+      if affecteeAttributeId == .shield_em_dmg_resonance {
+        print("++ affectorSet \(affectorSet)")
+      }
+      
       print(
         "mismatch affector count \(affectorSpecs.count) vs \(affectorSet.count)"
       )
       return []
     }
-
+    
+    if affecteeAttributeId == .shield_em_dmg_resonance {
+      print("++ getModifications affectorSpec count \(affectorSpecs.count) affectorSpecs \(affectorSpecs)")
+    }
+    
     for affectorSpec in affectorSpecs {
       let affectorModifier = affectorSpec.modifier
       let affectorItem = affectorSpec.itemType
 
       guard affectorModifier.affecteeAtributeId == affecteeAttributeId else {
+        if affecteeAttributeId == .shield_em_dmg_resonance {
+          print()
+        }
         continue
       }
       let modifier = affectorModifier.getModification(
@@ -292,16 +331,19 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
      */
   }
   
-  func handleItemLoaded(message: any Message) {
-    /*
-     item = msg.item
-             self.__affections.register_affectee_item(item)
-             if isinstance(item, SolarSystemItemMixin):
-                 self.__projections.register_solsys_item(item)
-     */
+  func handleItemLoaded(message: ItemLoaded) {
+    print("++ handleItemLoaded \(message.item.itemType?.name)")
+    let item = message.item
+    self.affections?.registerAffecteeItem(affecteeItem: item as! BaseItemMixin)
+    if let solar = item as? SolarSystemItemMixin {
+      self.projections?.registerSolsysItem(solsysItem: solar as! Ship)
+    } else {
+      print("")
+    }
   }
   
   func handleItemUnloaded(message: any Message) {
+    print()
     /*
      item = msg.item
              self.__affections.unregister_affectee_item(item)
@@ -310,7 +352,17 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
      */
   }
   
-  func handleEffectsStarted(message: any Message) {
+  func handleEffectsStarted(message: EffectsStarted) {
+    print("^^ handleEffectsStarted \(message.item.itemType?.name)")
+    print()
+    let item = message.item
+    let effectIds = message.effectIds
+    var attributeChanges: [String: Any] = [:]
+    let localAffectorSpecs = self.generateLocalAffectorSpecs(item: item, effectIds: Array(effectIds))
+    print("^^ made \(localAffectorSpecs.count) count AffectorSpecs")
+    for affectorSpec in localAffectorSpecs {
+      
+    }
     /*
      item = msg.item
              effect_ids = msg.effect_ids
@@ -384,6 +436,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func handleEffectsStopped(message: any Message) {
+    print()
     /*
      # Get info on warfare buffs
              effect_unapplications = []
@@ -427,6 +480,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func handleEffectsApplied(message: any Message) {
+    print()
     /*
      attr_changes = {}
      for affector_spec in self.__generate_projected_affectors(
@@ -452,6 +506,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func handleEffectsUnapplied(message: any Message) {
+    print()
     /*
      for affector_spec in self.__generate_projected_affectors(
          msg.item, (msg.effect_id,)
@@ -478,6 +533,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   
   /// Methods to clear calculated child attributes when parent attributes change
   func reviseRegularAttrDependents(message: any Message) {
+    print()
     /*
      Remove calculated attribute values which rely on passed attribute.
 
@@ -644,6 +700,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func revisePythonAttrDependents(message: any Message) {
+    print()
     /*
      Remove calculated attribute values when necessary.
 
@@ -692,27 +749,48 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func notify(message: any Message) {
-    
+    print()
     /*
      BaseSubscriber._notify(self, msg)
              # Relay all messages to python modifiers, as in case of python modifiers
              # any message may result in deleting dependent attributes
              self._revise_python_attr_dependents(msg)
      */
+    
+    switch message {
+    case let message as EffectsStarted:
+      self.handleEffectsStarted(message: message)
+    case let message as EffectsStopped:
+      self.handleEffectsStopped(message: message)
+    case let message as ItemLoaded:
+      self.handleItemLoaded(message: message)
+    case let message as ItemUnloaded:
+      self.handleItemUnloaded(message: message)
+    case let message as FleetFitAdded:
+      self.handleFleetFitAdded(message: message)
+    case let message as FleetFitRemoved:
+      self.handleFleetFitRemoved(message: message)
+    default: break
+    }
   }
   
   /// Get local affector specs for passed item and effects.
   func generateLocalAffectorSpecs(item: any BaseItemMixinProtocol, effectIds: [Int64]) -> Set<AffectorSpec> {
+    
     var affectorSpecs: Set<AffectorSpec> = []
-    /*
-     affector_specs = set()
-             item_effects = item._type_effects
-             for effect_id in effect_ids:
-                 effect = item_effects[effect_id]
-                 for modifier in effect.local_modifiers:
-                     affector_spec = AffectorSpec(item, effect, modifier)
-                     affector_specs.add(affector_spec)
-     */
+
+    let itemEffects = item.typeEffects
+    for effectId in effectIds {
+      guard let effect = itemEffects[effectId] else {
+        continue
+      }
+      print("++ effect local modifiers \(effect.effectId) has \(effect.localModifiers().count)")
+      for modifier in effect.localModifiers() {
+        let affectorSpec = AffectorSpec(modifier: modifier, effect: effect, itemType: item)
+        print("++ inserting \(affectorSpec.modifier.affecteeAtributeId) \(effect.effectId) \(affectorSpec.itemType.itemType?.name)")
+        affectorSpecs.insert(affectorSpec)
+      }
+    }
     return affectorSpecs
   }
   
@@ -753,6 +831,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   
   /// Subscribe affector spec with python modifier.
   func subscribePythonAffectorSpec(fit: Fit, affectorSpec: AffectorSpec) {
+    print()
     /*
      to_subscribe = set()
              for msg_type in affector_spec.modifier.revise_msg_types:
@@ -772,6 +851,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   
   /// unsubscribe affector spec with python modifier.
   func unsubscribePythonAffectorSpec(fit: Fit, affectorSpec: AffectorSpec) {
+    print()
     /*
      to_ubsubscribe = set()
              for msg_type in affector_spec.modifier.revise_msg_types:
@@ -808,6 +888,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func publishAttrChanges(attrChanges: Any?) {
+    print()
     /*
      # Format: {fit: {item: {attr_ids}}}
      fit_changes_regular = {}

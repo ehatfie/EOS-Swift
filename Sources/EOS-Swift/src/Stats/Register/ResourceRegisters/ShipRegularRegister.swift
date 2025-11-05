@@ -158,7 +158,7 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
     fit.subscribe(subscriber: self, for: [.EffectsStarted, .EffectsStopped])
   }
   
-  public func handleEffectsStopped(message: EffectsStopped) {
+  public func handleEffectsStarted(message: EffectsStarted) {
     let foo =  message.effectIds.contains(self.useEffectId.rawValue)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
     
@@ -168,7 +168,7 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
     self.resourceUsers.insert(message.item as! AnyHashable)
   }
   
-  public func handleEffectsStarted(message: EffectsStarted) {
+  public func handleEffectsStopped(message: EffectsStopped) {
     if message.effectIds.contains(self.useEffectId.rawValue) {
       self.resourceUsers.remove(message.item as! AnyHashable)
     }

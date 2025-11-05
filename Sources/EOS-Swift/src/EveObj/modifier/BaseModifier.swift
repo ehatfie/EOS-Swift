@@ -7,7 +7,7 @@
 
 /// Define base functionality for all modifier types.
 /// Modifiers are part of effects; one modifier describes one modification when it should be applied, on which items, how to apply it, and so on.
-protocol BaseModifierProtocol: AnyObject, Equatable {
+protocol BaseModifierProtocol: AnyObject, Equatable, Hashable {
   var affecteeFilter: ModAffecteeFilter? { get }
   var modDomain: ModDomain? { get }
   var affecteeFilterExtraArg: Int64? { get }
@@ -30,6 +30,18 @@ extension BaseModifierProtocol where Self: Equatable {
     return lhs.modDomain == rhs.modDomain
   }
 }
+
+extension BaseModifierProtocol where Self: Hashable {
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(affecteeFilter)
+    hasher.combine(modDomain)
+    hasher.combine(affecteeFilterExtraArg)
+    hasher.combine(affecteeDomain)
+    hasher.combine(affecteeAtributeId)
+  }
+}
+
+
 
 extension BaseModifierProtocol {
   

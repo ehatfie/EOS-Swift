@@ -6,7 +6,7 @@
 //
 
 public class ItemType {
-  let name: String
+  public let name: String
   let typeId: Int64
   let groupId: Int64
   let categoryId: Int64

@@ -245,20 +245,34 @@ extension MutableAttributeMap {
   ///   - `AttrMetadataError`: If metadata of attribute being calculated cannot be fetched.
   ///   - `BaseValueError`: If base value for attribute being calculated cannot be found.
   func calculate(attributeId: AttrId) throws -> Double? {
-    print("++ calculate \(attributeId) \(attributeId.rawValue)")
+    var logStuff: Bool = attributeId == .shield_em_dmg_resonance
+    
+    if logStuff {
+      print("++ calculate \(attributeId) \(attributeId.rawValue)")
+    }
+    
     guard let item = self.item else {
       print("++ calculate no item")
       return nil
     }
-    guard let attribute  = item.fit?.solarSystem?.source?.cacheHandler.getAttribute(attributeId: attributeId) else {
-      print("++ calculate no something fit: \(item.fit) system \(item.fit?.solarSystem) source \(item.fit?.solarSystem?.source) cacheHandler \(item.fit?.solarSystem?.source?.cacheHandler)")
-      return nil
-    }
-    if attributeId == .cpu_output {
+    
+    if logStuff {
+      print("++ calculate for item \(item.itemType?.name)")
       print("")
     }
+    guard let attribute  = item.fit?.solarSystem?.source?.cacheHandler.getAttribute(attributeId: attributeId) else {
+      if logStuff {
+        print("++ calculate no something fit: \(item.fit) system \(item.fit?.solarSystem) source \(item.fit?.solarSystem?.source) cacheHandler \(item.fit?.solarSystem?.source?.cacheHandler)")
+      }
+      
+      return nil
+    }
+
     var value = item.typeAttributes[attributeId, default: Double(attribute.default_value)]
-    print("++ got type attributes \(item.typeAttributes[.cpu_output])")
+    
+    if logStuff {
+      print("++ got type attributes \(item.typeAttributes[attributeId])")
+    }
     
     //print("++ default value \(value)")
     var stack: [ModOperator: [Double]] = [:]
@@ -268,10 +282,15 @@ extension MutableAttributeMap {
     // get the items related fit and its attached solarsystem and its attached calculator and call a function
     //item._fit.solar_system.source.cache_handler.get_attr(attr_id)
 
-    let foo = item.fit?.solarSystem?.calculator.getModifications(affecteeItem: item, affecteeAttributeId: attributeId) ?? []
-    print("+++ modifications \(foo.count)")
+    let foo = item.fit?.solarSystem?.calculator.getModifications(affecteeItem: item, affecteeAttributeId: attributeId)// ?? []
+    
+    if logStuff {
+      print("+++ modifications \(foo?.count)")
+      print()
+    }
+    
 
-    for value in foo {
+    for value in foo ?? [] {
       guard let modOperator = value.modOperator else {
          continue
       }
@@ -356,7 +375,7 @@ extension MutableAttributeMap {
 //      //one.value.0 < two.value.0 && one.value.1 == two.value.1
 //    })! as (key: TwoKey<ModOperator, AnyHashable>, value: (Double, Bool))
 //     
-    
+
     for (key, value) in aggregateMin {
       let modOperator = key.values.0
           let minResult = value.min(by: { one, two in
@@ -435,7 +454,10 @@ extension MutableAttributeMap {
       value = round(value * 100) / 100
     }
     
-    print("+++ calculate \(attributeId) \(attributeId.rawValue) value \(value)")
+    if logStuff {
+      print("+++ calculate \(attributeId) \(attributeId.rawValue) value \(value)")
+    }
+    
     return value
   }
   

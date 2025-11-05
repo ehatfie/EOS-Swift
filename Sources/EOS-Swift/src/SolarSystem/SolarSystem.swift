@@ -103,7 +103,13 @@ public class SourceManager: @unchecked Sendable {
     let types = eveObjects.2
     let buffTemplates = eveObjects.3
     
-    await cacheHandler.updateCache(types: types, attributes: attributes, effects: effects, buffTemplates: buffTemplates, fingerprint: currentFP)
+    await cacheHandler.updateCache(
+      types: types,
+      attributes: attributes,
+      effects: effects,
+      buffTemplates: buffTemplates,
+      fingerprint: currentFP
+    )
     
     //Finally, add record to list of sources
     let source = Source(alias: alias, cacheHandler: cacheHandler)

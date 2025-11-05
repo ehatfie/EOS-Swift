@@ -233,8 +233,16 @@ public class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
     return dealt / recieved
   }
   
+  /// Calculate layer EHP according to passed data.
+  /// If layer raw HP is None, None is returned.
   public func getLayerWorstCaseEHP(layerHp: Double, layerResists: ResistProfile) -> Double {
-    0.0
+    if layerHp.isZero {
+      return 0
+    }
+    
+    let resist = min(layerResists.em, layerResists.thermal, layerResists.kinetic, layerResists.explosive)
+
+    return layerHp / (1 - resist)
   }
   
   public var hp: ItemHP {

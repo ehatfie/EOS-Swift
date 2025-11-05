@@ -74,7 +74,7 @@ public class ArmorRepairerRegister: BaseRepairRegisterProtocol {
           RepairerData(item: message.item, effect: effect)
         )
       } else {
-        print("++ HandleEffectsStarted not LocalArmorRepairEffect")
+        //print("++ HandleEffectsStarted not LocalArmorRepairEffect")
       }
     }
   }

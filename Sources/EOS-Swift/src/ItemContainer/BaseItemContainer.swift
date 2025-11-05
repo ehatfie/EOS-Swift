@@ -92,10 +92,12 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     }
     
     for subItem in subItemIterator(item: item) {
-      print("++ subItem1 for \(item.typeId) is \(subItem.typeId)")
       let messages = MessageHelper.getItemAddedMessages(item: subItem)
       fit.publishBulk(messages: messages)
       subItem.load()
+      
+      print("++ subItem1 for \(item.typeId) is \(subItem.itemType?.name)")
+      print()
     }
   }
   

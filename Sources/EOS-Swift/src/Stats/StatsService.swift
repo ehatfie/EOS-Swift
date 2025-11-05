@@ -60,7 +60,9 @@ extension StatServiceValuesProtocol {
   /// Returns:
   /// TankingLayersTotal helper container instance. If ship data cannot be fetched, HP values will be None.
   public var hp: ItemHP {
-    return self.fit?.ship?.hp ?? ItemHP(hull: 0.0, armor: 0.0, shield: 0.0)
+    let hp = self.fit?.ship?.hp
+    print("++ hp \(hp?.shield)")
+    return hp ?? ItemHP(hull: 0.0, armor: 0.0, shield: 0.0)
   }
   /// Fetch ship resistances.
   /// Returns:
@@ -68,8 +70,9 @@ extension StatServiceValuesProtocol {
   /// DmgTypes helper container instances. If ship data cannot be fetched, resistance values will be None.
   public var resists: any TankingLayersProtocol {
     let empty = ResistProfile(0.0, thermal: 0.0, kinetic: 0.0, explosive: 0.0)!
-    
-    return self.fit?.ship?.resists ?? TankingLayers<ResistProfile>(hull: empty, armor: empty, shield: empty)
+    let shipResists = self.fit?.ship?.resists
+    print("++ ship resists \(shipResists?.shield)")
+    return shipResists ?? TankingLayers<ResistProfile>(hull: empty, armor: empty, shield: empty)
   }
   
   /*
