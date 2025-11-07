@@ -19,14 +19,14 @@ public class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     var returnValue: Double = 0.0
     for item in self.resourceUsers {
       if let item = item as? any BaseItemMixinProtocol {
-        returnValue += item.attributes![.drone_bandwidth_used, default: 0.0]
+        returnValue += item.attributes![AttrId.drone_bandwidth_used.rawValue, default: 0.0]
       }
     }
     return returnValue
   }
   
   public var output: Double {
-    return self.fit?.ship?.attributes![.drone_bandwidth] ?? 0.0
+    return self.fit?.ship?.attributes![AttrId.drone_bandwidth.rawValue] ?? 0.0
   }
   
   public var resourceUsers: Set<AnyHashable> = []
@@ -47,7 +47,7 @@ public class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     guard
       message.item is Drone,
       message.states.contains(.online),
-      message.item.typeAttributes.keys.contains(where: { $0 == .drone_bandwidth_used})
+      message.item.typeAttributes.keys.contains(where: { $0 == AttrId.drone_bandwidth_used.rawValue})
     else {
       return
     }

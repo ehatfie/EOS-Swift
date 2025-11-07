@@ -15,7 +15,7 @@ public protocol ItemMessage: Message {
 }
 
 public protocol AttributeMessage: Message {
-  var attributeChanges: [BaseItemMixin: [AttrId]] { get }
+  var attributeChanges: [BaseItemMixin: [Int64]] { get }
 }
 
 public struct ItemLoaded: ItemMessage {

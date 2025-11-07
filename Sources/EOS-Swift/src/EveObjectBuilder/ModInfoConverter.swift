@@ -27,11 +27,11 @@ class ModInfoConverter {
         affecteeFilter: affecteeFilter,
         affecteeFilterExtraArg: affecteeFilterExtraArg,
         affecteeDomain: ModDomain(value: modInfo.domain),
-        affecteeAtributeId: AttrId(rawValue: modInfo.modifiedAttributeID ?? -1),
+        affecteeAtributeId: modInfo.modifiedAttributeID,
         modOperator: modOperator,
         aggregateMode: .stack, // ModAggregateMode?
         aggregateKey: nil, // AnyHashable?
-        affectorAttrId: AttrId(rawValue: modInfo.modifyingAttributeID ?? -1)
+        affectorAttrId: modInfo.modifyingAttributeID
       )
       
       dogmaModifiers.append(dogmaModifier)

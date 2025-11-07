@@ -76,7 +76,8 @@ struct AffectorSpec: Hashable {
   
   static func == (lhs: AffectorSpec, rhs: AffectorSpec) -> Bool {
     let one = (lhs.itemType as! BaseItemMixin) == (rhs.itemType as! BaseItemMixin)
-    return lhs.modifier.affecteeDomain == rhs.modifier.affecteeDomain && lhs.effect == rhs.effect && one
+    return lhs.hashValue == rhs.hashValue
+    //return lhs.modifier.affecteeDomain == rhs.modifier.affecteeDomain && lhs.effect == rhs.effect && one
   }
   
   func hash(into hasher: inout Hasher) {
@@ -99,17 +100,19 @@ struct AffectorModifier: Hashable {
 
 class AffectionRegister {
   var affectees: Set<BaseItemMixin> = []
-  var affecteesDomain = KeyedStorage()
-  var affecteesDomainGroup = KeyedStorage()
-  var affecteesDomainSkillRequirement = KeyedStorage()
-  var affecteesOwnerSkillRequirement = KeyedStorage()
-  var affectorsItemOther = KeyedStorage()
-  var affectorsItemAwaiting = KeyedStorage()
-  var affectorsItemActive = KeyedStorage()
-  var affectorsDomain = KeyedStorage()
-  var affectorsDomainGroup = KeyedStorage()
-  var affectorsDomainSkillRequirement = KeyedStorage()
-  var affectorsOwnerSkillRequirement = KeyedStorage()
+  var affecteesDomain = KeyedStorage<BaseItemMixin>()
+  var affecteesDomainGroup = KeyedStorage<BaseItemMixin>()
+  var affecteesDomainSkillRequirement = KeyedStorage<BaseItemMixin>()
+  var affecteesOwnerSkillRequirement = KeyedStorage<BaseItemMixin>()
+  var affectorsItemOther = KeyedStorage<AffectorSpec>()
+  var affectorsItemAwaiting = KeyedStorage<AffectorSpec>()
+  var affectorsItemActive = KeyedStorage<AffectorSpec>()
+  var affectorsDomain = KeyedStorage<AffectorSpec>()
+  var affectorsDomainGroup = KeyedStorage<AffectorSpec>()
+  // Format: {(affectee fit, affectee domain, affectee skill requirementtype ID): {affector specs}}
+  var affectorsDomainSkillRequirement = KeyedStorage<AffectorSpec>()
+  //Format: {(affectee fit, affectee skill requirement type ID): {affectorspecs}}
+  var affectorsOwnerSkillRequirement = KeyedStorage<AffectorSpec>()
   
   init() {
     
@@ -133,12 +136,12 @@ class AffectionRegister {
       // En-masse filtered modification can use shared affectee item getters
       // affectee_domain = self.__resolve_local_domain(affector_spec)
       guard let affecteeDomain = resolveLocalDomain(affectorSpec: affectorSpec) else {
-        print("++ no affectee Domain")
+
         return nil
       }
       // affectee_fits = affector_spec.item._fit,
       guard let affecteeFits = affectorSpec.itemType.fit else {
-        print("++ no affectee fit")
+
         return nil
       }
       switch affecteeFilter {
@@ -189,16 +192,19 @@ class AffectionRegister {
     }
   }
   
-  func getAffectorSpecs(affecteeItem: any BaseItemMixinProtocol) -> Set<AnyHashable>? {
-   
+  func getAffectorSpecs(affecteeItem: any BaseItemMixinProtocol) -> Set<AffectorSpec>? {
+
     let affecteeFit = affecteeItem.fit
-    var affectorSpecs = Set<AnyHashable>()
+    var affectorSpecs = Set<AffectorSpec>()
     var affectorStorage = self.affectorsItemActive
     var key: AnyHashable = affecteeItem as! AnyHashable
     
-    let value = affectorStorage.dictionary[key, default: Set<AnyHashable>()]
+    let value = affectorStorage.dictionary[key, default: Set<AffectorSpec>()]
     
-    affectorSpecs.insert(value)
+    if let foo = value as? Set<AffectorSpec> {
+      affectorSpecs.formUnion(foo)
+    }
+    
     guard let affecteeDomain = affecteeItem.modifierDomain else {
       return nil
     }
@@ -206,8 +212,8 @@ class AffectionRegister {
     affectorStorage = self.affectorsDomainGroup
     let foo = affecteeDomain//(affecteeFit, affecteeDomain)
     key = foo as! AnyHashable
-    let default1 = Set<AnyHashable>()
-    affectorSpecs.insert(affectorStorage.dictionary[key, default: default1])
+    let default1 = Set<AffectorSpec>()
+    affectorSpecs.formUnion(affectorStorage.dictionary[key, default: default1] as! Set<AffectorSpec>)
     
     // Domain and group
     affectorStorage = self.affectorsDomainGroup
@@ -215,25 +221,24 @@ class AffectionRegister {
       affecteeDomain: affecteeDomain,
       groupID: affecteeItem.itemType!.groupId
     )/*(affecteeDomain, affecteeItem.itemType?.groupId) as! AnyHashable*/
-    affectorSpecs.insert(affectorStorage.dictionary[key, default: default1])
+    affectorSpecs.formUnion(affectorStorage.dictionary[key, default: default1] as! Set<AffectorSpec>)
     
     // Domain and skill requirement
     affectorStorage = self.affectorsDomainSkillRequirement
     guard let requiredSkills = affecteeItem.itemType?.requiredSkills else {
-      print("++ no itemType")
+
       return nil
     }
     
     for affecteeStorageRequirementTypeId in requiredSkills {
-      key = (affecteeFit, affecteeDomain, affecteeStorageRequirementTypeId) as! AnyHashable
-      affectorSpecs.insert(affectorStorage.dictionary[key, default: default1])
+      let key = DomainSkillKey(
+        affecteeDomain: affecteeDomain,
+        affecteeSkillRequirementTypeId: affecteeStorageRequirementTypeId.value
+      )
+      //key = (affecteeFit, affecteeDomain, affecteeStorageRequirementTypeId) as! AnyHashable
+      affectorSpecs.formUnion(affectorStorage.dictionary[key, default: default1] as! Set<AffectorSpec> )
     }
-    print("++ AffectionRegister.getAffectorSpecs for \(affecteeItem.itemType?.name) got \(affectorSpecs.count)")
-    if let affectorSpec = affectorSpecs.first as? AffectorSpec {
-      print("++ AffectionRegister.getAffectorSpecs is \(affectorSpec.modifier.affecteeAtributeId) \(affectorSpec.itemType.itemType?.name)")
-    } else if affectorSpecs.count == 1 {
-      print("++ AffectionRegister.getAffectorSpecs couldnt convert \(affectorSpecs.first)")
-    }
+    let toPrint = affectorSpecs.map { ($0.modifier, $0.effect.effectId, $0.itemType.itemType?.name)}
     return affectorSpecs
   }
   
@@ -262,7 +267,6 @@ class AffectionRegister {
   func unregisterAffecteeItem(affecteeItem: BaseItemMixin) {
     self.affectees.remove(affecteeItem)
     guard let affecteeFit = affecteeItem.fit else {
-      print("Unregister no fit")
       return
     }
     for (key, storage) in self.getAffecteeStorages(affecteeFit: affecteeFit, affecteeItem: affecteeItem) {
@@ -277,7 +281,6 @@ class AffectionRegister {
   /// It makes it possible for the affector spec to modify other items within its fit.
   func registerLocalAffectorSpec(affectorSpec: AffectorSpec) {
     guard let storages = self.getLocalAffectorStorages(affectorSpec: affectorSpec) else {
-      print("++ RLAS no storages for \(affectorSpec)")
       return
     }
     
@@ -305,7 +308,7 @@ class AffectionRegister {
     let storages = self.getProjectedAffectorStorages(affectorSpec: affectorSpec, targetItems: targetItems)
     
     for (key, storage) in storages {
-      storage.addDataEntry(key: key, data: affectorSpec as AnyHashable)
+      storage.addDataEntry(key: key, data: affectorSpec)
     }
   }
   
@@ -315,7 +318,7 @@ class AffectionRegister {
     let storages = self.getProjectedAffectorStorages(affectorSpec: affectorSpec, targetItems: targetItems)
     
     for (key, storage) in storages {
-      storage.removeDataEntry(key: key, data: affectorSpec as AnyHashable)
+      storage.removeDataEntry(key: key, data: affectorSpec)
     }
   }
   
@@ -325,11 +328,9 @@ class AffectionRegister {
   
   func getLocalAffecteesCharacter(affectorSpec: AffectorSpec) -> [Character]? {
     guard let affecteeFit = affectorSpec.itemType.fit else {
-      print("++ GLAC no fit")
       return nil
     }
     guard let affecteeCharacter = affecteeFit.character else {
-      print("++ GLAC no Character")
       return nil
     }
     
@@ -342,11 +343,9 @@ class AffectionRegister {
   
   func getLocalAffecteesShip(affectorSpec: AffectorSpec) -> [Ship]? {
     guard let affecteeFit = affectorSpec.itemType.fit else {
-      print("++ GLAS no fit")
       return nil
     }
     guard let affecteeShip = affecteeFit.ship else {
-      print("++ GLAS no Ship")
       return nil
     }
     
@@ -377,7 +376,8 @@ class AffectionRegister {
     var affecteeItems: Set<AnyHashable> = []
     let storage = self.affecteesDomainGroup
     for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
+      let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: affecteeGroupId!)
+      //let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
       affecteeItems.insert(storage.dictionary[key, default: []])
     }
     return affecteeItems
@@ -397,7 +397,11 @@ class AffectionRegister {
     let storage = self.affecteesDomainSkillRequirement
     
     for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSourceRequirementTypeId) as! AnyHashable
+      let key = DomainSkillKey(
+        affecteeDomain: affecteeDomain,
+        affecteeSkillRequirementTypeId: affecteeSourceRequirementTypeId!
+      )
+      //let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSourceRequirementTypeId) as! AnyHashable
       affecteeItems.insert(storage.dictionary[key, default: []])
     }
     return affecteeItems
@@ -432,8 +436,8 @@ class AffectionRegister {
         Iterable with multiple elements, where each element is tuple in
         (key, affectee map) format.
    */
-  func getAffecteeStorages(affecteeFit: Fit, affecteeItem: any BaseItemMixinProtocol) -> [(AnyHashable, KeyedStorage)] {
-    var storages: [(AnyHashable, KeyedStorage)] = []
+  func getAffecteeStorages(affecteeFit: Fit, affecteeItem: any BaseItemMixinProtocol) -> [(AnyHashable, KeyedStorage<BaseItemMixin>)] {
+    var storages: [(AnyHashable, KeyedStorage<BaseItemMixin>)] = []
     guard let affecteeDomain = affecteeItem.modifierDomain else {
       return []
     }
@@ -518,7 +522,6 @@ class AffectionRegister {
   /// Activate special affector specs which should affect passed item.
   func activateSpecialAffectorSpecs(affecteeFit: Fit, affecteeItem: any BaseItemMixinProtocol) {
     var awaitingToActivate: Set<AffectorSpec> = []
-    print("++ activateSpecialAffectorSpecs \(affecteeItem.itemType?.name) \(self.affectorsItemAwaiting.dictionary.count)")
     let key = affecteeFit.id
     
     /*
@@ -561,9 +564,8 @@ class AffectionRegister {
     }
     
     if !awaitingToActivate.isEmpty {
-      
-      self.affectorsItemAwaiting.removeDataSet(key: key, dataSet: awaitingToActivate.map { $0 as AnyHashable})
-      self.affectorsItemActive.addDataSet(key: key, dataSet: awaitingToActivate.map { $0 as AnyHashable})
+      self.affectorsItemAwaiting.removeDataSet(key: key, dataSet: awaitingToActivate.map { $0 })
+      self.affectorsItemActive.addDataSet(key: key, dataSet: awaitingToActivate.map { $0 })
     }
     
     // Other
@@ -581,7 +583,7 @@ class AffectionRegister {
     }
     
     if !otherToActivate.isEmpty {
-      self.affectorsItemActive.addDataSet(key: key, dataSet: otherToActivate.map { $0 as AnyHashable })
+      self.affectorsItemActive.addDataSet(key: key, dataSet: otherToActivate.map { $0 })
     }
   }
   
@@ -608,7 +610,7 @@ class AffectionRegister {
   }
 
   /// Get Places where passed local affector spec should be stored.
-  func getLocalAffectorStorages(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage)]? {
+  func getLocalAffectorStorages(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
 
     let affecteeFilter = affectorSpec.modifier.affecteeFilter
     
@@ -666,12 +668,12 @@ class AffectionRegister {
   }
   
   /// Get places where passed projected affector spec should be stored.
-  func getProjectedAffectorStorages(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) -> [(AnyHashable, KeyedStorage)] {
+  func getProjectedAffectorStorages(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
     
     var affecteeFilter = affectorSpec.modifier.affecteeFilter
     //  # Modifier affects just targeted items directly
     if affecteeFilter == .item {
-      var storages: [(AnyHashable, KeyedStorage)] = []
+      var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
       let storage = affectorsItemActive
       
       for targetItem in targetItems.compactMap({ $0 as? BaseItemMixin}) {
@@ -694,14 +696,14 @@ class AffectionRegister {
     }
   }
   
-  func getLocalAffectorStoragesSelf(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage)]? {
+  func getLocalAffectorStoragesSelf(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
     guard let affecteeItem = affectorSpec.itemType as? BaseItemMixin else {
       print("++ GLAS-S not BaseItemMixin")
       return nil
     }
     
     let key: AnyHashable
-    let storage: KeyedStorage
+    let storage: KeyedStorage<AffectorSpec>
     
     if self.affectees.contains(affecteeItem) {
       key = affecteeItem as AnyHashable
@@ -717,7 +719,7 @@ class AffectionRegister {
     return [(key, storage)]
   }
   
-  func getLocalAffectorStoragesCharacter(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage)]? {
+  func getLocalAffectorStoragesCharacter(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
     guard let affecteeFit = affectorSpec.itemType.fit else {
       print("++ GLAS-C no affecteeFit")
       return nil
@@ -728,7 +730,7 @@ class AffectionRegister {
     }
     
     let key: AnyHashable
-    let storage: KeyedStorage
+    let storage: KeyedStorage<AffectorSpec>
     
     if self.affectees.contains(affecteeCharacter) {
       key = affecteeCharacter as AnyHashable
@@ -740,7 +742,7 @@ class AffectionRegister {
     return [(key, storage)]
   }
   
-  func getLocalAffectorStoragesShip(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage)]? {
+  func getLocalAffectorStoragesShip(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
     guard let affecteeFit = affectorSpec.itemType.fit else {
       print("++ GLACS-S no affecteeFit")
       return nil
@@ -751,7 +753,7 @@ class AffectionRegister {
     }
     
     let key: AnyHashable
-    let storage: KeyedStorage
+    let storage: KeyedStorage<AffectorSpec>
     
     if self.affectees.contains(affecteeShip) {
       key = affecteeShip as AnyHashable
@@ -763,9 +765,9 @@ class AffectionRegister {
     return [(key, storage)]
   }
   
-  func getLocalAffectorStoragesOther(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage)] {
+  func getLocalAffectorStoragesOther(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
     // Affectors with 'other' modifiers are always stored in their special place
-    var storages: [(AnyHashable, KeyedStorage)] = [(affectorSpec.itemType as! AnyHashable, self.affectorsItemOther)]
+    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = [(affectorSpec.itemType as! AnyHashable, self.affectorsItemOther)]
     
     // And all those which have valid affectee item are also stored in storage for active direct affectors
     let storage = self.affectorsItemActive
@@ -780,8 +782,8 @@ class AffectionRegister {
   }
   
 
-  func getAffectorStoragesDomain(affectorSpec: AffectorSpec?, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage)] {
-    var storages: [(AnyHashable, KeyedStorage)] = []
+  func getAffectorStoragesDomain(affectorSpec: AffectorSpec?, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
+    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
     let storage = self.affectorsDomain
     
     for affecteeFit in affecteeFits {
@@ -791,44 +793,52 @@ class AffectionRegister {
     return storages
   }
   
-  func getAffectorStoragesDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage)] {
+  func getAffectorStoragesDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
     let affecteeGroupId = affectorSpec.modifier.affecteeFilterExtraArg
-    var storages: [(AnyHashable, KeyedStorage)] = []
+    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
     let storage = self.affectorsDomainGroup
     
     for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
+      let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: affecteeGroupId!)
       storages.append((key, storage))
     }
     return storages
   }
   
-  func getAffectorStoragesDomainSkillRequirement(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage)] {
+  func getAffectorStoragesDomainSkillRequirement(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
     var affecteeSkillRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
     if affecteeSkillRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
       affecteeSkillRequirementTypeId = affectorSpec.itemType.typeId
     }
     
-    var storages: [(AnyHashable, KeyedStorage)] = []
+    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
     let storage = self.affectorsDomainSkillRequirement
     
     for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
+      let key = DomainSkillKey(
+        affecteeDomain: affecteeDomain,
+        affecteeSkillRequirementTypeId: affecteeSkillRequirementTypeId!
+      )
+      //let key1: AnyHashable = (affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
       storages.append((key, storage))
     }
     return storages
   }
   
-  func getAffectorStoragesOwnerSkillRequirements(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage)] {
+  func getAffectorStoragesOwnerSkillRequirements(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
     var affecteeSkillRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
     if affecteeSkillRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
       affecteeSkillRequirementTypeId = affectorSpec.itemType.typeId
     }
     
-    var storages: [(AnyHashable, KeyedStorage)] = []
+    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
     let storage = self.affectorsOwnerSkillRequirement
     for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
+      let key = DomainSkillKey(
+        affecteeDomain: affecteeDomain,
+        affecteeSkillRequirementTypeId: affecteeSkillRequirementTypeId!
+      )
+      //let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
       storages.append((key, storage))
     }
     return storages
@@ -880,5 +890,16 @@ class AffectionRegister {
      else:
          raise error
      */
+  }
+}
+
+// affecteeDomain, affecteeSkillRequirementTypeId
+struct DomainSkillKey: Hashable {
+  let affecteeDomain: ModDomain
+  let affecteeSkillRequirementTypeId: Int64
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(affecteeDomain)
+    hasher.combine(affecteeSkillRequirementTypeId)
   }
 }

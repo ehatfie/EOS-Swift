@@ -20,10 +20,10 @@ func makeSlotModifiers() -> [DogmaModifier] {
       DogmaModifier(
         affecteeFilter: .item,
         affecteeDomain: .ship,
-        affecteeAtributeId: affecteeAttributeId,
+        affecteeAtributeId: affecteeAttributeId.rawValue,
         modOperator: .mod_add,
         aggregateMode: .stack,
-        affectorAttrId: affectorAttributeId
+        affectorAttrId: affectorAttributeId.rawValue
       )
     )
   }
@@ -44,10 +44,10 @@ func makeHardpointModifiers() -> [DogmaModifier] {
       DogmaModifier(
         affecteeFilter: .item,
         affecteeDomain: .ship,
-        affecteeAtributeId: affecteeAttributeId,
+        affecteeAtributeId: affecteeAttributeId.rawValue,
         modOperator: .mod_add,
         aggregateMode: .stack,
-        affectorAttrId: affectorAttributeId
+        affectorAttrId: affectorAttributeId.rawValue
       )
     )
   }

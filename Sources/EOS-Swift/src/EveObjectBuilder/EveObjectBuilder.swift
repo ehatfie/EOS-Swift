@@ -98,12 +98,11 @@ class EveObjectBuilder: @unchecked Sendable {
       )
     }
     print("++ typesEffects has 2929 \(typesEffects[2929] != nil)")
-    var typesAttributes: [Int64: [AttrId: Double]] = [:]
+    var typesAttributes: [Int64: [Int64: Double]] = [:]
     print("** convert got \(dogmaTypeAttributes.count) dogmaTypeAttributes")
     for row in dogmaTypeAttributes {
       var attributesForType = typesAttributes[row.typeID, default: [:]]
-      guard let attrId = AttrId(rawValue: row.attributeID) else { continue }
-      attributesForType[attrId] = Double(row.value)
+      attributesForType[row.attributeID] = Double(row.value)
 //      if row.attributeID == 272 {
 //        print("++ attribute value \(row.value)")
 //      }
@@ -156,11 +155,11 @@ class EveObjectBuilder: @unchecked Sendable {
           affecteeFilter: affecteeFilter,
           affecteeFilterExtraArg: affecteeFilterExtraArg,
           affecteeDomain: ModDomain(value: value.domain),
-          affecteeAtributeId: AttrId(rawValue: value.modifiedAttributeID ?? -1),
+          affecteeAtributeId: value.modifiedAttributeID,
           modOperator: modOperator,
           aggregateMode: .stack,  // ModAggregateMode?
           aggregateKey: nil,  // AnyHashable?
-          affectorAttrId: AttrId(rawValue: value.modifyingAttributeID ?? -1)
+          affectorAttrId: value.modifyingAttributeID
         )
       }
       

@@ -22,10 +22,10 @@ func makeMissileDamageEffect() -> Effect {
         affecteeFilter: .owner_skillrq,
         affecteeFilterExtraArg: TypeId.missileLauncherOperation.rawValue,
         affecteeDomain: .character,
-        affecteeAtributeId: damageAttribute,
+        affecteeAtributeId: damageAttribute.rawValue,
         modOperator: .post_mul_immune,
         aggregateMode: .stack,
-        affectorAttrId: .missile_dmg_mult
+        affectorAttrId: AttrId.missile_dmg_mult.rawValue
       )
     )
   }

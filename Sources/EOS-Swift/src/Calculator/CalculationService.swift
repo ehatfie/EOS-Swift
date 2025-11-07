@@ -44,12 +44,45 @@
 
  */
 
+/*
+ WarfareBuffTemplate(
+             buff_id=buff_template_data[0],
+             affectee_filter=buff_template_data[1],
+             affectee_filter_extra_arg=buff_template_data[2],
+             affectee_attr_id=buff_template_data[3],
+             operator=buff_template_data[4],
+             aggregate_mode=buff_template_data[5])
+ */
+
 //self.operator, value, self.aggregate_mode, self.aggregate_key
 struct GetModResponse {
   var modOperator: ModOperator?
   let modValue: Double?
   let aggregateMode: ModAggregateMode?
   let aggregateKey: AnyHashable?
+}
+
+public struct WarfareBuffTemplate {
+  public let buffId: Int64
+  public let affecteeFilter: ModAffecteeFilter?
+  public let affecteeFilterExtraArg: Int64
+  public let affecteeAttrId: Int64
+  public let modOperator: ModOperator
+  public let aggregateMode: ModAggregateMode?
+}
+
+public struct BuffTemplate: Hashable {
+  var buffId: Int64
+  var affecteeFilter: ModAffecteeFilter?
+  var affecteeFilterExtraArg: Int64?
+  var affecteeAtributeId: Int64?
+  var modOperator: ModOperator?
+  var aggregateMode: ModAggregateMode?
+  
+//  public func hash(into hasher: inout Hasher) {
+//    hasher.combine(buffId)
+//    hasher.combine(affecteeFilter)
+//  }
 }
 
 /*
@@ -64,6 +97,23 @@ struct GetModResponse {
      EffectUnapplied: _handle_effect_unapplied,
      AttrsValueChanged: _revise_regular_attr_dependents}
  */
+
+/*
+ WARFARE_BUFF_ATTRS = {
+     AttrId.warfare_buff_1_id: AttrId.warfare_buff_1_value,
+     AttrId.warfare_buff_2_id: AttrId.warfare_buff_2_value,
+     AttrId.warfare_buff_3_id: AttrId.warfare_buff_3_value,
+     AttrId.warfare_buff_4_id: AttrId.warfare_buff_4_value}
+ */
+
+let WARFARE_BUFF_ATTRS: [Int64: Int64] = [
+  AttrId.warfare_buff_1_id.rawValue: AttrId.warfare_buff_1_value.rawValue,
+  AttrId.warfare_buff_2_id.rawValue: AttrId.warfare_buff_2_value.rawValue,
+  AttrId.warfare_buff_3_id.rawValue: AttrId.warfare_buff_3_value.rawValue,
+  AttrId.warfare_buff_4_id.rawValue: AttrId.warfare_buff_4_value.rawValue
+]
+  
+
 
 class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   static func == (lhs: CalculationService, rhs: CalculationService) -> Bool {
@@ -84,11 +134,11 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   var affections: AffectionRegister? = nil  // AffectionRegister
   var projections: ProjectionRegister? = nil  // ProjectionRegister
   // Format: {projector: {modifiers}}
-  var warfareBuffs = KeyedStorage()
+  var warfareBuffs = KeyedStorage<AffectorSpec>()
 
   // Container with affector specs which will receive messages
   // Format: {message type: set(affector specs)}
-  var subscribedAffectors = KeyedStorage()
+  var subscribedAffectors = KeyedStorage<AffectorSpec>()
 
   init(solarSystem: SolarSystem) {
     self.solarSystem = solarSystem
@@ -127,13 +177,11 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   /// - Parameters:
   ///   - affecteeItem: Item, for which we're getting modifications.
   ///   - affecteeAttributeId: Affectee attribute ID; only modifications which influence attribute with this ID will be returned.
+  ///   
   func getModifications(
     affecteeItem: any BaseItemMixinProtocol,
-    affecteeAttributeId: AttrId
+    affecteeAttributeId: Int64
   ) -> [ModificationData] {
-    if affecteeAttributeId == .shield_em_dmg_resonance {
-      print("++ getModifications for \(affecteeAttributeId)")
-    }
     var returnValues: [ModificationData] = []
 
     /*
@@ -180,10 +228,6 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
       return []
     }
     
-    if affecteeItem.itemType?.name == "EM Shield Hardener II" && affecteeAttributeId == .shield_em_dmg_resonance {
-      print("")
-    }
-    
     guard
       let affectorSet = affections.getAffectorSpecs(affecteeItem: affecteeItem)
     else {
@@ -193,29 +237,16 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
 
     let affectorSpecs = affectorSet.compactMap { $0 as? AffectorSpec }
     
-    guard affectorSpecs.count == (affectorSet.count - 1) else {
-      if affecteeAttributeId == .shield_em_dmg_resonance {
-        print("++ affectorSet \(affectorSet)")
-      }
-      
-      print(
-        "mismatch affector count \(affectorSpecs.count) vs \(affectorSet.count)"
-      )
+    guard affectorSpecs.count == affectorSet.count else {
       return []
     }
-    
-    if affecteeAttributeId == .shield_em_dmg_resonance {
-      print("++ getModifications affectorSpec count \(affectorSpecs.count) affectorSpecs \(affectorSpecs)")
-    }
+
     
     for affectorSpec in affectorSpecs {
       let affectorModifier = affectorSpec.modifier
       let affectorItem = affectorSpec.itemType
 
       guard affectorModifier.affecteeAtributeId == affecteeAttributeId else {
-        if affecteeAttributeId == .shield_em_dmg_resonance {
-          print()
-        }
         continue
       }
       let modifier = affectorModifier.getModification(
@@ -227,12 +258,17 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
       let carrierItem = affecteeItem.solsysCarrier
       let resistValue: Double
       
-      if let resistAttrId, let carrierItem,
-        let resistAttr = AttrId(rawValue: resistAttrId)
+      if let resistAttrId, let carrierItem
       {
-        resistValue = carrierItem.attributes?[resistAttr] ?? 1
+        resistValue = carrierItem.attributes?[resistAttrId] ?? 1
       } else {
         resistValue = 1
+      }
+      
+      if modifier == nil {
+        print("Modifier is nil")
+      } else if let modifier = modifier, modifier.modValue == nil {
+        print("modifier value is nil \(modifier)")
       }
 
       returnValues.append(
@@ -361,78 +397,105 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
     let localAffectorSpecs = self.generateLocalAffectorSpecs(item: item, effectIds: Array(effectIds))
     print("^^ made \(localAffectorSpecs.count) count AffectorSpecs")
     for affectorSpec in localAffectorSpecs {
+      // register the affector spec
+      if affectorSpec.modifier is BasePythonModifier {
+        self.subscribePythonAffectorSpec(fit: message.fit!, affectorSpec: affectorSpec)
+      }
+      self.affections?.registerLocalAffectorSpec(affectorSpec: affectorSpec)
+      // Clear values of attributes dependent on the affector spec
+      for affecteeItem in self.affections?.getLocalAffecteeItems(affectorSpec: affectorSpec) ?? [] {
+        guard let attributeId = affectorSpec.modifier.affecteeAtributeId else {
+          continue
+        }
+        if affecteeItem.attributes?.forceRecalc(attrId: attributeId) == true {
+          print()
+          // attr_ids = attr_changes.setdefault(affectee_item, set())
+          // attr_ids.add(attr_id)
+        }
+      }
       
+      // Register projectors
+      for projector in self.generateProjectors(item: item, effectIds: Array(effectIds)) {
+        print("!! implement register projector")
+        //self.projections?.registerProjector(projector: projector)
+      }
+      
+      // Register warfare buffs (projector, tgt_ships)
+      var effectApplications: [EffectApplication] = []
+      let itemFleet = message.fit?.fleet
+      
+      for effectId in effectIds {
+        let effect = item.typeEffects[effectId]
+        if !(effect is WarfareBuffEffect) {
+          continue
+        }
+        let projector = Projector(item: item as! BaseItemMixin, effect: effect!)
+        
+        for buffIdAttrId in WARFARE_BUFF_ATTRS {
+          guard let buffId = item.attributes?[buffIdAttrId.key] else {
+            continue
+          }
+          let getter = self.solarSystem?.source?.cacheHandler.getBuffTemplates
+          let buffTemplates = getter?(Int64(buffId))
+          let affectorAttributeId = WARFARE_BUFF_ATTRS[buffIdAttrId.key]!
+          
+          guard let buffTemplates = buffTemplates else {
+            continue
+          }
+          
+          for buffTemplate in buffTemplates {
+            let modifier = DogmaModifier(
+              buffTemplate: buffTemplate,
+              affectorAttributeId: affectorAttributeId
+            )
+            let affectorSpec = AffectorSpec(modifier: modifier, effect: effect!, itemType: item)
+            self.warfareBuffs.addDataEntry(key: projector, data: affectorSpec)
+          }
+          
+          var targetShips: [Ship] = []
+          
+          for targetFit in self.solarSystem?.fits ?? [] {
+            // yes its the same
+            if targetFit === message.fit! {
+              if let targetShip = targetFit.ship {
+                targetShips.append(targetShip)
+              }
+            } else if let itemFleet = itemFleet, targetFit.fleet === itemFleet {
+              if let targetShip = targetFit.ship {
+                targetShips.append(targetShip)
+              }
+            }
+          }
+          
+          effectApplications.append(EffectApplication(projector: projector, targetShips: targetShips))
+        }
+      }
+      
+      if !attributeChanges.isEmpty {
+        print("++ publish attribute changes")
+        //self.__publish_attr_changes(attr_changes)
+      }
+      
+      // Apply warfare buffs
+      if !effectApplications.isEmpty {
+        var messages: [EffectApplied] = []
+        
+        for value in effectApplications {
+          let projector = value.projector
+          let targetShips = value.targetShips
+          messages.append(
+            EffectApplied(
+              item: projector.item,
+              effectId: projector.effect.effectId,
+              targetItems: targetShips
+            )
+          )
+        }
+        
+        message.fit?.publishBulk(messages: messages)
+      }
     }
-    /*
-     item = msg.item
-             effect_ids = msg.effect_ids
-             attr_changes = {}
-             for affector_spec in self.__generate_local_affector_specs(
-                 item, effect_ids
-             ):
-                 # Register the affector spec
-                 if isinstance(affector_spec.modifier, BasePythonModifier):
-                     self.__subscribe_python_affector_spec(msg.fit, affector_spec)
-                 self.__affections.register_local_affector_spec(affector_spec)
-                 # Clear values of attributes dependent on the affector spec
-                 for affectee_item in self.__affections.get_local_affectee_items(
-                     affector_spec
-                 ):
-                     attr_id = affector_spec.modifier.affectee_attr_id
-                     if affectee_item.attrs._force_recalc(attr_id):
-                         attr_ids = attr_changes.setdefault(affectee_item, set())
-                         attr_ids.add(attr_id)
-             # Register projectors
-             for projector in self.__generate_projectors(item, effect_ids):
-                 self.__projections.register_projector(projector)
-             # Register warfare buffs
-             effect_applications = []
-             item_fleet = msg.fit.fleet
-             for effect_id in effect_ids:
-                 effect = item._type_effects[effect_id]
-                 if not isinstance(effect, WarfareBuffEffect):
-                     continue
-                 projector = Projector(item, effect)
-                 for buff_id_attr_id in WARFARE_BUFF_ATTRS:
-                     try:
-                         buff_id = item.attrs[buff_id_attr_id]
-                     except KeyError:
-                         continue
-                     getter = (
-                         self.__solar_system.source.cache_handler.get_buff_templates)
-                     try:
-                         buff_templates = getter(buff_id)
-                     except BuffTemplatesFetchError:
-                         continue
-                     affector_attr_id = WARFARE_BUFF_ATTRS[buff_id_attr_id]
-                     if not buff_templates:
-                         continue
-                     for buff_template in buff_templates:
-                         modifier = DogmaModifier._make_from_buff_template(
-                             buff_template, affector_attr_id)
-                         affector_spec = AffectorSpec(item, effect, modifier)
-                         self.__warfare_buffs.add_data_entry(
-                             projector, affector_spec)
-                     tgt_ships = []
-                     for tgt_fit in self.__solar_system.fits:
-                         if (
-                             tgt_fit is msg.fit or
-                             (item_fleet is not None and tgt_fit.fleet is item_fleet)
-                         ):
-                             tgt_ship = tgt_fit.ship
-                             if tgt_ship is not None:
-                                 tgt_ships.append(tgt_ship)
-                     effect_applications.append((projector, tgt_ships))
-             if attr_changes:
-                 self.__publish_attr_changes(attr_changes)
-             # Apply warfare buffs
-             if effect_applications:
-                 msgs = []
-                 for projector, tgt_items in effect_applications:
-                     msgs.append(EffectApplied(
-                         projector.item, projector.effect.id, tgt_items))
-                 msg.fit._publish_bulk(msgs)
-     */
+
   }
   
   func handleEffectsStopped(message: any Message) {
@@ -787,7 +850,8 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
       print("++ effect local modifiers \(effect.effectId) has \(effect.localModifiers().count)")
       for modifier in effect.localModifiers() {
         let affectorSpec = AffectorSpec(modifier: modifier, effect: effect, itemType: item)
-        print("++ inserting \(affectorSpec.modifier.affecteeAtributeId) \(effect.effectId) \(affectorSpec.itemType.itemType?.name)")
+
+        print("++ inserting hash \(affectorSpec.hashValue) for \(affectorSpec.modifier.affecteeAtributeId) \(effect.effectId) \(affectorSpec.itemType.itemType?.name) \(affectorSpecs.count)")
         affectorSpecs.insert(affectorSpec)
       }
     }
@@ -917,4 +981,11 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
          fit._publish_bulk(msgs)
      */
   }
+}
+
+
+struct EffectApplication {
+  //projector, tgt_ships
+  let projector: Projector
+  let targetShips: [Ship]
 }

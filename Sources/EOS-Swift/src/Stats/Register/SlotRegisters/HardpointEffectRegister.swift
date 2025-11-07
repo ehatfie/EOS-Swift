@@ -53,7 +53,7 @@ public class HardpointEffectSlotRegister: HardpointEffectSlotRegisterProtocol {
   }
   
   public var total: Int {
-    return Int(self.fit?.ship?.attributes![self.slotAttrId] ?? 0.0)
+    return Int(self.fit?.ship?.attributes![self.slotAttrId.rawValue] ?? 0.0)
   }
   
   public init(fit: Fit) {

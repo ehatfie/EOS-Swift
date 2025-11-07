@@ -18,7 +18,7 @@ class BasePythonModifier: BasePythonModifierProtocol {
 
   var affecteeDomain: ModDomain?
 
-  var affecteeAtributeId: AttrId?
+  var affecteeAtributeId: Int64?
 
   // this could be a PythonModifier type only?
   func getModification(affectorItem: any BaseItemMixinProtocol)
@@ -44,7 +44,7 @@ class BasePythonModifier: BasePythonModifierProtocol {
     modDomain: ModDomain? = nil,
     affecteeFilterExtraArg: Int64? = nil,
     affecteeDomain: ModDomain? = nil,
-    affecteeAtributeId: AttrId? = nil
+    affecteeAtributeId: Int64? = nil
   ) {
     self.affecteeFilter = affecteeFilter
     self.modDomain = modDomain
@@ -60,7 +60,7 @@ class AncillaryRepAmountModifier: BasePythonModifier {
     super.init(
       affecteeFilter: .item,
       affecteeDomain: .me,
-      affecteeAtributeId: .armor_dmg_amount
+      affecteeAtributeId: AttrId.armor_dmg_amount.rawValue
     )
   }
 
@@ -71,7 +71,7 @@ class AncillaryRepAmountModifier: BasePythonModifier {
     if let charge = affectorItem as? Charge,
       charge.typeId == TypeId.naniteRepairPaste.rawValue
     {
-      value = affectorItem.attributes?[.charged_armor_dmg_mult]
+      value = affectorItem.attributes?[AttrId.charged_armor_dmg_mult.rawValue]
     } else {
       value = 1
     }
@@ -133,7 +133,7 @@ class AncillaryRepAmountModifier: BasePythonModifier {
     }
 
     if let value = message.attributeChanges[mixin],
-      value.contains(.charged_armor_dmg_mult)
+       value.contains(AttrId.charged_armor_dmg_mult.rawValue)
     {
       return true
     }

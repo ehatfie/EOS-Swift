@@ -18,10 +18,10 @@ struct Projector: Hashable {
 class ProjectionRegister {
   var projectors: Set<Projector> = []
   
-  var carrierProjectors: KeyedStorage = KeyedStorage()
+  var carrierProjectors: KeyedStorage<BaseItemMixin> = KeyedStorage<BaseItemMixin>()
   var carrierlessProjectors: Set<Projector> = []
-  var projectorTargets: KeyedStorage = KeyedStorage()
-  var targetProjectors: KeyedStorage = KeyedStorage()
+  var projectorTargets: KeyedStorage<BaseItemMixin> = KeyedStorage<BaseItemMixin>()
+  var targetProjectors: KeyedStorage<BaseItemMixin> = KeyedStorage<BaseItemMixin>()
 
   init() { }
   
@@ -54,7 +54,7 @@ class ProjectionRegister {
       return
     }
 
-    self.carrierProjectors.addDataEntry(key: carrierItem as AnyHashable, data: item)
+    self.carrierProjectors.addDataEntry(key: carrierItem as AnyHashable, data: item as! BaseItemMixin)
     //let carrierItem = projector.itemType
   }
   
@@ -77,7 +77,7 @@ class ProjectionRegister {
   
   func applyProjector(projector: any BaseItemMixinProtocol, targetItems: [any BaseItemMixinProtocol]) {
     print("PR - applyProjector()")
-    self.projectorTargets.addDataSet(key: projector as! AnyHashable, dataSet: targetItems as! [AnyHashable])
+    self.projectorTargets.addDataSet(key: projector as! AnyHashable, dataSet: targetItems.compactMap { $0 as? BaseItemMixin })
     
     for targetItem in targetItems {
       self.targetProjectors.addDataEntry(key: targetItem as! BaseItemMixin, data: projector as! BaseItemMixin)
@@ -86,7 +86,7 @@ class ProjectionRegister {
   
   func unapplyProjector(projector: any BaseItemMixinProtocol, targetItems: [any BaseItemMixinProtocol]) {
     print("PR - unapplyProjector()")
-    self.projectorTargets.removeDataSet(key: projector as! AnyHashable, dataSet: targetItems as! [AnyHashable])
+    self.projectorTargets.removeDataSet(key: projector as! AnyHashable, dataSet: targetItems.compactMap { $0 as? BaseItemMixin })
     
     for targetItem in targetItems {
       self.targetProjectors.removeDataEntry(key: targetItem as! BaseItemMixin, data: projector as! BaseItemMixin)
@@ -110,7 +110,7 @@ class ProjectionRegister {
     
     if !projectors.isEmpty {
       self.carrierlessProjectors.subtract(projectors)
-      self.carrierProjectors.addDataSet(key: solsysItem, dataSet: Array(projectors) as! [AnyHashable])
+      self.carrierProjectors.addDataSet(key: solsysItem, dataSet: Array(projectors) as! [BaseItemMixin])
     }
   }
   
@@ -122,7 +122,7 @@ class ProjectionRegister {
       for projector in projectors {
         self.carrierlessProjectors.insert(projector)
       }
-      self.carrierProjectors.removeDataSet(key: solsysItem, dataSet: Array(projectors) as! [AnyHashable])
+      self.carrierProjectors.removeDataSet(key: solsysItem, dataSet: Array(projectors) as! [BaseItemMixin])
     }
   }
 }

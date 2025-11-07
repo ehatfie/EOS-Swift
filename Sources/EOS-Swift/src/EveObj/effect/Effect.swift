@@ -13,7 +13,8 @@ public class Effect: Hashable {
   }
   
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(ObjectIdentifier(self))
+    hasher.combine(effectId)
+    //hasher.combine(ObjectIdentifier(self))
   }
   
   /*
@@ -251,14 +252,14 @@ extension Effect {
   }
   
   static func safeGetAttributeValue(item: any BaseItemMixinProtocol, attributeID: AttrId) -> Double {
-    return item.attributes![attributeID, default: 0]
+    return item.attributes![attributeID.rawValue, default: 0]
   }
   
   func getForcedInactiveTime(item: any BaseItemMixinProtocol) -> Double {
     guard let dischargeAttributeID else {
       return 0.0
     }
-    let timeMS = item.attributes![AttrId(rawValue: dischargeAttributeID)!, default: 0]
+    let timeMS = item.attributes![dischargeAttributeID, default: 0]
     return timeMS / 1000
   }
   

@@ -51,7 +51,7 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
     nil
   }
   
-  func getAttribute(attributeId: AttrId) -> Attribute? {
+  func getAttribute(attributeId: Int64) -> Attribute? {
     nil
   }
 
@@ -76,7 +76,7 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
     return nil
   }
   
-  func getAttribute(attributeId: AttrId) async {
+  func getAttribute(attributeId: Int64) async {
     
   }
   
@@ -84,8 +84,8 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
     nil
   }
   
-  func getBuffTemplates(buffId: Int64) {
-    
+  func getBuffTemplates(buffId: Int64) -> [BuffTemplate] {
+    return []
   }
   
   func getFingerprint() {

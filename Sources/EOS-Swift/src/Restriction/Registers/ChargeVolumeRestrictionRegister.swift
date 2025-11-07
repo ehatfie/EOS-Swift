@@ -59,8 +59,8 @@ class ChargeVolumeRestrictionRegister: BaseRestrictionRegisterProtocol {
       guard let item = container as? any BaseItemMixinProtocol else { continue }
       guard let charge = item as? Charge, charge.isLoaded else { continue }
       // Get volume and capacity with 0 as fallback, and compare them, raising error when charge can't fit
-      let chargeVolume = charge.typeAttributes[.volume, default: 0.0]
-      let containerCapacity = item.typeAttributes[.capacity, default: 0.0]
+      let chargeVolume = charge.typeAttributes[AttrId.volume.rawValue, default: 0.0]
+      let containerCapacity = item.typeAttributes[AttrId.capacity.rawValue, default: 0.0]
       
       if chargeVolume > containerCapacity {
         taintedItems[charge as AnyHashable] = ChargeVolumeErrorData(size: chargeVolume, maxAllowedVolume: containerCapacity)

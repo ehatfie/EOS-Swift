@@ -9,10 +9,9 @@
 /// Modifiers are part of effects; one modifier describes one modification when it should be applied, on which items, how to apply it, and so on.
 protocol BaseModifierProtocol: AnyObject, Equatable, Hashable {
   var affecteeFilter: ModAffecteeFilter? { get }
-  var modDomain: ModDomain? { get }
   var affecteeFilterExtraArg: Int64? { get }
   var affecteeDomain: ModDomain? { get }
-  var affecteeAtributeId: AttrId? { get }
+  var affecteeAtributeId: Int64? { get }
 
   func getModification(affectorItem: any BaseItemMixinProtocol) -> GetModResponse?
 
@@ -27,14 +26,15 @@ protocol BaseModifierProtocol: AnyObject, Equatable, Hashable {
 
 extension BaseModifierProtocol where Self: Equatable {
   static func == (lhs: Self, rhs: Self) -> Bool {
-    return lhs.modDomain == rhs.modDomain
+    return lhs.hashValue == rhs.hashValue
+    //lhs.affecteeDomain == rhs.affecteeDomain
+    
   }
 }
 
 extension BaseModifierProtocol where Self: Hashable {
   func hash(into hasher: inout Hasher) {
     hasher.combine(affecteeFilter)
-    hasher.combine(modDomain)
     hasher.combine(affecteeFilterExtraArg)
     hasher.combine(affecteeDomain)
     hasher.combine(affecteeAtributeId)

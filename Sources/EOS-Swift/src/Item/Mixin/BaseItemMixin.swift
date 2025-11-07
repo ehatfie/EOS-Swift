@@ -62,7 +62,7 @@ extension BaseItemMixinProtocol {
   }
   
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(ObjectIdentifier(self))
+    hasher.combine(typeId)
   }
   
   public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
@@ -112,7 +112,7 @@ extension BaseItemMixinProtocol {
    */
   
   
-  var typeAttributes: [AttrId: Double] {
+  var typeAttributes: [Int64: Double] {
     return self.itemType?.attributes ?? [:]
   }
   
@@ -401,7 +401,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
    */
   
   
-  var typeAttributes: [AttrId: Double] {
+  var typeAttributes: [Int64: Double] {
     return self.itemType?.attributes ?? [:]
   }
   

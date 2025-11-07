@@ -100,6 +100,6 @@ class Booster: ImmutableStateMixinProtocol {
 
   var slot: Double? {
     // return self._type_attrs.get(AttrId.boosterness)
-    return self.typeAttributes[AttrId.boosterness]
+    return self.typeAttributes[AttrId.boosterness.rawValue]
   }
 }

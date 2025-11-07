@@ -16,6 +16,6 @@ class Implant: ImmutableStateMixin {
   }
   
   var slot: Double? {
-    return self.typeAttributes[AttrId.implantness]
+    return self.typeAttributes[AttrId.implantness.rawValue]
   }
 }

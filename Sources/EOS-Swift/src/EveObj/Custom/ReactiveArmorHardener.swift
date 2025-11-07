@@ -17,10 +17,10 @@ func makeRAHModifiers() -> [DogmaModifier] {
       DogmaModifier(
         affecteeFilter: .item,
         affecteeDomain: .ship,
-        affecteeAtributeId: attributeId,
+        affecteeAtributeId: attributeId.rawValue,
         modOperator: .pre_mul,
         aggregateMode: .stack,
-        affectorAttrId: attributeId,
+        affectorAttrId: attributeId.rawValue,
       )
     )
   }

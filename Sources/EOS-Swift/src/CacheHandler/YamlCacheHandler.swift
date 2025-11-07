@@ -58,16 +58,16 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
 
   }
 
-  nonisolated public func getAttribute(attributeId: AttrId) -> Attribute? {
-    return attributeStore[attributeId.rawValue]
+  nonisolated public func getAttribute(attributeId: Int64) -> Attribute? {
+    return attributeStore[attributeId]
   }
 
   nonisolated public func getEffect(effectId: EffectId) -> Effect? {
     return effectStore[Int64(effectId.rawValue)]
   }
 
-  nonisolated public func getBuffTemplates(buffId: Int64) {
-
+  nonisolated public func getBuffTemplates(buffId: Int64) -> [BuffTemplate] {
+    return []
   }
 
   func getFingerprint() -> Int {
@@ -221,12 +221,13 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
   func updateEffectStore(effects: [(Int64, DogmaEffectData)]) {
     for effect in effects {
       let effectData = effect.1
+      
       let modifiers = effectData.modifierInfo?.map { value -> DogmaModifier in
         let modOperator = ModOperator(rawValue: Int(value.operation ?? 0))
         let affecteeFilter: ModAffecteeFilter? = ModAffecteeFilter(
           value: value.func
         )
-
+        
         let affecteeFilterExtraArg: Int64?
         switch affecteeFilter {
         case .owner_skillrq, .domain_skillrq:
@@ -238,12 +239,12 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
         return DogmaModifier(
           affecteeFilter: affecteeFilter,
           affecteeFilterExtraArg: affecteeFilterExtraArg,
-          affecteeDomain: ModDomain(value: value.domain),
-          affecteeAtributeId: AttrId(rawValue: value.modifiedAttributeID ?? -1),
+          affecteeDomain: ModDomain(value: value.domain), // not sure
+          affecteeAtributeId: value.modifiedAttributeID,
           modOperator: modOperator,
           aggregateMode: nil,  // ModAggregateMode?
           aggregateKey: nil,  // AnyHashable?
-          affectorAttrId: AttrId(rawValue: value.modifyingAttributeID ?? -1)
+          affectorAttrId: value.modifyingAttributeID
         )
       }
 

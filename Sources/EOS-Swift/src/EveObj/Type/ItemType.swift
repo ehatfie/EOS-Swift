@@ -10,7 +10,7 @@ public class ItemType {
   let typeId: Int64
   let groupId: Int64
   let categoryId: Int64
-  let attributes: [AttrId: Double]
+  let attributes: [Int64: Double]
   let effects: [Int64: Effect]
   let defaultEffect: Effect?
   let abilitiesData: [Int64: (Double, Int)]
@@ -21,7 +21,7 @@ public class ItemType {
     typeId: Int64,
     groupId: Int64,
     categoryId: Int64,
-    attributes: [AttrId: Double],
+    attributes: [Int64: Double],
     effects: [Int64: Effect],
     defaultEffect: Effect?,
     abilitiesData: [Int64: (Double, Int)],

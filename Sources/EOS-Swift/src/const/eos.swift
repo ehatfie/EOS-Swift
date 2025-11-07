@@ -71,7 +71,7 @@ enum EffectBuildStatus: Int, Codable {
   case custom = 5
 }
 
-enum ModAffecteeFilter: Int, CaseIterable {
+public enum ModAffecteeFilter: Int, CaseIterable {
   /*
   Contains possible modifier target filter types.
   
@@ -120,7 +120,7 @@ public enum ModDomain: Int, CaseIterable {
   }
 }
 
-enum ModOperator: Int, CaseIterable, Sendable, Hashable {
+public enum ModOperator: Int, CaseIterable, Sendable, Hashable {
 
   /*
    Contains possible modifier operator types.
@@ -139,7 +139,7 @@ enum ModOperator: Int, CaseIterable, Sendable, Hashable {
   case post_percent = 9
   case post_assign = 10
 
-  init?(rawValue: Int) {
+  public init?(rawValue: Int) {
     switch rawValue {
     case -1: self = .pre_assign
     case 0: self = .pre_mul
@@ -155,13 +155,13 @@ enum ModOperator: Int, CaseIterable, Sendable, Hashable {
   }
 }
 
-extension ModOperator {
-  func hash(into hasher: inout Hasher) {
+public extension ModOperator {
+  public func hash(into hasher: inout Hasher) {
     hasher.combine(rawValue)
   }
 }
 
-enum ModAggregateMode: Int, CaseIterable {
+public enum ModAggregateMode: Int, CaseIterable {
 
   /*
    Contains possible modifier aggregate modes.

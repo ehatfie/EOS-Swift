@@ -48,7 +48,7 @@ class ChargeSizeRestrictionRegister: BaseRestrictionRegisterProtocol {
   func handleItemLoaded(message: ItemLoaded) {
     let messageItem = message.item
     if !(messageItem is Charge) { return }
-    if message.item.typeAttributes[.charge_size] == nil {
+    if message.item.typeAttributes[AttrId.charge_size.rawValue] == nil {
       return
     }
     self.restrictedContainers.insert(messageItem as! AnyHashable)
@@ -66,8 +66,8 @@ class ChargeSizeRestrictionRegister: BaseRestrictionRegisterProtocol {
       guard let item = container as? any BaseItemMixinProtocol else { continue }
       guard let charge = item as? Charge, charge.isLoaded else { continue }
       
-      let containerSize = item.typeAttributes[.charge_size]
-      let chargeSize = charge.typeAttributes[.charge_size]
+      let containerSize = item.typeAttributes[AttrId.charge_size.rawValue]
+      let chargeSize = charge.typeAttributes[AttrId.charge_size.rawValue]
       
       if containerSize != chargeSize {
         taintedItems[charge as AnyHashable] = ChargeSizeErrorData(size: chargeSize!, allowedSize: containerSize!)

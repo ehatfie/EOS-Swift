@@ -12,10 +12,10 @@ func makeMissileROFModifiers() -> [DogmaModifier] {
       affecteeFilter: .domain_skillrq,
       affecteeFilterExtraArg: Int64(EosTypeId.current_self.rawValue),
       affecteeDomain: .ship,
-      affecteeAtributeId: .speed,
+      affecteeAtributeId: AttrId.speed.rawValue,
       modOperator: .post_percent,
       aggregateMode: .stack,
-      affectorAttrId: .rof_bonus
+      affectorAttrId: AttrId.rof_bonus.rawValue
     )
   ]
 }
@@ -26,10 +26,10 @@ func makeMissileDMGModifiers(affecteeAttributeId: AttrId) -> [DogmaModifier] {
       affecteeFilter: .owner_skillrq,
       affecteeFilterExtraArg: Int64(EosTypeId.current_self.rawValue),
       affecteeDomain: .character,
-      affecteeAtributeId: affecteeAttributeId,
+      affecteeAtributeId: affecteeAttributeId.rawValue,
       modOperator: .post_percent,
       aggregateMode: .stack,
-      affectorAttrId: .dmg_mult_bonus
+      affectorAttrId: AttrId.dmg_mult_bonus.rawValue
     )
   ]
 }
@@ -41,10 +41,10 @@ func makeDroneDMGModifiers() -> [DogmaModifier] {
       affecteeFilter: .owner_skillrq,
       affecteeFilterExtraArg: Int64(EosTypeId.current_self.rawValue),
       affecteeDomain: .character,
-      affecteeAtributeId: .dmg_mult,
+      affecteeAtributeId: AttrId.dmg_mult.rawValue,
       modOperator: .post_percent,
       aggregateMode: .stack,
-      affectorAttrId: .dmg_mult_bonus
+      affectorAttrId: AttrId.dmg_mult_bonus.rawValue
     )
   ]
 }

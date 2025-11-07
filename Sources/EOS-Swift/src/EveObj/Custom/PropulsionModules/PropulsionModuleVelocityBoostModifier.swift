@@ -12,7 +12,7 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
       affecteeFilter: .item,
       affecteeFilterExtraArg: nil,
       affecteeDomain: .ship,
-      affecteeAtributeId: .max_velocity
+      affecteeAtributeId: AttrId.max_velocity.rawValue,
     )
   }
 
@@ -23,9 +23,9 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
 
     /// If attribute values of any necessary items are not available, do not calculate anything
     guard
-      let mass = ship.attributes?[.mass],
-      let speedBoost = ship.attributes?[.speed_factor],
-      let thrust = ship.attributes?[.speed_boost_factor]
+      let mass = ship.attributes?[AttrId.mass.rawValue],
+      let speedBoost = ship.attributes?[AttrId.speed_factor.rawValue],
+      let thrust = ship.attributes?[AttrId.speed_boost_factor.rawValue]
     else { return nil }
     let perc = (speedBoost * thrust) / mass
     let mult = 1 * perc / 100
@@ -55,7 +55,7 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
   ) -> Bool {
     guard let ship = affectorItem.fit?.ship else { return false }
     if let attributeChanges = message.attributeChanges[ship],
-      attributeChanges.contains(.mass)
+       attributeChanges.contains(AttrId.mass.rawValue)
     {
       return true
     }
@@ -64,7 +64,7 @@ class PropulsionModuleVelocityBoostModifier: BasePythonModifier {
       affectorItem as! BaseItemMixin
     ],
       attributeChanges.contains(where: {
-        $0 == .speed_factor || $0 == .speed_boost_factor
+        $0 == AttrId.speed_factor.rawValue || $0 == AttrId.speed_boost_factor.rawValue
       })
     {
       return true
@@ -79,10 +79,10 @@ func makeMassModifier() -> DogmaModifier {
   return DogmaModifier(
     affecteeFilter: .item,
     affecteeDomain: .ship,
-    affecteeAtributeId: .mass,
+    affecteeAtributeId: AttrId.mass.rawValue,
     modOperator: .mod_add,
     aggregateMode: .stack,
-    affectorAttrId: .mass_addition
+    affectorAttrId: AttrId.mass_addition.rawValue
   )
 }
 
@@ -90,9 +90,9 @@ func makeSignatureModifier() -> DogmaModifier {
   return DogmaModifier(
     affecteeFilter: .item,
     affecteeDomain: .ship,
-    affecteeAtributeId: .signature_radius,
+    affecteeAtributeId: AttrId.signature_radius.rawValue,
     modOperator: .post_percent,
     aggregateMode: .stack,
-    affectorAttrId: .signature_radius_bonus
+    affectorAttrId: AttrId.signature_radius_bonus.rawValue
   )
 }

@@ -8,7 +8,7 @@
 struct AttributesValueChanged: AttributeMessage {
   var fit: Fit?
   let messageType: MessageTypeEnum = .AttributeValueChanged
-  let attributeChanges: [BaseItemMixin: [AttrId]] 
+  let attributeChanges: [BaseItemMixin: [Int64]]
 }
 
 struct AttributesValueChangedMasked: AttributeMessage {
@@ -16,5 +16,5 @@ struct AttributesValueChangedMasked: AttributeMessage {
   
   var fit: Fit?
   let messageType: MessageTypeEnum = .AttributeValueChangedMasked
-  let attributeChanges: [BaseItemMixin: [AttrId]]
+  let attributeChanges: [BaseItemMixin: [Int64]]
 }

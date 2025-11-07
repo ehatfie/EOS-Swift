@@ -6,6 +6,8 @@
 //
 // https://github.com/pyfa-org/eos/blob/master/eos/pubsub/broker.py
 
+import Foundation
+
 // I think this `Message` could be a FitMessage
 public protocol BaseSubscriberProtocol: Hashable {
   func notify(message: any Message)
@@ -123,6 +125,7 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
       for subscriber in self.subscribers[message.messageType] ?? [] {
         if let foo = subscriber as? any BaseSubscriberProtocol {
           foo.notify(message: m)
+          
         }
       }
     }

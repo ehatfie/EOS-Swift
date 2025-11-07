@@ -38,12 +38,12 @@ public class MutableAttributeMap {
   let dataSource: DataSource? = nil
 
   // self.__item = item
-  var modifiedAttributes: [AttrId: Double] = [:]
+  var modifiedAttributes: [Int64: Double] = [:]
   var overrideCallbacks: [Int64: () -> Double]? = nil
   
   /// Returns map which defines value caps.
   /// It includes attributes which cap something, and attributes being capped by them.
-  var capMap: KeyedStorage?
+  var capMap: KeyedStorage<Int64>?
 
 
   var length: Int {
@@ -57,10 +57,10 @@ public class MutableAttributeMap {
          self.__item._type_attrs, self.__modified_attrs,
          self.__override_callbacks or {}))
      */
-    var returnValues: Set<Int64> = Set(modifiedAttributes.keys.map (\.rawValue))
+    var returnValues: Set<Int64> = Set(modifiedAttributes.keys.map (\.self))
     
     if let item = self.item {
-      let typeAttrs = Set(item.typeAttributes.keys.map(\.rawValue))
+      let typeAttrs = Set(item.typeAttributes.keys.map(\.self))
       returnValues = returnValues.union(typeAttrs)
     }
     let overrideCallbacks = Set((self.overrideCallbacks ?? [:]).keys)
@@ -68,11 +68,10 @@ public class MutableAttributeMap {
     return Array(returnValues)
   }
 
-  var items: [(AttrId, Double)] {
-    let foo: [(AttrId, Double)] = keys.compactMap { value -> (AttrId, Double)? in
-      guard let attrId = AttrId(rawValue: value) else { return nil }
-      guard let val = self.getValue(attributeId: attrId) else { return nil }
-      return (attrId, val)
+  var items: [(Int64, Double)] {
+    let foo: [(Int64, Double)] = keys.compactMap { attributeId -> (Int64, Double)? in
+      guard let val = self.getValue(attributeId: attributeId) else { return nil }
+      return (attributeId, val)
     }
     // return set((attr_id, self.get(attr_id)) for attr_id in self.keys())
     return foo
@@ -85,7 +84,7 @@ public class MutableAttributeMap {
     self.modifiedAttributes = [:]
   }
   
-  subscript(_ attributeId: AttrId, default defaultValue: @autoclosure () -> Double) -> Double {
+  subscript(_ attributeId: Int64, default defaultValue: @autoclosure () -> Double) -> Double {
       get {
           // Return an appropriate subscript value here.
         return self.getValue(attributeId: attributeId) ?? defaultValue()
@@ -95,7 +94,7 @@ public class MutableAttributeMap {
       }
   }
   
-  subscript(_ attributeId: AttrId) -> Double? {
+  subscript(_ attributeId: Int64) -> Double? {
       get {
           // Return an appropriate subscript value here.
         return self.getValue(attributeId: attributeId)
@@ -106,9 +105,13 @@ public class MutableAttributeMap {
   }
   
   func getValue(attributeId: AttrId) -> Double? {
+    return getValue(attributeId: attributeId.rawValue)
+  }
+  
+  func getValue(attributeId: Int64) -> Double? {
     print("^^ MutableAttributeMap - getValue \(attributeId)")
     if let overrideCallbacks,
-       let callback = overrideCallbacks[attributeId.rawValue]
+       let callback = overrideCallbacks[attributeId]
     {
       print("TODO: getValue callback")
       return nil
@@ -129,8 +132,8 @@ public class MutableAttributeMap {
   }
 
 
-  func getItem(attrId: AttrId) -> Double? {
-    if let overrideCallbacks, overrideCallbacks.contains(where: { $0.key == attrId.rawValue }) {
+  func getItem(attrId: Int64) -> Double? {
+    if let overrideCallbacks, overrideCallbacks.contains(where: { $0.key == attrId }) {
       // return callback
       return nil
     }
@@ -160,11 +163,11 @@ public class MutableAttributeMap {
       self.capMap = KeyedStorage()
     }
     
-    self.capMap?.addDataEntry(key: cappingAttrId, data: cappedAttrId)
+    self.capMap?.addDataEntry(key: cappingAttrId, data: cappedAttrId.rawValue)
   }
   
   func capDel(cappingAttrId: AttrId, cappedAttrId: AttrId) {
-    self.capMap?.removeDataEntry(key: cappingAttrId, data: cappedAttrId)
+    self.capMap?.removeDataEntry(key: cappingAttrId, data: cappedAttrId.rawValue)
     
     if self.capMap?.dictionary.isEmpty ?? false {
       self.capMap = nil
@@ -172,15 +175,15 @@ public class MutableAttributeMap {
   }
   
   /// Force recalculation of attribute with passed ID.
-  func forceRecalc(attrId: AttrId) -> Bool {
+  func forceRecalc(attrId: Int64) -> Bool {
     let removedValue = self.modifiedAttributes.removeValue(forKey: attrId)
     return removedValue != nil
   }
   
   /// Set override for the attribute in the form of callback.
-  func setOverrideCallback(attrId: AttrId, callback: @escaping () -> Double) {
+  func setOverrideCallback(attrId: Int64, callback: @escaping () -> Double) {
     self.overrideCallbacks = [:]
-    self.overrideCallbacks?[attrId.rawValue] = callback
+    self.overrideCallbacks?[attrId] = callback
     guard let item = item else {
       return
     }
@@ -190,8 +193,8 @@ public class MutableAttributeMap {
   }
   
   /// Remove override callback from attribute.
-  func delOverrideCallback(attrId: AttrId) {
-    let val = self.overrideCallbacks?.removeValue(forKey: attrId.rawValue)
+  func delOverrideCallback(attrId: Int64) {
+    let val = self.overrideCallbacks?.removeValue(forKey: attrId)
     
     if let oc = self.overrideCallbacks, oc.isEmpty {
       self.overrideCallbacks = nil
@@ -205,14 +208,14 @@ public class MutableAttributeMap {
   /// Notify everyone that callback value may change.
   ///  When originator of callback knows that callback return value may (or will) change for an attribute,
   ///  it should invoke this method.
-  func overrideValueMayChange(attrId: AttrId) {
+  func overrideValueMayChange(attrId: Int64) {
     let message = AttributesValueChanged(
       attributeChanges: [item as! BaseItemMixin: [attrId]])
     self.publish(message: message)
   }
   
   /// Get attribute value without using overrides.
-  func getWithoutOverrides(attrId: AttrId, defaultVal: Double? = nil) -> Double? {
+  func getWithoutOverrides(attrId: Int64, defaultVal: Double? = nil) -> Double? {
     if let value = self.modifiedAttributes[attrId] {
       return value
     } else if let value = try? self.calculate(attributeId: attrId) {
@@ -244,11 +247,12 @@ extension MutableAttributeMap {
   /// - Throws:
   ///   - `AttrMetadataError`: If metadata of attribute being calculated cannot be fetched.
   ///   - `BaseValueError`: If base value for attribute being calculated cannot be found.
-  func calculate(attributeId: AttrId) throws -> Double? {
-    var logStuff: Bool = attributeId == .shield_em_dmg_resonance
+  
+  func calculate(attributeId: Int64) throws -> Double? {
+    var logStuff: Bool = attributeId == AttrId.shield_em_dmg_resonance.rawValue
     
     if logStuff {
-      print("++ calculate \(attributeId) \(attributeId.rawValue)")
+      print("++ calculate \(attributeId)")
     }
     
     guard let item = self.item else {
@@ -277,33 +281,40 @@ extension MutableAttributeMap {
     //print("++ default value \(value)")
     var stack: [ModOperator: [Double]] = [:]
     var stackPenalized: [ModOperator: [Double]] = [:]
-    var aggregateMin: [TwoKey<ModOperator, AnyHashable>: [(Double, Bool)]] = [:]
-    var aggregateMax: [TwoKey<ModOperator, AnyHashable>: [(Double, Bool)]] = [:]
+    var aggregateMin: [TwoKey<ModOperator, AnyHashable?>: [(Double, Bool)]] = [:]
+    var aggregateMax: [TwoKey<ModOperator, AnyHashable?>: [(Double, Bool)]] = [:]
     // get the items related fit and its attached solarsystem and its attached calculator and call a function
     //item._fit.solar_system.source.cache_handler.get_attr(attr_id)
 
-    let foo = item.fit?.solarSystem?.calculator.getModifications(affecteeItem: item, affecteeAttributeId: attributeId)// ?? []
+    let foo = item.fit?.solarSystem?.calculator.getModifications(
+      affecteeItem: item,
+      affecteeAttributeId: attributeId
+    )// ?? []
     
     if logStuff {
-      print("+++ modifications \(foo?.count)")
+      print("+++ modifications for \(attributeId) \(foo?.count)")
       print()
     }
     
 
     for value in foo ?? [] {
       guard let modOperator = value.modOperator else {
+        print("++ no mod operator for \(value)")
          continue
       }
       
-      guard var modValue = value.attributeValue else {
+      guard var modValue = value.modValue else {
+        print("++ no modValue for \(value)")
         continue
       }
       
       guard let res = value.resistValue else {
+        print("++ no res for ")
         continue
       }
       
       guard let affectorItem = value.affectorItem else {
+        print("++ no affectorItem")
         continue
       }
       
@@ -312,11 +323,11 @@ extension MutableAttributeMap {
         print("++ malformed")
         continue
       }
-      
-      guard let aggregateKey = value.aggregateKey else {
-        continue
-      }
-      
+      let aggregateKey = value.aggregateKey
+//      guard let aggregateKey = value.aggregateKey else {
+//        continue
+//      }
+      print("++ calculating for \(attributeId) value \(res) modValue \(modValue)")
       // Resistance attribute actually defines resonance, where 1 means 0%
       // resistance and 0 means 100% resistance
       modValue = normalizationFunc(modValue) * res
@@ -334,18 +345,21 @@ extension MutableAttributeMap {
       }
 
       if modAggregateMode == .stack {
+        print("++ stack aggregate mode penalize \(penalize)")
         if penalize {
           stackPenalized[modOperator, default: []].append(modValue)
         } else {
           stack[modOperator, default: []].append(modValue)
         }
       } else if modAggregateMode == .minimum {
-        let key: TwoKey<ModOperator, AnyHashable> = TwoKey(
+        print("++ minimum aggregate mode penalize \(penalize)")
+        let key: TwoKey<ModOperator, AnyHashable?> = TwoKey(
           values: (modOperator, aggregateKey)
         )
         aggregateMin[key, default: []].append((modValue, penalize))
       } else if modAggregateMode == .maximum {
-        let key: TwoKey<ModOperator, AnyHashable> = TwoKey(
+        print("++ maximum aggregate mode penalize \(penalize)")
+        let key: TwoKey<ModOperator, AnyHashable?> = TwoKey(
           values: (modOperator, aggregateKey)
         )
         aggregateMax[key, default: []].append((modValue, penalize))
@@ -375,7 +389,7 @@ extension MutableAttributeMap {
 //      //one.value.0 < two.value.0 && one.value.1 == two.value.1
 //    })! as (key: TwoKey<ModOperator, AnyHashable>, value: (Double, Bool))
 //     
-
+    print("++ aggregateMin \(aggregateMin) aggregateMax \(aggregateMax)")
     for (key, value) in aggregateMin {
       let modOperator = key.values.0
           let minResult = value.min(by: { one, two in
@@ -410,19 +424,23 @@ extension MutableAttributeMap {
     
     // When data gathering is complete, process penalized modifications. They
     // are penalized on per-operator basis
-    print("++ returning value \(value)")
+    print("++ returning value \(value) for \(attributeId)")
+    if value == -55 {
+      print()
+    }
     
     for (modOperator, modValues) in stackPenalized {
       let penalizedValue = self.penalizeValues(modValues: modValues)
+      print("++ penalized value \(modValues) modOperator \(modOperator)")
       stack[modOperator, default: []].append(penalizedValue)
     }
-    
+    print("++ stack \(stack)")
     for (key, values) in stack.sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
       let modOperator = key
       let modValues = values
       
-      var value: Double = 0
-      
+//      var value: Double = 1
+      print("++ inside thing modOperator \(modOperator) modValue \(modValues)")
       if ASSIGNMENT_OPERATORS.contains(modOperator) {
         value = attribute.high_is_good
         ? modValues.max()!
@@ -433,16 +451,19 @@ extension MutableAttributeMap {
         }
       } else if MULTIPLICATION_OPERATORS.contains(modOperator) {
         for modValue in modValues {
+          print("++ value pre \(value) against modValue \(modValue)")
           value *= 1 + modValue
+          print("++ value post \(value)")
         }
+      } else {
+        print("++ modOperator \(modOperator) not included in")
       }
     }
     
     // If attribute has upper cap, do not let its value to grow above it
-    if let maxAttributeId = attribute.max_attr_id,
-       let attrId = AttrId(rawValue: maxAttributeId
-       ) {
-      if let maxValue = self[attrId] {
+    if let maxAttributeId = attribute.max_attr_id {
+      if let maxValue = self[maxAttributeId] {
+        print("++ max value for \(attributeId) is \(maxValue) vs current \(value)")
         value = min(maxValue, value)
       }
       
@@ -450,14 +471,15 @@ extension MutableAttributeMap {
     // Some of attributes are rounded for whatever reason, deal with it after
     // all the calculations
     
-    if LIMITED_PRECISION_ATTR_IDS.contains(attributeId) {
+    if let attrId = AttrId(rawValue: attributeId), LIMITED_PRECISION_ATTR_IDS.contains(attrId) {
+      print("++ rounding \(value)")
       value = round(value * 100) / 100
     }
     
     if logStuff {
-      print("+++ calculate \(attributeId) \(attributeId.rawValue) value \(value)")
+      print("+++ calculate \(attributeId) value \(value)")
     }
-    
+    print("++ calculate for \(attributeId) returning value \(value)")
     return value
   }
   

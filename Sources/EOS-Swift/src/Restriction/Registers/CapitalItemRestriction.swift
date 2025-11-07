@@ -48,7 +48,7 @@ class CapitalItemRestrictionRegister: BaseRestrictionRegisterProtocol {
     let itemType = item.self
     
     guard trackedClasses.contains(where: { type(of: item) == $0 }) else { return }
-    guard let itemVolume = message.item.typeAttributes[.volume] else {
+    guard let itemVolume = message.item.typeAttributes[AttrId.volume.rawValue] else {
       return
     }
     guard itemVolume >= MAX_SUBCAP_VOLUME else {
@@ -64,7 +64,7 @@ class CapitalItemRestrictionRegister: BaseRestrictionRegisterProtocol {
   
   func validate() throws {
     guard let ship = self.fit.ship else { return }
-    guard ship.typeAttributes[.is_capital_size] == nil else {
+    guard ship.typeAttributes[AttrId.is_capital_size.rawValue] == nil else {
       return
     }
     
@@ -74,7 +74,7 @@ class CapitalItemRestrictionRegister: BaseRestrictionRegisterProtocol {
       let items = Array(self.capitalItems).compactMap { $0 as? any BaseItemMixinProtocol }
       
       for item in items {
-        let itemTypeVolume = item.typeAttributes[.volume, default: 0.0]
+        let itemTypeVolume = item.typeAttributes[AttrId.volume.rawValue, default: 0.0]
         taintedItems[item as! AnyHashable] = CapitalItemErrorData(itemVolume: itemTypeVolume, maxSubcapVolume: MAX_SUBCAP_VOLUME)
       }
       throw RestrictionValidationError(data: taintedItems)

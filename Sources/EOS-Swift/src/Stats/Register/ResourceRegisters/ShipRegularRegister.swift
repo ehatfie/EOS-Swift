@@ -24,7 +24,7 @@ extension ShipRegularResourceRegisterProtocol {
         continue
       }
       
-      returnValue += foo.attributes![self.useAttrId, default: 0.0]
+      returnValue += foo.attributes![self.useAttrId.rawValue, default: 0.0]
     }
     return returnValue
   }
@@ -35,7 +35,7 @@ extension ShipRegularResourceRegisterProtocol {
   
   public var output: Double {
     //print("++ ShipRegularResourceRegisterProtocol output")
-    let val = self.fit?.ship?.attributes![self.outputAttrId] ?? 0.0
+    let val = self.fit?.ship?.attributes![self.outputAttrId.rawValue] ?? 0.0
     //print("++ ShipRegularResourceRegisterProtocol output return")
     return val
   }
@@ -79,7 +79,7 @@ public class CalibrationRegister: ShipRegularResourceRegisterProtocol {
   
   public func handleEffectsStarted(message: EffectsStarted) {
     let foo =  message.effectIds.contains(self.useEffectId.rawValue)
-    let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
+    let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId.rawValue })
     
     guard foo && bar else {
       return
@@ -119,7 +119,7 @@ public class CPURegister: RoundedShipRegularResourceRegisterProtocol {
   
   public func handleEffectsStarted(message: EffectsStarted) {
     let isOnline =  message.effectIds.contains(self.useEffectId.rawValue)
-    let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
+    let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId.rawValue })
     print("&& handleEffectsStarted \(message.item.typeId) \(message.item.itemType?.name) \(isOnline) \(bar)")
     guard isOnline && bar else {
       return
@@ -160,7 +160,7 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
   
   public func handleEffectsStarted(message: EffectsStarted) {
     let foo =  message.effectIds.contains(self.useEffectId.rawValue)
-    let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId })
+    let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId.rawValue })
     
     guard foo && bar else {
       return

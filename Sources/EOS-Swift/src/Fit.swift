@@ -30,7 +30,7 @@ protocol DefaultHaving {
 public class Fit: FitMessageBroker<MockSubscriber> {
   var id: Int64 = 0
   public var solarSystem: SolarSystem?
-  weak var fleet: MockFleet?
+  public weak var fleet: MockFleet?
   var shipDescriptor: ItemDescriptor<Ship>
   public var ship: Ship? {
     set {
