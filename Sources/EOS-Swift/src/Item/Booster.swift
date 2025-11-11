@@ -5,12 +5,16 @@
 //  Created by Erik Hatfield on 9/7/25.
 //
 
+import Foundation
+
 struct SideEffectData {
   let chance: Double
   let status: Bool
 }
 
 class Booster: ImmutableStateMixinProtocol {
+  var id: UUID = UUID()
+  
   let SIDE_EFFECT_STATE = StateI.offline
 
   var typeId: Int64

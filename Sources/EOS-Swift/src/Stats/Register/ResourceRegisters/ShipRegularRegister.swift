@@ -165,6 +165,7 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
     guard foo && bar else {
       return
     }
+    
     self.resourceUsers.insert(message.item as! AnyHashable)
   }
   

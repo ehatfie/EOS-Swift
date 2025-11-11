@@ -28,7 +28,7 @@ let PENALIZABLE_OPERATORS: Set<ModOperator> = [
   ModOperator.pre_div,
   ModOperator.post_div
 ]
-  
+  //e−(u/2.67)2
 //# Stacking penalty base constant, used in attribute calculations
 let PENALTY_BASE = 1 / pow((1 / 2.67), 2)
 
@@ -495,24 +495,42 @@ extension MutableAttributeMap {
   func penalizeValues(modValues: [Double]) -> Double {
     var chainPositive: [Double] = []
     var chainNegative: [Double] = []
+    print(";; penalize values \(modValues)")
     for modValue in modValues {
       modValue >= 0 ? chainPositive.append(modValue) : chainNegative.append(modValue)
     }
-    chainPositive.sort(by: >)
-    chainNegative.sort(by: <)
+    chainPositive.sort(by: <)
+    chainNegative.sort(by: >)
+    print(";; made pos \(chainPositive) and neg \(chainNegative)")
     var value: Double = 1
+    
+    //f_n=exp(-(n-1)^2 * 0.14),
+    
+    //e−(u/2.67)2
+  //# Stacking penalty base constant, used in attribute calculations
+    let penaltyOne = (1 / 2.67)
+    // 1 + mod_value * PENALTY_BASE ** (pos ** 2)
+  let basePenalty = 1 / pow(penaltyOne, 2)
     
     for values in [chainPositive, chainNegative] {
       var chainValue: Double = 1
 
       for (offset, modValue) in values.enumerated() {
         let power = pow(Double(offset), 2)
-        let chainValue = 1 + (modValue * pow(PENALTY_BASE, power))
+        let stackingPenalty = exp(-pow(Double(offset - 1), 2) * 0.14)
+        
+        print(";; power for offset \(offset) modValue \(modValue) is \(power) penalty \(stackingPenalty)")
+        let chainValue = 1 + (modValue * stackingPenalty)
+        print(";; chainValue is \(chainValue)")
         value *= chainValue
       }
     }
     
-    return value - 1
+    let returnValue = value - 1
+    
+    print("++ penalizeValues \(modValues) to \(returnValue)")
+    
+    return returnValue
   }
   
   func publish(message: any Message) {

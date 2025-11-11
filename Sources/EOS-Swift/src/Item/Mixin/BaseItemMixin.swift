@@ -28,7 +28,10 @@
  
  */
 
+import Foundation
+
 public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
+  var id: UUID { get }
   var typeId: Int64 { get }
   var itemType: ItemType? { get set }
   
@@ -62,7 +65,8 @@ extension BaseItemMixinProtocol {
   }
   
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(typeId)
+    hasher.combine(id)
+    //hasher.combine(ObjectIdentifier(self))
   }
   
   public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
@@ -277,6 +281,8 @@ extension BaseItemMixinProtocol {
 }
 
 open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
+  public var id: UUID = UUID()
+  
   public var attributes: MutableAttributeMap?
   
   public var userModifiable: Bool

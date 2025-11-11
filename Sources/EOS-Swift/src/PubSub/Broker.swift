@@ -125,7 +125,6 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
       for subscriber in self.subscribers[message.messageType] ?? [] {
         if let foo = subscriber as? any BaseSubscriberProtocol {
           foo.notify(message: m)
-          
         }
       }
     }
