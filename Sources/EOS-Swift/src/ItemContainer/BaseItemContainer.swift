@@ -92,6 +92,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     }
     
     for subItem in subItemIterator(item: item) {
+      print("++ loading subitem \(subItem.typeId)")
       let messages = MessageHelper.getItemAddedMessages(item: subItem)
       fit.publishBulk(messages: messages)
       subItem.load()

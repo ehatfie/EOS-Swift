@@ -267,7 +267,9 @@ extension Effect {
   func getCycleParameters(item: any BaseItemMixinProtocol, reload: Bool) -> Any? {
     //let cyclesUntilReload = self.getCyclesUntilReload(item: )
     let cyclesUntilReload = self.getCyclesUntilReload(item: item) ?? 0
-    guard cyclesUntilReload > 0 else { return nil }
+    guard cyclesUntilReload > 0 else {
+      return nil
+    }
     let activeTime = self.getDuration(item: item)
     let forcedInactiveTime = getForcedInactiveTime(item: item)
     let reloadTime = self.getReloadTime(item: item)
@@ -308,15 +310,19 @@ extension Effect {
        return CycleInfo(active_time, forced_inactive_time, math.inf)
        */
       if !reload || cyclesUntilReload == .infinity {
+        print()
         // return CycleInfo(active_time, forced_inactive_time, math.inf)
       } else if let reloadTime = reloadTime, forcedInactiveTime >=  reloadTime {
+        print()
         // return CycleInfo(active_time, forced_inactive_time, math.inf)
       } else {
         let finalCycles: Double = 1.0
         let earlyCycles = cyclesUntilReload - finalCycles
         if earlyCycles == 0 {
           // return CycleInfo(active_time, reload_time, math.inf)
+          print()
         } else {
+          print()
           /*
            return CycleSequence((
                CycleInfo(active_time, forced_inactive_time, early_cycles),

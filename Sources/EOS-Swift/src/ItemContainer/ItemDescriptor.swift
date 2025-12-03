@@ -14,8 +14,8 @@
      item_class: Class of items this container is allowed to contain.
  
  */
-class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHaving {
-  var fit: Fit?
+public class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHaving {
+  public var fit: Fit?
   
   var item: T?
   
@@ -24,7 +24,7 @@ class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHa
     super.init()
   }
   
-  func get() -> T? {
+  public func get() -> T? {
     return item
   }
   

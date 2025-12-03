@@ -6,5 +6,6 @@
 //
 
 func getCyclesUntilReloadGeneric(item: BaseItemMixin, default: Double? = nil) -> Double {
-  return 0.0
+  // TODO
+  return 10.0
 }

@@ -69,23 +69,23 @@ extension BaseItemMixinProtocol {
     //hasher.combine(ObjectIdentifier(self))
   }
   
-  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
-    print("!! default childItemIterator impl")
-    var values: [(any BaseItemMixinProtocol)?] = []
-    var index: Int = 0
-    
-    if !skipAutoItems {
-      if let autocharges = self.autocharges {
-        values.append(contentsOf: autocharges.values())
-      }
-    }
-    
-    return AnyIterator {
-      guard index < values.count else { return nil }
-      defer { index += 1 }
-      return values[index]
-    }
-  }
+//  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
+//    print("!! default childItemIterator impl")
+//    var values: [(any BaseItemMixinProtocol)?] = []
+//    var index: Int = 0
+//    
+//    if !skipAutoItems {
+//      if let autocharges = self.autocharges {
+//        values.append(contentsOf: autocharges.values())
+//      }
+//    }
+//    
+//    return AnyIterator {
+//      guard index < values.count else { return nil }
+//      defer { index += 1 }
+//      return values[index]
+//    }
+//  }
   
   func childItemIter(skipAutoitems: Bool = false) {
     
@@ -331,11 +331,13 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   public func hash(into hasher: inout Hasher) {
-    hasher.combine(ObjectIdentifier(self))
+    hasher.combine(self.id)
   }
   
-  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
-    print("++ open baseItemMixin childItemIterator")
+  
+  
+  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
+    //print("++ open baseItemMixin childItemIterator")
     /*
      if not skip_autoitems:
          for item in self.autocharges.values():
@@ -476,7 +478,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     }
     
     self.itemType = result
-    print("++ load itemType result \(result.name)")
+    print("++ load itemType result \(result.name) effects \(result.effects.map { $0.value.effectId})")
     if let fit = fit {
       let messages = MessageHelper.getItemLoadedMessages(item: self)
       fit.publishBulk(messages: messages)

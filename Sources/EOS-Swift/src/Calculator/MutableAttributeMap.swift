@@ -46,7 +46,7 @@ public class MutableAttributeMap {
   var capMap: KeyedStorage<Int64>?
 
 
-  var length: Int {
+  public var length: Int {
     return keys.count
   }
 
@@ -249,7 +249,7 @@ extension MutableAttributeMap {
   ///   - `BaseValueError`: If base value for attribute being calculated cannot be found.
   
   func calculate(attributeId: Int64) throws -> Double? {
-    var logStuff: Bool = attributeId == AttrId.shield_em_dmg_resonance.rawValue
+    var logStuff: Bool = attributeId == AttrId.capacity.rawValue
     
     if logStuff {
       print("++ calculate \(attributeId)")
@@ -275,7 +275,7 @@ extension MutableAttributeMap {
     var value = item.typeAttributes[attributeId, default: Double(attribute.default_value)]
     
     if logStuff {
-      print("++ got type attributes \(item.typeAttributes[attributeId])")
+      print("++ got type attributes \(item.typeAttributes[attributeId]) in \(item.typeAttributes)")
     }
     
     //print("++ default value \(value)")
@@ -331,13 +331,15 @@ extension MutableAttributeMap {
       // Resistance attribute actually defines resonance, where 1 means 0%
       // resistance and 0 means 100% resistance
       modValue = normalizationFunc(modValue) * res
+      var penaltyImmune: Bool = true
+      if let typeCategoryId = TypeCategoryId(rawValue: affectorItem.itemType!.categoryId) {
+        penaltyImmune = PENALTY_IMMUNE_CATEGORY_IDS.contains(typeCategoryId)
+      }
       
       // Decide if modification should be stacking penalized or not
       let penalize: Bool =
         !attribute.stackable &&
-        !PENALTY_IMMUNE_CATEGORY_IDS.contains(
-          TypeCategoryId(rawValue: affectorItem.itemType!.categoryId)!
-        ) &&
+        !penaltyImmune &&
         PENALIZABLE_OPERATORS.contains(modOperator)
       
       guard let modAggregateMode = value.aggregateMode else {

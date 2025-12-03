@@ -75,6 +75,20 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
         type: DogmaAttributeData.self
       ).map { $0.1 }) ?? []
   }
+  
+  public func getDogmaAttributesDict() async -> [Int64: DogmaAttributeData] {
+    let fetcher = await YamlDataFetcher.shared
+    let data = (try? await fetcher.readYamlAsync(
+      for: .dogmaAttrbutes,
+      type: DogmaAttributeData.self
+    )) ?? []
+    
+    var returnData: [Int64: DogmaAttributeData] = [:]
+    for(key, value) in data {
+      returnData[key] = value
+    }
+    return returnData
+  }
 
   public func getDogmaTypeAttributes() async -> [DogmaTypeAttributeData] {
     let fetcher = await YamlDataFetcher.shared
@@ -82,7 +96,6 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       for: .typeDogma,
       type: TypeDogmaAttributeDataOuter.self
     )) ?? []
-    
     let bar = foo.flatMap { value in
       return (value.0, value.1)
     }
@@ -102,6 +115,47 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
         value: $0.1.value
       )
     }
+    //return bar1.flatMap { $0 }
+      
+  }
+  
+  public func getDogmaTypeAttributesDict() async -> [DogmaTypeAttributeData] {
+    let fetcher = await YamlDataFetcher.shared
+    let foo: [(Int64, TypeDogmaAttributeDataOuter)] = (try? await fetcher.readYamlAsync(
+      for: .typeDogma,
+      type: TypeDogmaAttributeDataOuter.self
+    )) ?? []
+    
+    
+//    let bar = foo.flatMap { value in
+//      return (value.0, value.1)
+//    }
+
+    var returnValues: [Int64: DogmaTypeAttributeData] = [:]
+    for value in foo {
+      
+      //returnValues[value.0] = DogmaTypeAttributeD
+    }
+    
+    let bar1: [[(Int64, TypeDogmaAttributeData)]] = foo.map { value in
+      let value1 = value.1
+      return value1.dogmaAttributes.map { value2 in
+        return (value.0, value2)
+      }
+    }
+    
+    let res: [(Int64, TypeDogmaAttributeData)] = bar1.flatMap { $0 }
+    let returnVals: [DogmaTypeAttributeData] = res.map {
+      DogmaTypeAttributeData(
+        typeID: $0.0,
+        attributeID: $0.1.attributeID,
+        value: $0.1.value
+      )
+    }
+    for value in returnVals {
+      
+    }
+    return returnVals
     //return bar1.flatMap { $0 }
       
   }
@@ -126,11 +180,14 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
     print("++ getDogmaTypeEffects \(result.count) ")
     
     rows = result.flatMap { (typeId, typeData) in
-      return typeData.dogmaEffects?.map {
-        DogmaTypeEffect(
+      return typeData.dogmaEffects?.map { value in
+        if typeId == 2929 {
+          print("&& effectID for \(typeId) is value \(value.effectID)")
+        }
+        return DogmaTypeEffect(
           typeId: typeId,
-          effectID: $0.effectID,
-          isDefault: $0.isDefault
+          effectID: value.effectID,
+          isDefault: value.isDefault
         )
       } ?? []
     }

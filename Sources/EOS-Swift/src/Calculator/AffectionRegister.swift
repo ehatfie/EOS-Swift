@@ -4,7 +4,7 @@
 //
 //  Created by Erik Hatfield on 9/11/25.
 //
-
+import Foundation
 
 struct Key1: Hashable {
   //affecteeDomain, affecteeItem.itemType?.groupId
@@ -246,7 +246,7 @@ class AffectionRegister {
   /// We track affectee items to efficiently update attributes when set of items influencing them changes.
   func registerAffecteeItem(affecteeItem: BaseItemMixin) {
     if affecteeItem.itemType?.name == "EM Shield Hardener II" {
-      print("^^ registerAffecteeItem \(affecteeItem.itemType?.name)")
+      print("^^ registerAffecteeItem \(affecteeItem)")
     }
    // self.affectees.insert(AffecteeInfo)
     self.affectees.insert(affecteeItem)
@@ -457,15 +457,18 @@ class AffectionRegister {
     
     // Domain and skill requirement
     storage = self.affecteesDomainSkillRequirement
-    for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [:] {
-      key = (affecteeFit, affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
-      storages.append((key, storage))
-    }
+//    for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [:] {
+//      
+//      key = Key1(affecteeDomain: affecteeDomain, groupID: affecteeSkillRequirementTypeId)
+//      storages.append((key, storage))
+//    }
     // Owner-modifiable and skill requirement
     if affecteeItem.ownerModifiable {
       storage = self.affecteesOwnerSkillRequirement
       for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [:] {
-        key = (affecteeFit, affecteeSkillRequirementTypeId) as! AnyHashable
+        
+        //key = (affecteeFit, affecteeSkillRequirementTypeId) as! AnyHashable
+        let key = FitSkillKey(fitID: affecteeFit.id, skillRequirementTypeId: KeyValueKey(key: affecteeSkillRequirementTypeId.key, value: affecteeSkillRequirementTypeId.value)) as! AnyHashable
         storages.append((key, storage))
       }
     }
@@ -902,4 +905,19 @@ struct DomainSkillKey: Hashable {
     hasher.combine(affecteeDomain)
     hasher.combine(affecteeSkillRequirementTypeId)
   }
+}
+
+struct FitSkillKey: Hashable {
+  let fitID: Int64
+  let skillRequirementTypeId: KeyValueKey
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(fitID)
+    hasher.combine(skillRequirementTypeId)
+  }
+}
+
+struct KeyValueKey: Hashable {
+  let key: Int64
+  let value: Int64
 }

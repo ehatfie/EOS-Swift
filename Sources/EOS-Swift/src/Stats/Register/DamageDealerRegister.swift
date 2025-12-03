@@ -57,28 +57,31 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
   ) -> DamageStats {
     var dpsValues: [DamageStats] = []
     for item in self.ddIterator(itemFilter: itemFilter) {
+      print("++ dd item \(item.itemType!.name)")
+      
       if let dps = item.getDps(reload: reload, targetResists: targetResists) {
         dpsValues.append(dps)
       }
     }
     let combined = DamageStats.combined(dpsValues)
-    print("++ getDPS \(dpsValues.count) values combined to \(combined)")
+    print("++ getDPS \(dpsValues.count) values combined to \(combined?.em) \(combined?.kinetic ?? -1) \(combined?.thermal ?? -1) \(combined?.explosive ?? -1)")
     return combined ?? DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
   
   public func handleEffectsStarted(message: EffectsStarted) {
     let itemEffects = message.item.typeEffects
-    print("&& DDR handleEffectsStarted \(message.item.typeId) \(message.effectIds) itemEffects \(itemEffects)")
+    print("&& DDR handleEffectsStarted \(message.item.itemType?.name) \(message.effectIds) itemEffects \(itemEffects)")
     
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
         if let foo = message.item as? (any DamageDealerMixinProtocol) {
+          print("&& got damage dealer effect \(effect)")
           self.damageDealers[effectId] = foo
         } else {
-          print("not DamageDealerMixinProtocol")
+          print("&& not DamageDealerMixinProtocol")
         }
       } else {
-        
+        print("&& not right effect is \(effectId)")
       }
     }
   }

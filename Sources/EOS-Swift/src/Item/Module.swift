@@ -26,7 +26,7 @@ protocol ModuleProtocol:
   var reloadTime: Double? { get }
   var reactivationDelay: Double? { get }
 
-  func childItemIterator() -> AnyIterator<any BaseItemMixinProtocol>
+  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>
 }
 
 public class Module:
@@ -36,6 +36,7 @@ public class Module:
   SingleTargetableMixinProtocol,
   ModuleProtocol
 {
+  
   public func subItemIterator(item: BaseItemMixin) -> AnyIterator<any BaseItemMixinProtocol> {
     return self.subItemIterator(item: item as! BaseItemMixin) as! AnyIterator<any BaseItemMixinProtocol>
   }
@@ -52,7 +53,7 @@ public class Module:
   
   var target: (any BaseItemMixinProtocol)?
   
-  var charge: ItemDescriptor<Charge>
+  public var charge: ItemDescriptor<Charge>
   /*
    Max quantity of loadable charges.
   
@@ -63,14 +64,19 @@ public class Module:
       attribute values is not defined, or no charge is found in item, None
       is returned.
    */
-  var chargeQuantity: Double? {
+  public var chargeQuantity: Double? {
     guard let charge = charge.get() else { return nil }
-
-    guard let containerCapacity = self.attributes![AttrId.capacity.rawValue],
-          let chargeVolume = self.attributes![AttrId.volume.rawValue]
+    
+    guard
+      let attributes = charge.attributes,
+      let containerCapacity = self.attributes![AttrId.capacity.rawValue],
+          let chargeVolume = attributes[AttrId.volume.rawValue]
     else {
       return nil
     }
+    self.itemType
+    print("++ containerCapacity \(containerCapacity) chargeVolume \(chargeVolume)")
+    print("++ \(self.typeId)(our) attributes \(self.attributes?.keys ?? [-1]), charge attributes \(charge.attributes?.keys ?? [-1])")
     let chargeQuantity = Double(containerCapacity / chargeVolume)
     return chargeQuantity
   }
@@ -117,7 +123,7 @@ public class Module:
     super.init(typeId: typeId, state: state)
     if let charge = charge {
       do {
-        print("++ pre-charge set")
+        print("++ pre-charge set \(charge.typeId)")
         try self.charge.set(item: charge, parent: self)
       } catch let error {
         print("++ module init set charge error \(error)")
@@ -129,23 +135,23 @@ public class Module:
     self.modifierDomain = .ship
   }
   
-  override public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
-    print("++ module childItemIterator")
-    let charge = self.charge.item
-    let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
-    let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
-    let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
-    var index: Int = 0
-    print("++ module childItemIterator value count \(values.count) with \(values)")
-    return AnyIterator {
-      guard index < values.count else { return nil }
-      defer { index += 1 }
-      return values[index]
-    }
-  }
-  
+//  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {
+//    print("++ module childItemIterator")
+//    let charge = self.charge.item
+//    let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
+//    let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
+//    let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
+//    var index: Int = 0
+//    print("++ module childItemIterator value count \(values.count) with \(values)")
+//    return AnyIterator {
+//      guard index < values.count else { return nil }
+//      defer { index += 1 }
+//      return values[index]
+//    }
+//  }
+  //public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
   // duplicate?? Pretty sure the above is the right way to do it
-  func childItemIterator() -> AnyIterator<any BaseItemMixinProtocol> {
+  override public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
     print("++ module childItemIterator2")
     let charge = self.charge.item
     let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}

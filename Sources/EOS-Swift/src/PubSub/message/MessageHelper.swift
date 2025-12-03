@@ -103,12 +103,15 @@ class MessageHelper {
   /// Besides generating messages, it actually updates item's set of effects
   /// which are considered as running.
   static func getEffectsStatusUpdateMessages(item: any BaseItemMixinProtocol) -> [any Message] {
-    print(":: getEffectsStatusUpdateMessages for \(item.typeId) \(item.itemType?.name) has \(item.typeEffects.count) typeEffects \(item.typeEffects)")
+    print(":: getEffectsStatusUpdateMessages for \(item.typeId) \(item.itemType?.name) has \(item.typeEffects.count) typeEffects \(item.typeEffects.map { $0.value.effectId})")
     // Set of effects which should be running according to new conditions
     var newRunningEffectIds: Set<Int64> = []
     let effectStatus = EffectStatusResolver.resolveEffectsStatus(item: item)
+    if item.typeId == 2929 {
+      print()
+    }
+    
     for (effectId, status) in effectStatus {
-      
       if status {
         newRunningEffectIds.insert(effectId)
       }

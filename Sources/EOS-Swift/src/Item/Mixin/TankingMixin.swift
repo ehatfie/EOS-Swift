@@ -74,7 +74,10 @@ extension BufferTankingMixinProtocol {
   }
   
   public func getResistByAttribute(attributeID: AttrId) -> Double {
-    let attributeValue = self.attributes![attributeID.rawValue, default: 1]
+    guard let attributes = self.attributes else {
+      return 1
+    }
+    let attributeValue = attributes[attributeID.rawValue, default: 1]
     return 1 - attributeValue
   }
   

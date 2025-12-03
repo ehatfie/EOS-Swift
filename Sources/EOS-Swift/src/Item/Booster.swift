@@ -13,6 +13,25 @@ struct SideEffectData {
 }
 
 class Booster: ImmutableStateMixinProtocol {
+  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
+    print("!! booster bad childItemIterator impl")
+    var values: [(any BaseItemMixinProtocol)?] = []
+    var index: Int = 0
+    
+    if !skipAutoItems {
+//      if let autocharges = self.autocharges {
+//        values.append(contentsOf: autocharges.values())
+//      }
+    }
+    
+    return AnyIterator {
+      guard index < values.count else { return nil }
+      defer { index += 1 }
+      return values[index]
+    }
+  }
+//  }
+  
   var id: UUID = UUID()
   
   let SIDE_EFFECT_STATE = StateI.offline

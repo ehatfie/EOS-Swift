@@ -28,7 +28,7 @@ protocol DefaultHaving {
 
 
 public class Fit: FitMessageBroker<MockSubscriber> {
-  var id: Int64 = 0
+  public var id: Int64 = 0
   public var solarSystem: SolarSystem?
   public weak var fleet: MockFleet?
   var shipDescriptor: ItemDescriptor<Ship>
@@ -175,12 +175,12 @@ public class Fit: FitMessageBroker<MockSubscriber> {
 
     // TODO: Simplify
     let skills = fit!.skills.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
     
     let implants = fit!.implants.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
     
@@ -190,17 +190,17 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     }.flatMap { $0 }
 
     let subsystems = fit!.subsystems.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
     
     let modules = self.modules.items().iter().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
     
     let rigs = fit!.rigs.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems)?.map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
       return [item] + children
     }.flatMap { $0 }
 

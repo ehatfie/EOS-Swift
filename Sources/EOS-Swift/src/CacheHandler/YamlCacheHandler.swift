@@ -162,7 +162,7 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
   ) {
     for row in types {
       if row.typeId == 2929 {
-        print(":: updateMemoryCache2 \(row.typeId) has effects \(row.effects.count)")
+        print(":: updateMemoryCache2 \(row.typeId) has effects \(row.effects.map{ $0.value.effectId })")
       }
       typeStore[row.typeId] = row
     }

@@ -14,7 +14,45 @@ public protocol DamageDealerMixinProtocol: BaseItemMixinProtocol {
 }
 
 extension DamageDealerMixinProtocol {
-  public func ddEffectIter() -> AnyIterator<DamageDealerEffect>? { nil }
+  public func ddEffectIter() -> AnyIterator<DamageDealerEffect>? {
+    var effects: [DamageDealerEffect] = []
+    var suppressorEffects: [Effect] = []
+    /*
+     effects = []
+     suppressor_effects = []
+     for effect in self._type_effects.values():
+         if not isinstance(effect, DmgDealerEffect):
+             continue
+         if effect.id not in self._running_effect_ids:
+             continue
+         effects.append(effect)
+         if effect.suppress_dds:
+             suppressor_effects.append(effect)
+     # If we have any effects which suppress other effects on this item,
+     # we're going to cycle only through them
+     if suppressor_effects:
+         effects = suppressor_effects
+     for effect in effects:
+         yield effect
+     */
+    for effect in self.typeEffects.values {
+      if !(effect is DamageDealerEffect) {
+        continue
+      }
+      if !self.runningEffectIds.contains(effect.effectId) {
+        continue
+      }
+      effects.append(effect as! DamageDealerEffect)
+    }
+    let values = effects
+    
+    var index: Int = 0
+    return AnyIterator {
+      guard index < values.count else { return nil }
+      defer { index += 1 }
+      return values[index]
+    }
+  }
   
   public func getVolley(targetResists: ResistProfile? = nil) -> DamageStats? {
     var volleys: [DamageStats] = []
@@ -31,7 +69,9 @@ extension DamageDealerMixinProtocol {
   public func getDps(reload: Bool = false, targetResists: ResistProfile? = nil) -> DamageStats? {
     var dpss: [DamageStats] = []
     
-    guard let iterator = self.ddEffectIter() else { return nil }
+    guard let iterator = self.ddEffectIter() else {
+      return nil
+    }
     
     for effect in iterator {
       let dps = effect.getDps(item: self, reload: reload)
