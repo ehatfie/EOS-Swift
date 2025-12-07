@@ -111,10 +111,20 @@ public class Module:
     return delayMs / 1000
   }
 
-  var cycleTime: Double = 0
-
-  func safeGetFromDefeff(key: String) {
-
+  public var cycleTime: Double? {
+    self.safeGetFromDefeff(key: "get_duration")
+  }
+  
+  public var optimalRange: Double? {
+    self.safeGetFromDefeff(key: "get_optimal_range")
+  }
+  
+  public var falloffRange: Double? {
+    self.safeGetFromDefeff(key: "get_falloff_range")
+  }
+  
+  public var trackingSpeed: Double? {
+    self.safeGetFromDefeff(key: "get_tracking_speed")
   }
 
   public init(typeId: Int64, state: StateI = .offline, charge: Charge? = nil) {
@@ -133,6 +143,24 @@ public class Module:
     
     self.ownerModifiable = false
     self.modifierDomain = .ship
+  }
+  
+
+  
+  func safeGetFromDefeff(key: String) -> Double? {
+    let defaultEffect = self.typeDefaultEffect
+    if let effect = defaultEffect as? Effect {
+      switch key {
+      case "get_duration": return effect.getDuration(item: self)
+      case "get_optimal_range": return effect.getOptimalRange(item: self)
+      case "get_falloff_range": return effect.getFalloffRange(item: self)
+      case "get_tracking_speed": return effect.getTrackingSpeed(item: self)
+      default: return nil
+      }
+    } else {
+      print("couldnt convert \(defaultEffect)")
+    }
+    return nil
   }
   
 //  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>? {

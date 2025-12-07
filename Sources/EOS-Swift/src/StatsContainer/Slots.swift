@@ -7,6 +7,6 @@
 
 
 public struct SlotStats {
-  let used: Int
-  let total: Int
+  public let used: Int
+  public let total: Int
 }

@@ -5,13 +5,51 @@
 //  Created by Erik Hatfield on 9/6/25.
 //
 
+/*
+ @property
+    def optimal_range(self):
+        return self.__safe_get_from_defeff('get_optimal_range')
+
+    @property
+    def falloff_range(self):
+        return self.__safe_get_from_defeff('get_falloff_range')
+
+    @property
+    def tracking_speed(self):
+        return self.__safe_get_from_defeff('get_tracking_speed')
+
+    def __safe_get_from_defeff(self, method):
+        default_effect = self._type_default_effect
+        if default_effect is None:
+            return None
+        return getattr(default_effect, method)(self)
+
+ */
+
 protocol DefaultEffectProxyMixinProtocol: BaseItemMixinProtocol {
-  var cycleTime: Double { get }
-  func safeGetFromDefeff(key: String)
+  var cycleTime: Double? { get }
+  var optimalRange: Double? { get }
+  var falloffRange: Double? { get }
+  var trackingSpeed: Double? { get }
+  
+  func safeGetFromDefeff(key: String) -> Double?
 }
+
 class DefaultEffectProxyMixin: BaseItemMixin {
   var cycleTime: Double? {
     self.safeGetFromDefeff(key: "get_duration")
+  }
+  
+  var optimalRange: Double? {
+    self.safeGetFromDefeff(key: "get_optimal_range")
+  }
+  
+  var falloffRange: Double? {
+    self.safeGetFromDefeff(key: "get_falloff_range")
+  }
+  
+  var trackingSpeed: Double? {
+    self.safeGetFromDefeff(key: "get_tracking_speed")
   }
   
   func safeGetFromDefeff(key: String) -> Double? {

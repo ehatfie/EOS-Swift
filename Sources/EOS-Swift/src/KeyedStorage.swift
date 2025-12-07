@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/11/25.
 //
 
-class KeyedStorage<T: Hashable> {
+public class KeyedStorage<T: Hashable> {
   var dictionary: [AnyHashable: Set<T>] = [:]
   
   func addDataSet(key: AnyHashable, dataSet: [T]) {

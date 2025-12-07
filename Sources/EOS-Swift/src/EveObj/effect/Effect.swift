@@ -95,21 +95,6 @@ public class Effect: Hashable {
     self.resistanceAttributeID = resistanceAttributeID
     self.buildStatus = buildStatus
     self.modifiers = modifiers
-    /*
-     self.id = effect_id
-     self.category_id = category_id
-     self.is_offensive = bool(is_offensive)
-     self.is_assistance = bool(is_assistance)
-     self.duration_attr_id = duration_attr_id
-     self.discharge_attr_id = discharge_attr_id
-     self.range_attr_id = range_attr_id
-     self.falloff_attr_id = falloff_attr_id
-     self.tracking_speed_attr_id = tracking_speed_attr_id
-     self.fitting_usage_chance_attr_id = fitting_usage_chance_attr_id
-     self.resist_attr_id = resist_attr_id
-     self.build_status = build_status
-     self.modifiers = modifiers
-     */
   }
 
   var isProjectable: Bool {

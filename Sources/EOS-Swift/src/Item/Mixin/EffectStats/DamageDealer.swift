@@ -98,7 +98,7 @@ extension DamageDealerMixinProtocol {
   }
 }
 
-class DamageDealerMixin: BaseItemMixin {
+public class DamageDealerMixin: BaseItemMixin {
   func ddEffectIter() -> AnyIterator<DamageDealerEffect>? { nil }
   
   func getVolley(targetResists: ResistProfile? = nil) -> DamageStats? {

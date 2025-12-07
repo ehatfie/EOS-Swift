@@ -327,7 +327,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   public static func == (lhs: BaseItemMixin, rhs: BaseItemMixin) -> Bool {
-    return lhs.typeId == rhs.typeId
+    return lhs.id == rhs.id
   }
   
   public func hash(into hasher: inout Hasher) {
