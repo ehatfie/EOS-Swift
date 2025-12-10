@@ -8,7 +8,7 @@
 import Foundation
 import Yams
 
-public let allowedGroups: Set<Int64> = [27, 77, 508, 89, 55, 372]
+public let allowedGroups: Set<Int64> = [27, 77, 508, 89, 53, 55, 74, 372]
 
 public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
 

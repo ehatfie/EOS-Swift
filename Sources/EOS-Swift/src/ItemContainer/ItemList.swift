@@ -24,7 +24,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     return self.parent?.fit
   }
   
-  init(parent: any MaybeFitHaving) {
+  public init(parent: (any MaybeFitHaving)?) {
     //super.init(parent: parent)
     self.parent = parent
     self.list = []

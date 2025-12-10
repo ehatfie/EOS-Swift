@@ -13,6 +13,10 @@ struct SideEffectData {
 }
 
 class Booster: ImmutableStateMixinProtocol {
+  func load(from source: any BaseCacheHandlerProtocol) {
+    
+  }
+  
   public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
     print("!! booster bad childItemIterator impl")
     var values: [(any BaseItemMixinProtocol)?] = []

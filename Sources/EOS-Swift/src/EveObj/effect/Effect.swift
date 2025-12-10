@@ -237,7 +237,10 @@ extension Effect {
   }
   
   static func safeGetAttributeValue(item: any BaseItemMixinProtocol, attributeID: AttrId) -> Double {
-    return item.attributes![attributeID.rawValue, default: 0]
+    var hasValue = item.attributes![attributeID.rawValue]
+    
+    print("++ safeGetAttributeValue hasValue for \(attributeID.rawValue) \(hasValue)")
+    return item.typeAttributes[attributeID.rawValue, default: 0]
   }
   
   func getForcedInactiveTime(item: any BaseItemMixinProtocol) -> Double {

@@ -9,4 +9,9 @@
 public struct SlotStats {
   public let used: Int
   public let total: Int
+  
+  public init(used: Int, total: Int) {
+    self.used = used
+    self.total = total
+  }
 }

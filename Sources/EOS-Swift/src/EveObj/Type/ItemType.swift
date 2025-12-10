@@ -10,9 +10,9 @@ public class ItemType {
   let typeId: Int64
   let groupId: Int64
   let categoryId: Int64
-  let attributes: [Int64: Double]
-  let effects: [Int64: Effect]
-  let defaultEffect: Effect?
+  public let attributes: [Int64: Double]
+  public let effects: [Int64: Effect]
+  public let defaultEffect: Effect?
   let abilitiesData: [Int64: (Double, Int)]
   let requiredSkills: [Int64: Int64]
 

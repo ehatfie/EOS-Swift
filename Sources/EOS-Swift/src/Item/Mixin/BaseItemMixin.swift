@@ -55,6 +55,8 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   func load()
   func unload()
   
+  func load(from source: BaseCacheHandlerProtocol)
+  
   func clearAutocharges()
   
 }
@@ -473,6 +475,28 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
       return
     }
     guard let result = cacheHandler.getType(typeId: self.typeId) else {
+      print("++ no cache result \(self.typeId)")
+      return
+    }
+    
+    self.itemType = result
+    print("++ load itemType result \(result.name) effects \(result.effects.map { $0.value.effectId})")
+    if let fit = fit {
+      let messages = MessageHelper.getItemLoadedMessages(item: self)
+      fit.publishBulk(messages: messages)
+    }
+    
+    for (effectId, effect) in self.typeEffects {
+      guard let autoChargeTypeId = effect.getAutoChargeTypeId(item: self) else {
+        continue
+      }
+      
+      self.addAutoCharge(effectId: effectId, autoChargeTypeId: autoChargeTypeId)
+    }
+  }
+  
+  public func load(from source: any BaseCacheHandlerProtocol) {
+    guard let result = source.getType(typeId: self.typeId) else {
       print("++ no cache result \(self.typeId)")
       return
     }
