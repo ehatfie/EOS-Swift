@@ -52,7 +52,7 @@ public class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated
   }
   
   func clear() {
-    var items = set
+    let items = set
     for item in items {
       self.handleItemRemoval(item)
       self.set.remove(item)

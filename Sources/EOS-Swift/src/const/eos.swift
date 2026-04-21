@@ -156,7 +156,7 @@ public enum ModOperator: Int, CaseIterable, Sendable, Hashable {
 }
 
 public extension ModOperator {
-  public func hash(into hasher: inout Hasher) {
+  func hash(into hasher: inout Hasher) {
     hasher.combine(rawValue)
   }
 }

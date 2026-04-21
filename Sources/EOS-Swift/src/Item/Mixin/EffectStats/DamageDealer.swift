@@ -36,14 +36,16 @@ extension DamageDealerMixinProtocol {
          yield effect
      */
     for effect in self.typeEffects.values {
-      if !(effect is DamageDealerEffect) {
-        continue
-      }
+      guard let effect = effect as? DamageDealerEffect else { continue }
       if !self.runningEffectIds.contains(effect.effectId) {
         continue
       }
-      effects.append(effect as! DamageDealerEffect)
+      effects.append(effect)
+      if effect.suppressesDD {
+        suppressorEffects.append(effect)
+      }
     }
+
     let values = effects
     
     var index: Int = 0

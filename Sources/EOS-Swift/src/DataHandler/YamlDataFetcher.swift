@@ -137,10 +137,8 @@ class YamlDataFetcher: @unchecked Sendable {
     type: T.Type
   ) async -> [(Int64, T)] {
     var returnValue: [(Int64, T)] = []
-    //print("decode2() - start splits \(splits) for \(some.count)")
     let decoder = YAMLDecoder()
 
-    let start = Date()
     some.forEach { key, value in
       guard let keyValue = key.int else { return }
       do {
@@ -151,7 +149,6 @@ class YamlDataFetcher: @unchecked Sendable {
         print("Decode error \(err) for \(type) decode")
       }
     }
-    //print("decode2() -  took \(Date().timeIntervalSince(start))")
     return returnValue
   }
 }

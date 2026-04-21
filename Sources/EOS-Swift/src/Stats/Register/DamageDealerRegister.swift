@@ -29,11 +29,10 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
   
   public func ddIterator(itemFilter: Any?) -> AnyIterator<any DamageDealerMixinProtocol> {
     let foo = Array(self.damageDealers.dictionary.values)
-    let castFoo = foo as! [Set<BaseItemMixin>]
-    let bar = castFoo.flatMap { $0 }
+    let bar = foo.flatMap { $0 }
     
-    let values = bar.map { value in
-      value as! any DamageDealerMixinProtocol //as any DamageDealerMixinProtocol
+    let values = bar.compactMap { value in
+      value as? any DamageDealerMixinProtocol //as any DamageDealerMixinProtocol
     }
     print("++- ddIterator has \(values.count) items")
     var index = 0
@@ -69,13 +68,13 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
       }
     }
     let combined = DamageStats.combined(dpsValues)
-    print("++ getDPS \(dpsValues.count) values combined to \(combined?.em) \(combined?.kinetic ?? -1) \(combined?.thermal ?? -1) \(combined?.explosive ?? -1)")
+    print("++ getDPS \(dpsValues.count) values combined to \(String(describing: combined?.em)) \(combined?.kinetic ?? -1) \(combined?.thermal ?? -1) \(combined?.explosive ?? -1)")
     return combined ?? DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
   
   public func handleEffectsStarted(message: EffectsStarted) {
     let itemEffects = message.item.typeEffects
-    print("&& DDR handleEffectsStarted \(message.item.itemType?.name) \(message.effectIds) itemEffects \(itemEffects)")
+    print("&& DDR handleEffectsStarted \(String(describing: message.item.itemType?.name)) \(message.effectIds) itemEffects \(itemEffects)")
     
     /*
      item_effects = msg.item._type_effects
@@ -86,7 +85,7 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
      */
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? DamageDealerEffect {
-        if let foo = message.item as? (any DamageDealerMixinProtocol) {
+        if message.item is (any DamageDealerMixinProtocol) {
           print("&& got damage dealer effect \(effect)")
           self.damageDealers.addDataEntry(key: effectId, data: message.item as! BaseItemMixin)
         } else {

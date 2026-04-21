@@ -43,6 +43,8 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var attributes: MutableAttributeMap? { get set } // will be a custom dictionary type
   var autocharges: ItemDict<AutoCharge>? { get set }
   
+  var attributes1: MutableAttributeMapActor? { get set }
+  
   var _state: StateI { get set }
   var modifierDomain: ModDomain? { get set }
   var ownerModifiable: Bool { get set }
@@ -123,14 +125,12 @@ extension BaseItemMixinProtocol {
   }
   
   var typeEffects: [Int64: Effect] {
-    // return self.type.effects
-    let effects = itemType?.effects ?? [:]
     return self.itemType?.effects ?? [:]
   }
   
   var typeDefaultEffect: Any? {
     let itemTypeDefaultEffect = self.itemType?.defaultEffect
-    print(":: typeDefaultEffect is \(itemTypeDefaultEffect), hasItemType \(self.itemType != nil)")
+    print(":: typeDefaultEffect is \(String(describing: itemTypeDefaultEffect)), hasItemType \(self.itemType != nil)")
     return itemTypeDefaultEffect
   }
   
@@ -158,14 +158,10 @@ extension BaseItemMixinProtocol {
 
   func load() {
     print("!! Default Load Implementation")
-    // get a getter
-    for (effectId, effect) in self.typeEffects {
-      //let autoChargeTypeId = effect.getAutoChargeTypeId(item: )
-    }
   }
   
   func unload() {
-    let fit = self.fit
+    //let fit = self.fit
   
   }
 
@@ -184,7 +180,7 @@ extension BaseItemMixinProtocol {
     }
     
     if self.typeId == 2301 {
-      print(":: effects in \(effects) for item \(itemType?.name)")
+      print(":: effects in \(effects) for item \(String(describing: itemType?.name))")
     }
     
     return effects
@@ -219,7 +215,7 @@ extension BaseItemMixinProtocol {
     for (effectId, effectMode) in effectsModes {
       print("++ checking effectsModes effectId \(effectId) effectMode \(effectMode)")
       if effectMode == .full_compliance {
-        guard let effectModeOverrides else {
+        guard effectModeOverrides != nil else {
           continue
         }
         self.effectModeOverrides?[effectId] = nil
@@ -283,6 +279,8 @@ extension BaseItemMixinProtocol {
 }
 
 open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
+  public var attributes1: MutableAttributeMapActor?
+  
   public var id: UUID = UUID()
   
   public var attributes: MutableAttributeMap?
@@ -306,7 +304,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     if let container = self.container as? MaybeFitHaving {
       return container.fit
     }
-    print("-- \(self.typeId) container \(container)")
+    print("-- \(self.typeId) container \(String(describing: container))")
     return nil
   }
   
@@ -335,8 +333,6 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   public func hash(into hasher: inout Hasher) {
     hasher.combine(self.id)
   }
-  
-  
   
   public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
     //print("++ open baseItemMixin childItemIterator")
@@ -416,6 +412,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   var typeEffects: [Int64: Effect] {
+    print("!! typeEffects default implementation")
     // return self.type.effects
     /*
      effects = {}
@@ -425,13 +422,13 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
          effects[effect_id] = EffectData(effect, mode, status)
      return effects
      */
-    var returnValues = [Int64: Effect]()
+//    var returnValues = [Int64: Effect]()
+//    
+//    for value in (self.itemType?.effects ?? [:]) {
+//      
+//    }
     
-    for value in (self.itemType?.effects ?? [:]) {
-      
-    }
-    
-    return returnValues
+    return [:]//returnValues
   }
   
   var typeDefaultEffect: Effect? {
@@ -471,7 +468,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     print("++ loadFor \(self.typeId)")
     let fit = self.fit
     guard let cacheHandler = fit?.solarSystem?.source?.cacheHandler else {
-      print("++ no cacheHandler for \(self.typeId) fit: \(fit) solarSystem: \(fit?.solarSystem) source: \(fit?.solarSystem?.source) \(fit?.solarSystem?.source?.cacheHandler)")
+      print("++ no cacheHandler for \(self.typeId) fit: \(String(describing: fit)) solarSystem: \(String(describing: fit?.solarSystem)) source: \(String(describing: fit?.solarSystem?.source)) \(String(describing: fit?.solarSystem?.source?.cacheHandler))")
       return
     }
     guard let result = cacheHandler.getType(typeId: self.typeId) else {
@@ -530,7 +527,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   }
   
   var effects: [Int64: EffectData] {
-    var effects: [Int64: EffectData] = [:]
+    let effects: [Int64: EffectData] = [:]
     
 //    for (key, value) in self.typeEffects {
 //      let effectMode = self.getEffectMode(effectId: key)
@@ -560,7 +557,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   func setEffectsModes(effectsModes: [Int64: EffectMode]) {
     for (effectId, effectMode) in effectsModes {
       if effectMode == .full_compliance {
-        guard let effectModeOverrides else {
+        guard effectModeOverrides != nil else {
           continue
         }
         self.effectModeOverrides?[effectId] = nil

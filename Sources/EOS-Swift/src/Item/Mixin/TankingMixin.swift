@@ -19,7 +19,7 @@ public protocol BufferTankingMixinProtocol: BaseItemMixinProtocol {
 
 extension BufferTankingMixinProtocol {
   public var hp: ItemHP {
-    print(".. attributes1 \(self.attributes)")
+    print(".. attributes1 \(String(describing: self.attributes))")
     let hull = self.attributes![AttrId.hp.rawValue, default: 0]
     let armor = self.attributes![AttrId.armor_hp.rawValue, default: 0]
     let shield = self.attributes![AttrId.shield_capacity.rawValue, default: 0]
@@ -83,8 +83,7 @@ extension BufferTankingMixinProtocol {
   
   public func getEHP(damageProfile: DamageProfile?) -> ItemHP {
     let fitDefault = self.fit?.defaultIncomingDamage
-    
-    let maybeDamageProfile = damageProfile ?? self.fit?.defaultIncomingDamage
+
     guard let actualDamageProfile = damageProfile ?? fitDefault else {
       return .init(hull: 0, armor: 0, shield: 0)
     }
@@ -188,7 +187,6 @@ public class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   }
   
   public func getEHP(damageProfile: DamageProfile?) -> ItemHP {
-    let maybeDamageProfile = damageProfile ?? self.fit?.defaultIncomingDamage
     guard let actualDamageProfile = damageProfile else {
       return .init(hull: 0, armor: 0, shield: 0)
     }
@@ -249,7 +247,7 @@ public class BufferTankingMixin: BaseItemMixin, BufferTankingMixinProtocol {
   }
   
   public var hp: ItemHP {
-    print(".. attributes \(self.attributes)")
+    print(".. attributes \(String(describing: self.attributes))")
     let hull = self.attributes![AttrId.hp.rawValue, default: 0]
     let armor = self.attributes![AttrId.armor_hp.rawValue, default: 0]
     let shield = self.attributes![AttrId.shield_capacity.rawValue, default: 0]

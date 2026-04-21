@@ -10,7 +10,7 @@
 class ModInfoConverter {
   static func convert(modInfos: [ModifierData]) -> ([DogmaModifier], Int) {
     var dogmaModifiers: [DogmaModifier] = []
-    var fails: Int = 0
+    let fails: Int = 0
     
     for modInfo in modInfos {
       let modOperator = ModOperator(rawValue: Int(modInfo.operation ?? 0))

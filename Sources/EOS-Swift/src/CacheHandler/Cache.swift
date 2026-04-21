@@ -165,7 +165,6 @@ extension Cache where Key: Codable, Value: Codable {
     )
     
     let fileURL = folderURLs[0].appendingPathComponent(name + ".cache")
-    let foo = try Data(contentsOf: fileURL)
     let data = try JSONEncoder().encode(self)
     try data.write(to: fileURL)
   }

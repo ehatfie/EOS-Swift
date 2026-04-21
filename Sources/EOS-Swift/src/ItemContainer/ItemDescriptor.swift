@@ -35,14 +35,14 @@ public class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, May
       self.handleItemRemoval(oldItem)
     }
     
-    guard let parent = parent as? ItemContainerBaseProtocol else {
+    guard let parent = parent as? (any ItemContainerBaseProtocol) else {
       return
     }
     
     self.item = item
     do {
       try self.handleItemAddition(item: item, container: parent)
-    } catch let error {
+    } catch {
       if let oldItem {
         try self.handleItemAddition(item: oldItem, container: parent)
       }
@@ -56,15 +56,10 @@ public class ItemDescriptor<T: BaseItemMixinProtocol>: ItemContainerBase<T>, May
     if let oldItem {
       self.handleItemRemoval(oldItem)
     }
-    
-    guard let parent = parent as? ItemContainerBaseProtocol else {
-      return
-    }
-    
     self.item = item
     do {
       try self.handleItemAddition(item: item, container: parent)
-    } catch let error {
+    } catch {
       if let oldItem {
         try self.handleItemAddition(item: oldItem, container: parent)
       }

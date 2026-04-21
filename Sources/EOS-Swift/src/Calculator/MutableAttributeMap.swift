@@ -30,9 +30,8 @@ let PENALIZABLE_OPERATORS: Set<ModOperator> = [
 ]
   //e−(u/2.67)2
 //# Stacking penalty base constant, used in attribute calculations
-let PENALTY_BASE = 1 / pow((1 / 2.67), 2)
+let PENALTY_BASE = 1.0 / pow((1.0 / 2.67), 2)
 
-// TODO: Implement
 public class MutableAttributeMap {
   // New
   let dataSource: DataSource? = nil
@@ -111,7 +110,7 @@ public class MutableAttributeMap {
   func getValue(attributeId: Int64) -> Double? {
     print("^^ MutableAttributeMap - getValue \(attributeId)")
     if let overrideCallbacks,
-       let callback = overrideCallbacks[attributeId]
+       let _ = overrideCallbacks[attributeId]
     {
       print("TODO: getValue callback")
       return nil
@@ -120,7 +119,7 @@ public class MutableAttributeMap {
     guard let value = self.modifiedAttributes[attributeId] else {
       do {
         let value = try self.calculate(attributeId: attributeId)
-        print("++ getValue returning calculated value \(value)")
+        print("++ getValue returning calculated value \(String(describing: value))")
         return value
       } catch let err {
         print("!! calc error \(err)")
@@ -194,7 +193,7 @@ public class MutableAttributeMap {
   
   /// Remove override callback from attribute.
   func delOverrideCallback(attrId: Int64) {
-    let val = self.overrideCallbacks?.removeValue(forKey: attrId)
+    _ = self.overrideCallbacks?.removeValue(forKey: attrId)
     
     if let oc = self.overrideCallbacks, oc.isEmpty {
       self.overrideCallbacks = nil
@@ -249,7 +248,7 @@ extension MutableAttributeMap {
   ///   - `BaseValueError`: If base value for attribute being calculated cannot be found.
   
   func calculate(attributeId: Int64) throws -> Double? {
-    var logStuff: Bool = attributeId == AttrId.capacity.rawValue
+    let logStuff: Bool = attributeId == AttrId.capacity.rawValue
     
     if logStuff {
       print("++ calculate \(attributeId)")
@@ -261,12 +260,12 @@ extension MutableAttributeMap {
     }
     
     if logStuff {
-      print("++ calculate for item \(item.itemType?.name)")
+      print("++ calculate for item \(String(describing: item.itemType?.name))")
       print("")
     }
     guard let attribute  = item.fit?.solarSystem?.source?.cacheHandler.getAttribute(attributeId: attributeId) else {
       if logStuff {
-        print("++ calculate no something fit: \(item.fit) system \(item.fit?.solarSystem) source \(item.fit?.solarSystem?.source) cacheHandler \(item.fit?.solarSystem?.source?.cacheHandler)")
+        print("++ calculate no something fit: \(String(describing: item.fit)) system \(String(describing: item.fit?.solarSystem)) source \(String(describing: item.fit?.solarSystem?.source)) cacheHandler \(String(describing: item.fit?.solarSystem?.source?.cacheHandler))")
       }
       
       return nil
@@ -275,7 +274,7 @@ extension MutableAttributeMap {
     var value = item.typeAttributes[attributeId, default: Double(attribute.default_value)]
     
     if logStuff {
-      print("++ got type attributes \(item.typeAttributes[attributeId]) in \(item.typeAttributes)")
+      print("++ got type attributes \(String(describing: item.typeAttributes[attributeId])) in \(item.typeAttributes)")
     }
     
     //print("++ default value \(value)")
@@ -292,7 +291,7 @@ extension MutableAttributeMap {
     )// ?? []
     
     if logStuff {
-      print("+++ modifications for \(attributeId) \(foo?.count)")
+      print("+++ modifications for \(attributeId) \(String(describing: foo?.count))")
       print()
     }
     
@@ -366,15 +365,6 @@ extension MutableAttributeMap {
         )
         aggregateMax[key, default: []].append((modValue, penalize))
       }
-    }
-    
-    var minClosure: (Double, Bool) -> Bool = { one, two in
-      
-      return false
-    }
-    
-    var closure2: (Double, Bool) -> Bool = { one, two in
-      return false//(one, !two)
     }
 
 //    let maxResult = aggregateMax.max(by: { one, two in
@@ -509,10 +499,7 @@ extension MutableAttributeMap {
     //f_n=exp(-(n-1)^2 * 0.14),
     
     //e−(u/2.67)2
-  //# Stacking penalty base constant, used in attribute calculations
-    let penaltyOne = (1 / 2.67)
-    // 1 + mod_value * PENALTY_BASE ** (pos ** 2)
-  let basePenalty = 1 / pow(penaltyOne, 2)
+
     
     for values in [chainPositive, chainNegative] {
       var chainValue: Double = 1
@@ -522,7 +509,12 @@ extension MutableAttributeMap {
         let stackingPenalty = exp(-pow(Double(offset - 1), 2) * 0.14)
         
         print(";; power for offset \(offset) modValue \(modValue) is \(power) penalty \(stackingPenalty)")
-        let chainValue = 1 + (modValue * stackingPenalty)
+        
+        /*
+         # Apply stacking penalty based on modification position
+         chain_value *= 1 + mod_value * PENALTY_BASE ** (pos ** 2)
+         */
+        chainValue *= 1 + (modValue * stackingPenalty)
         print(";; chainValue is \(chainValue)")
         value *= chainValue
       }

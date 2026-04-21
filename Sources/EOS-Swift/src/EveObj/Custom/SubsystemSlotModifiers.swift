@@ -8,7 +8,7 @@
 
 func makeSlotModifiers() -> [DogmaModifier] {
   
-  var values: [(AttrId, AttrId)] = [
+  let values: [(AttrId, AttrId)] = [
     (.hi_slot_modifier, .hi_slots),
     (.med_slot_modifier, .med_slots),
     (.low_slot_modifier, .low_slots)
@@ -33,7 +33,7 @@ func makeSlotModifiers() -> [DogmaModifier] {
 
 func makeHardpointModifiers() -> [DogmaModifier] {
   
-  var values: [(AttrId, AttrId)] = [
+  let values: [(AttrId, AttrId)] = [
     (.turret_hardpoint_modifier, .turret_slots_left),
     (.launcher_hardpoint_modifier, .launcher_slots_left)
   ]

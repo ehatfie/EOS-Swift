@@ -35,7 +35,6 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   public var ship: Ship? {
     set {
       if let newValue {
-        print("++ set ship to \(ship?.typeId)")
         try? self.shipDescriptor.set1(item: newValue, parent: self)
       }
       
@@ -64,18 +63,18 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   //  point.
   var defaultIncomingDamage: DamageProfile? {
     set {
-      print("++ setting incoming damage default \(newValue)")
+      print("++ setting incoming damage default \(String(describing: newValue))")
       self.incomingDamageDefault = newValue
     }
     get {
-      print("++ returning incoming damage default \(self.incomingDamageDefault)")
+      print("++ returning incoming damage default \(String(describing: self.incomingDamageDefault))")
       return self.incomingDamageDefault
     }
   }
   
   @MainActor
   public init(solarSystem: SolarSystem? = DefaultSolarSystem(source: nil), fleet: MockFleet?) {
-    print("++ fit init solarSystem \(solarSystem)")
+    print("++ fit init solarSystem \(String(describing: solarSystem))")
     self.solarSystem =  solarSystem
     self.fleet = fleet
     self.shipDescriptor = ItemDescriptor()
@@ -124,7 +123,8 @@ public class Fit: FitMessageBroker<MockSubscriber> {
       solarSystem.fit = self
     }
     
-    if let fleet = self.fleet {
+    if let _ = self.fleet {
+      // TODO: Implement fleet fit stuff
       //fleet.fits.add(self)
     }
     
@@ -175,12 +175,12 @@ public class Fit: FitMessageBroker<MockSubscriber> {
 
     // TODO: Simplify
     let skills = fit!.skills.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
       return [item] + children
     }.flatMap { $0 }
     
     let implants = fit!.implants.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
       return [item] + children
     }.flatMap { $0 }
     
@@ -190,17 +190,17 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     }.flatMap { $0 }
 
     let subsystems = fit!.subsystems.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
       return [item] + children
     }.flatMap { $0 }
     
     let modules = self.modules.items().iter().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
       return [item] + children
     }.flatMap { $0 }
     
     let rigs = fit!.rigs.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 } ?? []
+      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
       return [item] + children
     }.flatMap { $0 }
 

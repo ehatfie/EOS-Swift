@@ -50,7 +50,7 @@ public protocol RoundedShipRegularResourceRegisterProtocol: ShipRegularResourceR
 }
 
 public extension RoundedShipRegularResourceRegisterProtocol {  
-  public var used: Double {
+  var used: Double {
     round(usedI)
   }
 }
@@ -120,7 +120,7 @@ public class CPURegister: RoundedShipRegularResourceRegisterProtocol {
   public func handleEffectsStarted(message: EffectsStarted) {
     let isOnline =  message.effectIds.contains(self.useEffectId.rawValue)
     let bar = message.item.typeAttributes.keys.contains(where: { $0 == self.useAttrId.rawValue })
-    print("&& handleEffectsStarted \(message.item.typeId) \(message.item.itemType?.name) \(isOnline) \(bar)")
+    print("&& handleEffectsStarted \(message.item.typeId) \(String(describing: message.item.itemType?.name)) \(isOnline) \(bar)")
     guard isOnline && bar else {
       return
     }

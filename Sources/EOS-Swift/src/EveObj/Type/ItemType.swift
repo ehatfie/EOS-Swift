@@ -39,10 +39,17 @@ public class ItemType {
     self.requiredSkills = requiredSkills
   }
   
-  
-  // @cached_property
+  // TODO: Implement with fighters
   func effectsData() -> Any? {
-    var effectsData: [String: Any] = [:]
+    /*
+     """Get extended effect data."""
+     effects_data = {}
+     for ability_id, ability_data in self.abilities_data.items():
+         effect_id = fighter_ability_map[ability_id]
+         effects_data[effect_id] = ability_data
+     return effects_data
+     */
+    
     return nil
   }
   

@@ -47,15 +47,11 @@ public class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   ) -> Double {
     guard let item = item else { return 0.0 }
     var rps: Double = 0.0
-    for (key, value) in self.localRepairers {
+    for (_, value) in self.localRepairers {
       let repItem = value.item
       let repEffect = value.effect
       //
       rps += repEffect.getRps(item: repItem, relad: reload)
-      
-      // if item is not rep_item._solsys_carrier:
-      //rps += rep_effect.get_rps(rep_item, reload)
-      //rps += repEffect.get
     }
     /*
      proj_reg = (

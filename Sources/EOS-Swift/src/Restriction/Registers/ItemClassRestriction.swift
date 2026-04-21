@@ -20,8 +20,8 @@ class ItemClassRestriction: BaseRestrictionProtocol {
   }
   
   func validate() throws {
-    var taintedItems: [AnyHashable: ItemClassErrorData] = [:]
-    // TODO
+    let _ : [AnyHashable: ItemClassErrorData] = [:]
+    // TODO: Implement
     // _loaded_item_iter(skip_autoitems=True):
     
   }

@@ -54,7 +54,7 @@ class DefaultEffectProxyMixin: BaseItemMixin {
   
   func safeGetFromDefeff(key: String) -> Double? {
     let defaultEffect = self.typeDefaultEffect
-    if let effect = defaultEffect as? Effect {
+    if let effect = defaultEffect {
       switch key {
       case "get_duration": return effect.getDuration(item: self)
       case "get_optimal_range": return effect.getOptimalRange(item: self)

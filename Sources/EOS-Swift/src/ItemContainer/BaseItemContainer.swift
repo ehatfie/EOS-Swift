@@ -82,9 +82,9 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     guard item.container == nil else {
       fatalError("Item already assigned to another container")
     }
-    print("++ handleItemAddition \(item.typeId) \(item.itemType?.name)")
+    print("++ handleItemAddition \(item.typeId) \(String(describing: item.itemType?.name))")
     item.container = container
-    print("++ item.container \(item.typeId) set \(item.container)")
+    print("++ item.container \(item.typeId) set \(String(describing: item.container))")
     //print("handleItemAddition \()")
     guard let fit = item.fit else {
       print("++ Item no fit1")
@@ -97,7 +97,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
       fit.publishBulk(messages: messages)
       subItem.load()
       
-      print("++ subItem1 for \(item.typeId) is \(subItem.itemType?.name)")
+      print("++ subItem1 for \(item.typeId) is \(String(describing: subItem.itemType?.name))")
       print()
     }
   }
@@ -106,13 +106,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     var index = 0
     var values = [any BaseItemMixinProtocol]()
     let iterResult = item.childItemIterator(skipAutoItems: true).map({ $0 })
-    let castIterResult = (iterResult as? [any BaseItemMixinProtocol] ?? [])
-    values = [item] + castIterResult
-    
-    if iterResult.count != castIterResult.count {
-      print("++ child item iterator values count mismatch \(iterResult.count) vs \(castIterResult.count)")
-      print("++ iterResult: \(iterResult) values \(values)")
-    }
+    values = [item] + iterResult
     
     return AnyIterator {
       guard index < values.count else { return nil }

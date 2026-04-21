@@ -53,8 +53,8 @@ public class ArmorRepairerRegister: BaseRepairRegisterProtocol {
     }
     
     if let projectionRegister = self.fit?.solarSystem?.calculator.projections {
-      for foo in projectionRegister.getTargetProjectors(targetItem: item!) {
-        guard let item = foo as? BaseItemMixin else {
+      for targetProjector in projectionRegister.getTargetProjectors(targetItem: item!) {
+        guard targetProjector is BaseItemMixin else {
           print("++ projection item not BaseItemMixin")
           continue
         }

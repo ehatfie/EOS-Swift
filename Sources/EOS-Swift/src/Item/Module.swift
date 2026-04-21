@@ -38,7 +38,7 @@ public class Module:
 {
   
   public func subItemIterator(item: BaseItemMixin) -> AnyIterator<any BaseItemMixinProtocol> {
-    return self.subItemIterator(item: item as! BaseItemMixin) as! AnyIterator<any BaseItemMixinProtocol>
+    return self.subItemIterator(item: item ) 
   }
   
   public typealias ExpectedType = BaseItemMixin
@@ -74,7 +74,7 @@ public class Module:
     else {
       return nil
     }
-    self.itemType
+
     print("++ containerCapacity \(containerCapacity) chargeVolume \(chargeVolume)")
     print("++ \(self.typeId)(our) attributes \(self.attributes?.keys ?? [-1]), charge attributes \(charge.attributes?.keys ?? [-1])")
     let chargeQuantity = Double(containerCapacity / chargeVolume)
@@ -149,7 +149,7 @@ public class Module:
   
   func safeGetFromDefeff(key: String) -> Double? {
     let defaultEffect = self.typeDefaultEffect
-    if let effect = defaultEffect as? Effect {
+    if let effect = defaultEffect {
       switch key {
       case "get_duration": return effect.getDuration(item: self)
       case "get_optimal_range": return effect.getOptimalRange(item: self)
@@ -158,7 +158,7 @@ public class Module:
       default: return nil
       }
     } else {
-      print("couldnt convert \(defaultEffect)")
+      print("couldnt convert \(String(describing: defaultEffect))")
     }
     return nil
   }

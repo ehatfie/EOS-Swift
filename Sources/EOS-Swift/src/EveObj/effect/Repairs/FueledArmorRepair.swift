@@ -7,7 +7,7 @@
 
 class FueledArmorRepair: LocalArmorRepairEffect {
   func getCyclesUntilReload(item: BaseItemMixin) -> Double? {
-    return getCyclesUntilReloadGeneric(item: item, default: .infinity)
+    return getCyclesUntilReloadGeneric(item: item, defaultVal: .infinity)
   }
   
   func getRepAmount(item: BaseItemMixin) -> Double? {

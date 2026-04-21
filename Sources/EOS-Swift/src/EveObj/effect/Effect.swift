@@ -145,10 +145,14 @@ public class Effect: Hashable {
 
   // TODO: After model definitions
   func getCharge(item: any BaseItemMixinProtocol) -> Charge? {
-    if let autoChargeTypeId = self.getAutoChargeTypeId(item: item) {
-      //item.autocharges.get(self.id)
+    if self.getAutoChargeTypeId(item: item) != nil {
       print("!! not returning autocharge but should")
-      item.autocharges?.getItem(key: self.effectId as AnyHashable)
+      if let charge = item.autocharges?.getItem(key: self.effectId as AnyHashable) as? Charge {
+        return charge
+      } else {
+        print("!! item wasnt a charge")
+      }
+      
     } else {
       if let item = item as? Module {
         return item.charge.item
@@ -237,9 +241,9 @@ extension Effect {
   }
   
   static func safeGetAttributeValue(item: any BaseItemMixinProtocol, attributeID: AttrId) -> Double {
-    var hasValue = item.attributes![attributeID.rawValue]
+    let hasValue = item.attributes![attributeID.rawValue]
     
-    print("++ safeGetAttributeValue hasValue for \(attributeID.rawValue) \(hasValue)")
+    print("++ safeGetAttributeValue hasValue for \(attributeID.rawValue) \(String(describing: hasValue))")
     return item.typeAttributes[attributeID.rawValue, default: 0]
   }
   
@@ -252,7 +256,7 @@ extension Effect {
   }
   
   // TODO
-  func getCycleParameters(item: any BaseItemMixinProtocol, reload: Bool) -> Any? {
+  func getCycleParameters(item: any BaseItemMixinProtocol, reload: Bool) -> (CycleSequence?, CycleInfo?)? {
     //let cyclesUntilReload = self.getCyclesUntilReload(item: )
     let cyclesUntilReload = self.getCyclesUntilReload(item: item) ?? 0
     guard cyclesUntilReload > 0 else {
@@ -266,18 +270,18 @@ extension Effect {
       
       let earlyCycles = cyclesUntilReload - finalCycles
       if earlyCycles == 0 {
-        return CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: 1)
+        return (nil,CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: 1))
       }
       
       if forcedInactiveTime == 0 {
-        return CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: cyclesUntilReload)
+        return (nil, CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: cyclesUntilReload))
       }
       
-      return CycleSequence(sequence: [
+      return (CycleSequence(sequence: [
         CycleInfo(activeTime: activeTime, inactiveTime: forcedInactiveTime, quantity: earlyCycles),
         CycleInfo(activeTime: activeTime, inactiveTime: 0, quantity: finalCycles)
         ], quantity: finalCycles
-      )
+      ), nil)
     }
       /*
        return CycleSequence((

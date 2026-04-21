@@ -235,7 +235,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
       return []
     }
 
-    let affectorSpecs = affectorSet.compactMap { $0 as? AffectorSpec }
+    let affectorSpecs = affectorSet//.compactMap { $0 as? AffectorSpec }
     
     guard affectorSpecs.count == affectorSet.count else {
       return []
@@ -368,7 +368,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func handleItemLoaded(message: ItemLoaded) {
-    print("++ handleItemLoaded \(message.item.itemType?.name)")
+    print("++ handleItemLoaded \(String(describing: message.item.itemType?.name))")
     let item = message.item
     self.affections?.registerAffecteeItem(affecteeItem: item as! BaseItemMixin)
     if let solar = item as? SolarSystemItemMixin {
@@ -389,11 +389,11 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   }
   
   func handleEffectsStarted(message: EffectsStarted) {
-    print("^^ handleEffectsStarted \(message.item.itemType?.name)")
+    print("^^ handleEffectsStarted \(String(describing: message.item.itemType?.name))")
     print()
     let item = message.item
     let effectIds = message.effectIds
-    var attributeChanges: [String: Any] = [:]
+    let attributeChanges: [String: Any] = [:]
     let localAffectorSpecs = self.generateLocalAffectorSpecs(item: item, effectIds: Array(effectIds))
     print("^^ made \(localAffectorSpecs.count) count AffectorSpecs")
     for affectorSpec in localAffectorSpecs {
@@ -417,7 +417,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
       // Register projectors
       for projector in self.generateProjectors(item: item, effectIds: Array(effectIds)) {
         print("!! implement register projector")
-        //self.projections?.registerProjector(projector: projector)
+        self.projections?.registerProjector(projector: projector.item)
       }
       
       // Register warfare buffs (projector, tgt_ships)
@@ -851,7 +851,7 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
       for modifier in effect.localModifiers() {
         let affectorSpec = AffectorSpec(modifier: modifier, effect: effect, itemType: item)
 
-        print("++ inserting hash \(affectorSpec.hashValue) for \(affectorSpec.modifier.affecteeAtributeId) \(effect.effectId) \(affectorSpec.itemType.itemType?.name) \(affectorSpecs.count)")
+        print("++ inserting hash \(affectorSpec.hashValue) for \(String(describing: affectorSpec.modifier.affecteeAtributeId)) \(effect.effectId) \(String(describing: affectorSpec.itemType.itemType?.name)) \(affectorSpecs.count)")
         affectorSpecs.insert(affectorSpec)
       }
     }
@@ -869,8 +869,8 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
       }
       
       let projector = Projector(item: item as! BaseItemMixin, effect: effect)
-      if let existing = self.warfareBuffs.dictionary[projector] as? AffectorSpec {
-        affectorSpecs.update(with: existing)
+      if let existing = self.warfareBuffs.dictionary[projector]{
+        affectorSpecs.formUnion(existing)
       }
       
       for modifier in effect.projectedModifiers() {

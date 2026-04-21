@@ -96,10 +96,6 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       for: .typeDogma,
       type: TypeDogmaAttributeDataOuter.self
     )) ?? []
-    let bar = foo.flatMap { value in
-      return (value.0, value.1)
-    }
-    
     let bar1 = foo.map { value in
       let value1 = value.1
       return value1.dogmaAttributes.map { value2 in
@@ -121,23 +117,12 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
   
   public func getDogmaTypeAttributesDict() async -> [DogmaTypeAttributeData] {
     let fetcher = await YamlDataFetcher.shared
-    let foo: [(Int64, TypeDogmaAttributeDataOuter)] = (try? await fetcher.readYamlAsync(
+    let loadedData: [(Int64, TypeDogmaAttributeDataOuter)] = (try? await fetcher.readYamlAsync(
       for: .typeDogma,
       type: TypeDogmaAttributeDataOuter.self
     )) ?? []
     
-    
-//    let bar = foo.flatMap { value in
-//      return (value.0, value.1)
-//    }
-
-    var returnValues: [Int64: DogmaTypeAttributeData] = [:]
-    for value in foo {
-      
-      //returnValues[value.0] = DogmaTypeAttributeD
-    }
-    
-    let bar1: [[(Int64, TypeDogmaAttributeData)]] = foo.map { value in
+    let bar1: [[(Int64, TypeDogmaAttributeData)]] = loadedData.map { value in
       let value1 = value.1
       return value1.dogmaAttributes.map { value2 in
         return (value.0, value2)
@@ -152,12 +137,7 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
         value: $0.1.value
       )
     }
-    for value in returnVals {
-      
-    }
     return returnVals
-    //return bar1.flatMap { $0 }
-      
   }
 
   public func getDogmaEffects() async -> [DogmaEffectData] {
@@ -213,7 +193,6 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
         type: TypeDogmaData.self
       )) ?? []
 
-    let primary = AttrId.required_skill_1.rawValue
     let expectedAtrributes: [(AttrId, AttrId)] = [
       (.required_skill_1, .required_skill_1_level),
       (.required_skill_2, .required_skill_2_level),
@@ -226,7 +205,6 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
     var skillTypeReqs: [TypeSkillReq] = []
 
     for (typeId, typeDogmaData) in typeDogmaData {
-      let data = TypeSkillReq(typeId: typeId, skillTypeId: 0, level: 1)
       let dogmaAttributes = typeDogmaData.dogmaAttributes
       for (requiredSkill, requiredSkillLevel) in expectedAtrributes {
         // this should be a dict
@@ -377,10 +355,8 @@ extension YamlDataHandler {
     type: T.Type
   ) async -> [(Int64, T)] {
     var returnValue: [(Int64, T)] = []
-    //print("decode2() - start splits \(splits) for \(some.count)")
     let decoder = YAMLDecoder()
 
-    let start = Date()
     some.forEach { key, value in
       guard let keyValue = key.int else { return }
       do {
@@ -391,7 +367,6 @@ extension YamlDataHandler {
         print("Decode error \(err) for \(type) decode")
       }
     }
-    //print("decode2() -  took \(Date().timeIntervalSince(start))")
     return returnValue
   }
 }

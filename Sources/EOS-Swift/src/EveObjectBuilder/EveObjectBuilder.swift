@@ -8,7 +8,7 @@ import Foundation
 
 class EveObjectBuilder: @unchecked Sendable {
 
-  nonisolated(unsafe)
+  nonisolated
     static func run(dataHandler: any DataHandlerProtocol) async -> (
       [Attribute],
       [Effect],
@@ -41,7 +41,7 @@ class EveObjectBuilder: @unchecked Sendable {
     print("++ dogmaTypeEffects took \(Date().timeIntervalSince(start))s")
     
     start = Date()
-    let dbuffCollections = await dataHandler.getDebuffCollection()
+    let _ = await dataHandler.getDebuffCollection()
     print("++ dbuffCollections took \(Date().timeIntervalSince(start))s")
     
     start = Date()
@@ -51,9 +51,8 @@ class EveObjectBuilder: @unchecked Sendable {
     
     // need to update the DogmaTypeAttributes with mock data from the types
     
-    dogmaTypeAttributes
     
-    var attrIds: Set<Int64> = [
+    let attrIds: Set<Int64> = [
       AttrId.radius.rawValue,
       AttrId.mass.rawValue,
       AttrId.volume.rawValue,
@@ -363,9 +362,7 @@ class EveObjectBuilder: @unchecked Sendable {
       for effect in effects {
         ourEffectMap[effect] = effectMap[effect]
       }
-      let typeEffectIds = typesEffects[typeID, default: []]
-      // effects=tuple(effect_map[eid] for eid in type_effect_ids),
-      let effects1 = typeEffectIds.compactMap { effectMap[$0] }
+      
       let itemType = ItemType(
         name: row.name,
         typeId: typeID,

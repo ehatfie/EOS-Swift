@@ -6,6 +6,8 @@
 //
 
 protocol DamageDealerEffectProtocol: Effect {
+  var suppressesDD: Bool { get }
+  
   func getVolley(for item: any BaseItemMixinProtocol) -> DamageStats
   func getDps(item: any BaseItemMixinProtocol, reload: Bool) -> DamageStats
   func getAppliedVolley(item: any BaseItemMixinProtocol, targetData: Any, reload: Bool) -> DamageStats?
@@ -22,7 +24,10 @@ extension DamageDealerEffectProtocol {
       return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
     }
     let volley = self.getVolley(for: item)
-    let averageTime: Double = 1.0
+    guard let averageTime: Double = cycleParameters.0?.averageTime ?? cycleParameters.1?.getTime() else {
+      print("!! getDPS extension no cycle time")
+      return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    }
     
     return DamageStats(
       em: volley.em,
@@ -43,6 +48,7 @@ extension DamageDealerEffectProtocol {
 }
 
 public class DamageDealerEffect: Effect {
+  var suppressesDD: Bool = false
   open func getVolley(for item: any BaseItemMixinProtocol) -> DamageStats {
     return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
@@ -51,8 +57,12 @@ public class DamageDealerEffect: Effect {
     guard let cycleParameters = self.getCycleParameters(item: item, reload: reload) else {
       return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
     }
+    
     let volley = self.getVolley(for: item)
-    let averageTime: Double = 1.0
+    guard let averageTime: Double = cycleParameters.0?.averageTime ?? cycleParameters.1?.getTime() else {
+      print("!! getDPS no cycle time")
+      return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
+    }
     
     return DamageStats(
       em: volley.em,

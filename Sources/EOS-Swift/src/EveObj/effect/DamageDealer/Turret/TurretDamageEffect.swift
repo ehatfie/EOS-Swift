@@ -35,7 +35,7 @@ protocol TurretDamageDealerEffectProtocol: DamageDealerEffect {
 
 extension TurretDamageDealerEffectProtocol {
   func getVolley(item: any BaseItemMixinProtocol) -> DamageStats {
-    guard let cyclesUntilReload = self.getCyclesUntilReload(item: item) else {
+    guard self.getCyclesUntilReload(item: item) != nil else {
       return DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0, mult: 1.0)!
     }
     guard let baseDamageItem = self.getBaseDamageItem(item: item) else {
@@ -48,7 +48,7 @@ extension TurretDamageDealerEffectProtocol {
     let expl = baseDamageItem.attributes?.getValue(attributeId: .expl_dmg) ?? 0.0
     let mult = item.attributes?.getValue(attributeId: .dmg_mult)
     
-    return DamageStats(em: em, thermal: thermal, kinetic: kin, explosive: 0, mult: mult)!
+    return DamageStats(em: em, thermal: thermal, kinetic: kin, explosive: expl, mult: mult)!
   }
   
   func getAppliedVolley(item: any BaseItemMixinProtocol, targetData: any BaseTargetableMixinProtocol) -> DamageStats {

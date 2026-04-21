@@ -61,7 +61,7 @@ extension StatServiceValuesProtocol {
   /// TankingLayersTotal helper container instance. If ship data cannot be fetched, HP values will be None.
   public var hp: ItemHP {
     let hp = self.fit?.ship?.hp
-    print("++ hp \(hp?.shield)")
+    print("++ hp \(String(describing: hp?.shield))")
     return hp ?? ItemHP(hull: 0.0, armor: 0.0, shield: 0.0)
   }
   /// Fetch ship resistances.
@@ -71,7 +71,7 @@ extension StatServiceValuesProtocol {
   public var resists: any TankingLayersProtocol {
     let empty = ResistProfile(0.0, thermal: 0.0, kinetic: 0.0, explosive: 0.0)!
     let shipResists = self.fit?.ship?.resists
-    print("++ ship resists \(shipResists?.shield)")
+    print("++ ship resists \(String(describing: shipResists?.shield))")
     return shipResists ?? TankingLayers<ResistProfile>(hull: empty, armor: empty, shield: empty)
   }
   
@@ -87,7 +87,7 @@ extension StatServiceValuesProtocol {
        fetched, EHP values will be None.
    */
   public func getEHP(damageProfile: DamageProfile? = nil) -> ItemHP {
-    print("^^ getEHP fit: \(self.fit) ship: \(self.fit?.ship)")
+    print("^^ getEHP fit: \(String(describing: self.fit)) ship: \(String(describing: self.fit?.ship))")
     return self.fit?.ship?.getEHP(damageProfile: damageProfile) ?? ItemHP(hull: 0, armor: 0, shield: 0)
   }
   
@@ -120,8 +120,8 @@ extension StatServiceValuesProtocol {
   public func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double {
     if damageProfile is DefaultImpl {
       let dmgProfile = self.fit?.defaultIncomingDamage
-      return 0.0
-      //return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
+      //return 0.0
+      return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: dmgProfile, reload: reload)
     }
     //return 0.0
     return self.shieldRepRegister.getRps(item: self.fit?.ship, damageProfile: damageProfile, reload: reload)

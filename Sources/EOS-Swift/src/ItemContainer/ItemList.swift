@@ -59,11 +59,10 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     
     do {
       try self.handleItemAddition(item: value as! T, container: self)
-    } catch let error {
-      print("++ ItemList insert item error")
+    } catch {
+      print("++ ItemList insert item error \(error)")
       self.list.remove(at: index)
       self.cleanup()
-      // raise ValueError(*e.args) from e
     }
   }
   
@@ -76,8 +75,8 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     self.list.append(item as? T)
     do {
       try self.handleItemAddition(item: item as! T, container: self)
-    } catch let error {
-      print("++ ItemList insert error")
+    } catch {
+      print("++ ItemList insert error \(error)")
       // remove last?
       self.list.removeLast()
       // except ItemAlreadyAssignedError as e:
@@ -98,7 +97,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     
     let oldItem = self.list[index]
     
-    if let oldItem = oldItem {
+    if oldItem != nil {
       // TODO throw SlotTakenError(index)
       return
     }
@@ -120,7 +119,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
   ///
   @MainActor
   public func equip(item: any BaseItemMixinProtocol) {
-    print("++ equip item \(item.typeId) \(item.itemType?.name)")
+    print("++ equip item \(item.typeId) \(String(describing: item.itemType?.name))")
     guard self.checkClass(item: item, allowNil: false) else {
       return
     }

@@ -11,15 +11,20 @@ class BaseNeutEffect: Effect {
   }
   
   func getNeutPerSecond(item: any BaseItemMixinProtocol, reload: Bool) -> Double {
-    let cycleParameters = 1.0
-//    guard let cycleParameters = self.getCycleParameters(item: item, reload: reload) else {
-//      return 0
+    guard let cycleParameters = self.getCycleParameters(item: item, reload: reload) else {
+      print("!! getNeutPerSEcond no cycle parameters")
+      return 0
+    }
     
-//    }
+    guard let cycleTime = cycleParameters.0?.getTime() ?? cycleParameters.1?.getTime() else {
+      print("!! no cycle time")
+      return 0
+    }
+    
     guard let neutAmount = self.getNeutAmount(item: item) else {
       return 0
     }
-    return neutAmount / cycleParameters
+    return neutAmount / cycleTime
   }
 }
 
@@ -32,10 +37,10 @@ class EnergyNeutralizerFalloff: BaseNeutEffect {
 
 class EnergyNosferatuFalloff: BaseNeutEffect {
   override func getNeutAmount(item: any BaseItemMixinProtocol) -> Double? {
-    if let nosOvveride = item.attributes?[AttrId.nos_override.rawValue] {
+    if item.attributes?[AttrId.nos_override.rawValue] != nil {
       return item.attributes?[AttrId.power_transfer_amount.rawValue, default: 0]
     }
-                
+    print("!! EnergyNosferatu verify this")
     return 0
   }
 }

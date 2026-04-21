@@ -8,7 +8,7 @@
 
 class ShipModuleAncillaryRemoteShieldRepairer: RemoteShieldRepairEffect {
   func getCyclesUntilReload(item: BaseItemMixin) -> Double? {
-    getCyclesUntilReloadGeneric(item: item, default: .infinity)
+    getCyclesUntilReloadGeneric(item: item, defaultVal: .infinity)
   }
   
   func getRepAmount(item: BaseItemMixin) -> Double? {

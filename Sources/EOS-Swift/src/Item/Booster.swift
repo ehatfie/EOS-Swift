@@ -13,6 +13,8 @@ struct SideEffectData {
 }
 
 class Booster: ImmutableStateMixinProtocol {
+  var attributes1: MutableAttributeMapActor?
+  
   func load(from source: any BaseCacheHandlerProtocol) {
     
   }
@@ -23,9 +25,9 @@ class Booster: ImmutableStateMixinProtocol {
     var index: Int = 0
     
     if !skipAutoItems {
-//      if let autocharges = self.autocharges {
-//        values.append(contentsOf: autocharges.values())
-//      }
+      if let autocharges = self.autocharges {
+        values.append(contentsOf: autocharges.values())
+      }
     }
     
     return AnyIterator {
@@ -34,7 +36,6 @@ class Booster: ImmutableStateMixinProtocol {
       return values[index]
     }
   }
-//  }
   
   var id: UUID = UUID()
   
@@ -89,7 +90,7 @@ class Booster: ImmutableStateMixinProtocol {
   }
 
   var sideEffects: [Int64: SideEffectData] {
-    var chances = self.sideEffectChances
+    let chances = self.sideEffectChances
     let effectIds = Array(chances.keys)
     let statuses = EffectStatusResolver.resolveEffectsStatus(
       item: self,

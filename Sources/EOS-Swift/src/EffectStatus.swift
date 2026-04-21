@@ -27,7 +27,7 @@ class EffectStatusResolver {
     stateOverride: StateI? = nil
   ) -> [Int64: Bool] {
     print(":: ")
-    print(":: resolveEffectStatus for \(item.typeId) \(item.itemType?.name)")
+    print(":: resolveEffectStatus for \(item.typeId) \(String(describing: item.itemType?.name))")
     let itemEffects = item.typeEffects  //.filter(\.id.in(effectIds))
     var requiredEffectIds: Set<Int64> = []
 
@@ -50,7 +50,7 @@ class EffectStatusResolver {
         effectsStatus[Int64(EffectId.online.rawValue)] = onlineRunning
       }
     } else {
-      print(":: doesnt contain online in \(item.effects) \(item.effects[EffectId.online.rawValue])")
+      print(":: doesnt contain online in \(item.effects) \(String(describing: item.effects[EffectId.online.rawValue]))")
       onlineRunning = false
     }
     
@@ -106,7 +106,7 @@ class EffectStatusResolver {
   ) -> Bool {
     print(":: resolveEffectStatus2")
 
-    var resolverMap: [EffectMode: Any] = [
+    let resolverMap: [EffectMode: Any] = [
       EffectMode.full_compliance: EffectStatusResolver.resolveFullCompliance,
       EffectMode.state_compliance: EffectStatusResolver.resolveStateCompliance,
       EffectMode.force_run: EffectStatusResolver.resolveForceRun,
@@ -153,7 +153,7 @@ class EffectStatusResolver {
     if itemState < effectState {
       return false
     }
-    print(":: resolveFullCompliance for \(item.itemType?.name) itemState \(itemState) effectState \(effectState)")
+    print(":: resolveFullCompliance for \(String(describing: item.itemType?.name)) itemState \(itemState) effectState \(effectState)")
     switch effectState {
     case .offline:
       return effect.fittingUseUsageChanceAttributeID == nil
@@ -165,7 +165,7 @@ class EffectStatusResolver {
       }
     case .active:
       //print("++ EffectState for \(effect.effectId) == active \(item.typeId)  !!!")
-      print(":: item.typeDefaultEffect \(item.typeDefaultEffect)")
+      print(":: item.typeDefaultEffect \(String(describing: item.typeDefaultEffect))")
       return item.typeDefaultEffect is Effect
     case .overload:
       return true

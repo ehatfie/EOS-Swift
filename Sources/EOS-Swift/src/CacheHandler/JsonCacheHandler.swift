@@ -66,10 +66,7 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
   nonisolated
   init(cachePath: String) {
     self.cachePath = cachePath
-    Task {
-      await self.loadPersistantCache()
-    }
-    
+    self.loadPersistantCache()
   }
   
   func getType(typeId: Int64) async -> ItemType? {
@@ -102,6 +99,7 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
     guard let path = Bundle.main.path(forResource: "", ofType: "json") else {
       return
     }
+    // TODO: Figure out if necessary
   }
 
   

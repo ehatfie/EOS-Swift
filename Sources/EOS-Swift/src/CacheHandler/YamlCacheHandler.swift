@@ -23,7 +23,7 @@ enum YamlFiles: String {
   case dbuffCollections = "dbuffCollections"
 }
 
-public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
+public class YamlCacheHandler: BaseCacheHandlerProtocol,
   @unchecked Sendable
 {
   
@@ -163,7 +163,7 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
     for row in types {
       if row.typeId == 2897 {
         //print(":: updateMemoryCache2 \(row.typeId) has effects \(row.effects.map{ $0.value.effectId })")
-        print(":: updateMemoryCache2 \(row.typeId) has attributes \(row.attributes[54])")
+        print(":: updateMemoryCache2 \(row.typeId) has attributes \(String(describing: row.attributes[54]))")
       }
       typeStore[row.typeId] = row
     }
@@ -201,8 +201,8 @@ public class YamlCacheHandler: @preconcurrency BaseCacheHandlerProtocol,
   func updateTypeStore(types: [(Int64, TypeData)]) {
     
     for type in types {
-      let typeId = type.0
-      let typeData = type.1
+//      let typeId = type.0
+//      let typeData = type.1
       
       
       
@@ -399,7 +399,7 @@ extension YamlCacheHandler {
     //print("decode2() - start splits \(splits) for \(some.count)")
     let decoder = YAMLDecoder()
 
-    let start = Date()
+//    let start = Date()
     some.forEach { key, value in
       guard let keyValue = key.int else { return }
       do {

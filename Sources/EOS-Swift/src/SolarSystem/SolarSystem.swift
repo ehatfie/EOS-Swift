@@ -24,7 +24,7 @@ public class SolarSystem: MaybeFitHaving {
         return
       }
 
-      if let source = oldSource {
+      if oldSource != nil {
         for fit in self.fits {
           fit.unloadItems()
         }
@@ -32,7 +32,7 @@ public class SolarSystem: MaybeFitHaving {
 
       self.Source = newValue
 
-      if let source = self.Source {
+      if self.Source != nil {
         for fit in self.fits {
           fit.loadItems()
         }
@@ -70,7 +70,7 @@ public class SourceManager: @unchecked Sendable {
   /// Add source to source manager
   /// Adding includes initializing all facilities hidden behind name 'source'.
   /// After source has been added, it is accessible with alias.
-  nonisolated(unsafe)
+  nonisolated
     public func add(
       alias: String,
       dataHandler: any DataHandlerProtocol,
@@ -78,14 +78,14 @@ public class SourceManager: @unchecked Sendable {
       makeDefault: Bool = false
     ) async
   {
-    if await self.sources.contains(where: { $0.key == alias }) {
+    if self.sources.contains(where: { $0.key == alias }) {
       // raise ExistingSourceError(alias)
     }
 
     //Compare fingerprints from data and cache
-    let cacheFP = await cacheHandler.getFingerprint()
+    let cacheFP = cacheHandler.getFingerprint()
     let dataVersion = dataHandler.getVersion()
-    let currentFP = await self.formatFingerprint(dataVersion: dataVersion)
+    let currentFP = self.formatFingerprint(dataVersion: dataVersion)
 
     // If data version is corrupt or fingerprints mismatch, update cache
     if dataVersion == nil || cacheFP != currentFP {
@@ -103,7 +103,7 @@ public class SourceManager: @unchecked Sendable {
     let types = eveObjects.2
     let buffTemplates = eveObjects.3
     
-    await cacheHandler.updateCache(
+    cacheHandler.updateCache(
       types: types,
       attributes: attributes,
       effects: effects,

@@ -54,17 +54,13 @@ class ProjectionRegister {
       return
     }
 
-    self.carrierProjectors.addDataEntry(key: carrierItem as AnyHashable, data: item as! BaseItemMixin)
+    self.carrierProjectors.addDataEntry(key: carrierItem as AnyHashable, data: item )
     //let carrierItem = projector.itemType
   }
   
   func unregisterProjector(projector: Projector) {
     print("PR - unregisterProjector()")
-    guard let item = projector.item as? BaseItemMixin else {
-      print("++ no item")
-      return
-    }
-    
+    let item = projector.item
     self.projectors.remove(projector)
     
     guard let carrierItem = item.solsysCarrier else {
@@ -116,7 +112,7 @@ class ProjectionRegister {
   
   func unregisterSolsysItem(solsysItem: Ship) {
     print("PR - unregisterSolsysItem()")
-    var projectors = self.carrierProjectors.dictionary[solsysItem, default: []] as! Set<Projector>
+    let projectors = self.carrierProjectors.dictionary[solsysItem, default: []] as! Set<Projector>
     
     if !projectors.isEmpty {
       for projector in projectors {
