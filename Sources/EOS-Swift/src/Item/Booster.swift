@@ -19,10 +19,9 @@ class Booster: ImmutableStateMixinProtocol {
     
   }
   
-  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
+  public func childItems(skipAutoItems: Bool) -> [any BaseItemMixinProtocol] {
     print("!! booster bad childItemIterator impl")
-    var values: [(any BaseItemMixinProtocol)?] = []
-    var index: Int = 0
+    var values: [any BaseItemMixinProtocol] = []
     
     if !skipAutoItems {
       if let autocharges = self.autocharges {
@@ -30,11 +29,7 @@ class Booster: ImmutableStateMixinProtocol {
       }
     }
     
-    return AnyIterator {
-      guard index < values.count else { return nil }
-      defer { index += 1 }
-      return values[index]
-    }
+    return values
   }
   
   var id: UUID = UUID()

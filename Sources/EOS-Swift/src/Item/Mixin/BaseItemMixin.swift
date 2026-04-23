@@ -51,7 +51,7 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var solsysCarrier: Ship? { get set }
   var fit: Fit? { get }
   
-  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>
+  func childItems(skipAutoItems: Bool) -> [any BaseItemMixinProtocol]
   
   var isLoaded: Bool { get }
   func load()
@@ -334,7 +334,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
     hasher.combine(self.id)
   }
   
-  public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
+  public func childItems(skipAutoItems: Bool) -> [any BaseItemMixinProtocol] {
     //print("++ open baseItemMixin childItemIterator")
     /*
      if not skip_autoitems:
@@ -349,8 +349,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
          for item in child_item_iter(skip_autoitems=skip_autoitems):
              yield item
      */
-    var values: [(any BaseItemMixinProtocol)?] = []
-    var index: Int = 0
+    var values: [any BaseItemMixinProtocol] = []
     
     if !skipAutoItems {
       if let autocharges = self.autocharges {
@@ -358,11 +357,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
       }
     }
     
-    return AnyIterator {
-      guard index < values.count else { return nil }
-      defer { index += 1 }
-      return values[index]
-    }
+    return values
   }
   
   /*
@@ -378,26 +373,6 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
      return values[index]
    }
    */
-  
-  func childItemIter(skipAutoitems: Bool = false)  {
-    if !skipAutoitems {
-      // for item in self.autocharges.values():
-      // yield item
-    }
-    
-    /*
-     # Try next in MRO
-     try:
-         child_item_iter = super()._child_item_iter
-     except AttributeError:
-         pass
-     else:
-         for item in child_item_iter(skip_autoitems=skip_autoitems):
-             yield item
-     */
-  }
-  
-
   
   /*
    @property

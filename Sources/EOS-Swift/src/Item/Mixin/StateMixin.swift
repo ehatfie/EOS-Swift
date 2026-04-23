@@ -66,7 +66,7 @@ public class MutableStateMixin: BaseItemMixin {
           newState: newValue
         )
         messages.append(contentsOf: stateUpdateMessages)
-        let iterator = self.childItemIterator(skipAutoItems: false)
+        let iterator = self.childItems(skipAutoItems: false)
         for childItem in iterator where childItem is ContainerStateMixin{
           let otherUpdateMessages = MessageHelper.getItemStateUpdateMessages(
             item: childItem as! ContainerStateMixin,

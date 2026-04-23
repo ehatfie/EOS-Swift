@@ -17,8 +17,7 @@ protocol ModuleProtocol:
   MutableStateMixin,
   EffectStatsMixinProtocol,
   BaseTargetableMixinProtocol,
-  SingleTargetableMixinProtocol,
-  ItemContainerBaseProtocol
+  SingleTargetableMixinProtocol
 {
 
   var chargeQuantity: Double? { get }
@@ -26,7 +25,7 @@ protocol ModuleProtocol:
   var reloadTime: Double? { get }
   var reactivationDelay: Double? { get }
 
-  func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol>
+  func childItems(skipAutoItems: Bool) -> [any BaseItemMixinProtocol]
 }
 
 public class Module:
@@ -36,11 +35,6 @@ public class Module:
   SingleTargetableMixinProtocol,
   ModuleProtocol
 {
-  
-  public func subItemIterator(item: BaseItemMixin) -> AnyIterator<any BaseItemMixinProtocol> {
-    return self.subItemIterator(item: item ) 
-  }
-  
   public typealias ExpectedType = BaseItemMixin
   
   public func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool {
@@ -179,19 +173,14 @@ public class Module:
 //  }
   //public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
   // duplicate?? Pretty sure the above is the right way to do it
-  override public func childItemIterator(skipAutoItems: Bool) -> AnyIterator<any BaseItemMixinProtocol> {
+  override public func childItems(skipAutoItems: Bool) -> [any BaseItemMixinProtocol] {
     print("++ module childItemIterator2")
     let charge = self.charge.item
-    let foo: AnyIterator<any BaseItemMixinProtocol>? = super.childItemIterator(skipAutoItems: false)//.map { $0.next()}
-    let bar: [(any BaseItemMixinProtocol)?] = foo?.map { $0 } ?? []
-    let values: [(any BaseItemMixinProtocol)?] = [charge] + bar
-    var index: Int = 0
+    let foo: [any BaseItemMixinProtocol] = super.childItems(skipAutoItems: false)//.map { $0.next()}
+    let bar: [any BaseItemMixinProtocol] = foo.map { $0 }
+    let values: [any BaseItemMixinProtocol] = ([charge] + bar).compactMap { $0 }
     print("++ module childItemIterator2 value count \(values.count)")
-    return AnyIterator {
-      guard index < values.count else { return nil }
-      defer { index += 1 }
-      return values[index]
-    }
+    return values
   }
   
   override func addAutoCharge(effectId: Int64, autoChargeTypeId: Int64) {

@@ -16,7 +16,7 @@ public protocol ItemContainerBaseProtocol<ExpectedType>: AnyObject {
   func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool
   
   func handleItemAddition(item: ExpectedType, container: any ItemContainerBaseProtocol) throws
-  func subItemIterator(item: ExpectedType) -> AnyIterator<any BaseItemMixinProtocol>
+  func subItems(item: ExpectedType) -> [any BaseItemMixinProtocol]
   func length() -> Int
 }
 
@@ -34,7 +34,7 @@ extension ItemContainerBaseProtocol where ExpectedType: BaseItemMixinProtocol {
       return
     }
     
-    for subItem in subItemIterator(item: item) {
+    for subItem in subItems(item: item) {
       print("++ subItem for \(item.typeId) is \(subItem.typeId)")
       let messages = MessageHelper.getItemAddedMessages(item: subItem)
       fit.publishBulk(messages: messages)
@@ -91,7 +91,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
       return
     }
     
-    for subItem in subItemIterator(item: item) {
+    for subItem in subItems(item: item) {
       print("++ loading subitem \(subItem.typeId)")
       let messages = MessageHelper.getItemAddedMessages(item: subItem)
       fit.publishBulk(messages: messages)
@@ -102,17 +102,12 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     }
   }
   
-  public func subItemIterator(item: T) -> AnyIterator<any BaseItemMixinProtocol> {
+  public func subItems(item: T) -> [any BaseItemMixinProtocol] {
     var index = 0
     var values = [any BaseItemMixinProtocol]()
-    let iterResult = item.childItemIterator(skipAutoItems: true).map({ $0 })
+    let iterResult = item.childItems(skipAutoItems: true)
     values = [item] + iterResult
-    
-    return AnyIterator {
-      guard index < values.count else { return nil }
-      defer { index += 1 }
-      return values[index]
-    }
+    return values
   }
   
   func handleItemRemoval(_ item: T) {
@@ -123,7 +118,7 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
      that presence checks during removal pass.
      */
     let fit = item.fit
-    for subItem in self.subItemIterator(item: item) {
+    for subItem in self.subItems(item: item) {
       subItem.unload()
       if let fit = fit {
         let messages = MessageHelper.getItemRemovedMessages(item: subItem)

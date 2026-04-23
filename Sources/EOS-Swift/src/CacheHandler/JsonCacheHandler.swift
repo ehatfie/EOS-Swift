@@ -96,7 +96,7 @@ class JsonCachehandler: BaseCacheHandlerProtocol, @unchecked Sendable {
   nonisolated
   func loadPersistantCache() {
     // verify file exists
-    guard let path = Bundle.main.path(forResource: "", ofType: "json") else {
+    guard Bundle.main.path(forResource: "", ofType: "json") != nil else {
       return
     }
     // TODO: Figure out if necessary

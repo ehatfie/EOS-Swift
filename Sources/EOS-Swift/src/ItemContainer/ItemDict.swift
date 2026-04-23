@@ -72,7 +72,7 @@ public class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
   }
   
   func iterator() -> AnyIterator<any BaseItemMixinProtocol> {
-    var values = Array(self.keyedItems.values)
+    let values = Array(self.keyedItems.values)
     var index: Int = 0
     return AnyIterator {
       guard index < values.count else { return nil }

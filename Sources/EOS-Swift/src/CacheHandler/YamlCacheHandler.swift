@@ -112,7 +112,7 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol,
     print("++ YamnlCacheHandler load persistant cache")
 
     // verify file exists
-    guard let path = Bundle.main.path(forResource: "", ofType: "Yaml") else {
+    guard Bundle.main.path(forResource: "", ofType: "Yaml") != nil else {
       return
     }
 

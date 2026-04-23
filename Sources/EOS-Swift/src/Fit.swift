@@ -175,32 +175,32 @@ public class Fit: FitMessageBroker<MockSubscriber> {
 
     // TODO: Simplify
     let skills = fit!.skills.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
+      let children = item.childItems(skipAutoItems: skipAutoitems)
       return [item] + children
     }.flatMap { $0 }
     
     let implants = fit!.implants.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
+      let children = item.childItems(skipAutoItems: skipAutoitems)
       return [item] + children
     }.flatMap { $0 }
     
     let boosters = fit!.boosters.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
+      let children = item.childItems(skipAutoItems: skipAutoitems)
       return [item] + children
     }.flatMap { $0 }
 
     let subsystems = fit!.subsystems.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
+      let children = item.childItems(skipAutoItems: skipAutoitems)
       return [item] + children
     }.flatMap { $0 }
     
     let modules = self.modules.items().iter().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
+      let children = item.childItems(skipAutoItems: skipAutoitems)
       return [item] + children
     }.flatMap { $0 }
     
     let rigs = fit!.rigs.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItemIterator(skipAutoItems: skipAutoitems).map { $0 }
+      let children = item.childItems(skipAutoItems: skipAutoitems)
       return [item] + children
     }.flatMap { $0 }
 
@@ -243,8 +243,8 @@ extension Fit: ItemContainerBaseProtocol {
     print("!! default handle item addition")
   }
   
-  public func subItemIterator(item: ExpectedType) -> AnyIterator<any BaseItemMixinProtocol> {
-    return AnyIterator({ nil })
+  public func subItems(item: ExpectedType) -> [any BaseItemMixinProtocol] {
+    return []
   }
   
   public typealias ExpectedType = Any
