@@ -65,7 +65,7 @@ class Booster: ImmutableStateMixinProtocol {
     attributes = MutableAttributeMap(item: self)
   }
   
-  var autocharges: ItemDict<AutoCharge>?
+  var autocharges: ItemDict<Int64, AutoCharge>?
   
   func clearAutocharges() { }
   

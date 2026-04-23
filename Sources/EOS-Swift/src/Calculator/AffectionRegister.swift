@@ -6,31 +6,27 @@
 //
 import Foundation
 
-struct Key1: Hashable {
-  //affecteeDomain, affecteeItem.itemType?.groupId
-  static func == (lhs: Key1, rhs: Key1) -> Bool {
-    return lhs.hashValue == rhs.hashValue
-  }
-  
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(affecteeDomain)
-    hasher.combine(groupID)
-  }
-  
+// MARK: - Key Structs
+
+/// Key for affecteesDomainGroup: domain + groupId
+struct DomainGroupKey: Hashable {
   let affecteeDomain: ModDomain
   let groupID: Int64
 }
+
+// Kept for backward compatibility during transition
+typealias Key1 = DomainGroupKey
 
 struct AffecteeInfo: Hashable {
   static func == (lhs: AffecteeInfo, rhs: AffecteeInfo) -> Bool {
     return lhs.effect == rhs.effect
   }
-  
+
   func hash(into hasher: inout Hasher) {
     hasher.combine(ObjectIdentifier(item))
     hasher.combine(ObjectIdentifier(effect))
   }
-  
+
   let item: any BaseItemMixinProtocol
   let effect: BaseRepairEffect
 }
@@ -39,49 +35,28 @@ struct AffecteeDomain: Hashable {
   static func == (lhs: AffecteeDomain, rhs: AffecteeDomain) -> Bool {
     return lhs.effect == rhs.effect
   }
-  
+
   func hash(into hasher: inout Hasher) {
     if let fit = fit {
       hasher.combine(ObjectIdentifier(fit))
     }
     hasher.combine(ObjectIdentifier(effect))
   }
-  
+
   let fit: Fit?
   let effect: BaseRepairEffect
 }
-
-
-/*
- struct RepairerData: Hashable {
-   static func == (lhs: RepairerData, rhs: RepairerData) -> Bool {
-     return lhs.effect == rhs.effect
-   }
-   
-   func hash(into hasher: inout Hasher) {
-     hasher.combine(self)
-   }
-   
-   let item: any BaseItemMixinProtocol
-   let effect: BaseRepairEffect
- }
- */
 
 struct AffectorSpec: Hashable {
   public var modifier: any BaseModifierProtocol
   public var effect: Effect
   public var itemType: any BaseItemMixinProtocol
-  
-  //'item', 'effect', 'modifier'
-  
+
   static func == (lhs: AffectorSpec, rhs: AffectorSpec) -> Bool {
     return lhs.hashValue == rhs.hashValue
   }
-  
+
   func hash(into hasher: inout Hasher) {
-//    if let modifier = modifier as Hashable {
-//      hasher.combine(modifier)
-//    }
     hasher.combine(modifier)
     hasher.combine(effect)
     hasher.combine(itemType)
@@ -96,819 +71,547 @@ struct AffectorModifier: Hashable {
   let affecteeAtributeId: AttrId
 }
 
+/// Key for affectorsDomain: (fitID, domain)
+struct FitDomainKey: Hashable {
+  let fitID: Int64
+  let domain: ModDomain
+}
+
+/// Key for affecteesOwnerSkillRequirement: (fitID, skillTypeId)
+struct FitTypeIdKey: Hashable {
+  let fitID: Int64
+  let typeId: Int64
+}
+
+// MARK: - AffectionRegister
+
 class AffectionRegister {
   var affectees: Set<BaseItemMixin> = []
-  var affecteesDomain = KeyedStorage<BaseItemMixin>()
-  var affecteesDomainGroup = KeyedStorage<BaseItemMixin>()
-  var affecteesDomainSkillRequirement = KeyedStorage<BaseItemMixin>()
-  var affecteesOwnerSkillRequirement = KeyedStorage<BaseItemMixin>()
-  var affectorsItemOther = KeyedStorage<AffectorSpec>()
-  var affectorsItemAwaiting = KeyedStorage<AffectorSpec>()
-  var affectorsItemActive = KeyedStorage<AffectorSpec>()
-  var affectorsDomain = KeyedStorage<AffectorSpec>()
-  var affectorsDomainGroup = KeyedStorage<AffectorSpec>()
-  // Format: {(affectee fit, affectee domain, affectee skill requirementtype ID): {affector specs}}
-  var affectorsDomainSkillRequirement = KeyedStorage<AffectorSpec>()
-  //Format: {(affectee fit, affectee skill requirement type ID): {affectorspecs}}
-  var affectorsOwnerSkillRequirement = KeyedStorage<AffectorSpec>()
-  
-  init() {
-    
-  }
-  
+
+  // Affectee storages: track which items belong to which domain/group/etc
+  var affecteesDomain = KeyedStorage<ModDomain, BaseItemMixin>()
+  var affecteesDomainGroup = KeyedStorage<DomainGroupKey, BaseItemMixin>()
+  var affecteesDomainSkillRequirement = KeyedStorage<DomainSkillKey, BaseItemMixin>()
+  var affecteesOwnerSkillRequirement = KeyedStorage<FitTypeIdKey, BaseItemMixin>()
+
+  // Affector storages: track which affector specs affect which items/domains
+  var affectorsItemOther = KeyedStorage<BaseItemMixin, AffectorSpec>()
+  var affectorsItemAwaiting = KeyedStorage<Int64, AffectorSpec>()    // keyed by fit.id
+  var affectorsItemActive = KeyedStorage<BaseItemMixin, AffectorSpec>()
+  var affectorsDomain = KeyedStorage<FitDomainKey, AffectorSpec>()
+  var affectorsDomainGroup = KeyedStorage<DomainGroupKey, AffectorSpec>()
+  var affectorsDomainSkillRequirement = KeyedStorage<DomainSkillKey, AffectorSpec>()
+  var affectorsOwnerSkillRequirement = KeyedStorage<DomainSkillKey, AffectorSpec>()
+
+  init() { }
+
+  // MARK: - Public: Affectee Queries
+
   /// Get iterable with items influenced by passed local affector spec.
   func getLocalAffecteeItems(affectorSpec: AffectorSpec) -> [any BaseItemMixinProtocol]? {
     let affecteeFilter = affectorSpec.modifier.affecteeFilter
-    // Direct item modification needs to use local-specific getters
-    
+
     if affecteeFilter == .item {
-      let affecteeDomain = affectorSpec.modifier.affecteeDomain
-      switch affecteeDomain {
-      case .me: return self.getLocalAffecteesSelf(affectorSpec: affectorSpec)
-      case .character: return self.getLocalAffecteesCharacter(affectorSpec: affectorSpec)
-      case .ship: return self.getLocalAffecteesShip(affectorSpec: affectorSpec)
-      case .other: return self.getLocalAffecteesOther(affectorSpec: affectorSpec)
-      default: return nil
+      switch affectorSpec.modifier.affecteeDomain {
+      case .me:        return getLocalAffecteesSelf(affectorSpec: affectorSpec)
+      case .character: return getLocalAffecteesCharacter(affectorSpec: affectorSpec)
+      case .ship:      return getLocalAffecteesShip(affectorSpec: affectorSpec)
+      case .other:     return getLocalAffecteesOther(affectorSpec: affectorSpec)
+      default:         return nil
       }
     } else {
-      // En-masse filtered modification can use shared affectee item getters
-      // affectee_domain = self.__resolve_local_domain(affector_spec)
-      guard let affecteeDomain = resolveLocalDomain(affectorSpec: affectorSpec) else {
-
-        return nil
-      }
-      // affectee_fits = affector_spec.item._fit,
-      guard let affecteeFits = affectorSpec.itemType.fit else {
-
-        return nil
-      }
+      guard let affecteeDomain = resolveLocalDomain(affectorSpec: affectorSpec),
+            let affecteeFit = affectorSpec.itemType.fit else { return nil }
+      let fits = [affecteeFit]
       switch affecteeFilter {
       case .domain:
-        let value = self.getAffecteesDomain(affecteeDomain: affecteeDomain, affecteeFits: [affecteeFits])
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesDomain(affecteeDomain: affecteeDomain, affecteeFits: fits))
       case .domain_group:
-        let value = self.getAffecteesDomainGroup(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: [affecteeFits])
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesDomainGroup(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits))
       case .domain_skillrq:
-        let value = self.getAffecteesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: [affecteeFits])
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits))
       case .owner_skillrq:
-        let value = self.getAffecteesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: [affecteeFits])
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesOwnerSkillRequirement(affectorSpec: affectorSpec, affecteeFits: fits))
       default: return nil
       }
     }
-    
   }
 
-  
   /// Get iterable with items influenced by projected affector spec.
   func getProjectedAffecteeItems(affectorSpec: AffectorSpec, targetItems: [BaseItemMixin]) -> [any BaseItemMixinProtocol]? {
     let affecteeFilter = affectorSpec.modifier.affecteeFilter
-    // Return targeted items when modification affects just them directly
+
     if affecteeFilter == .item {
-      // return {i for i in tgt_items if i in self.__affectees}
-      return targetItems.filter({ self.affectees.contains($0) })
+      return targetItems.filter { self.affectees.contains($0) }
     } else {
-      // En-masse modifications of items located on targeted items use shared affectee item getters
       let affecteeFits = targetItems.filter { $0 is Ship }.compactMap { $0.fit }
       switch affecteeFilter {
       case .domain:
-        let value = self.getAffecteesDomain(affecteeDomain: .ship, affecteeFits: affecteeFits)
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesDomain(affecteeDomain: .ship, affecteeFits: affecteeFits))
       case .domain_group:
-        let value = self.getAffecteesDomainGroup(affectorSpec: affectorSpec, affecteeDomain: .ship, affecteeFits: affecteeFits)
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesDomainGroup(affectorSpec: affectorSpec, affecteeDomain: .ship, affecteeFits: affecteeFits))
       case .domain_skillrq:
-        let value = self.getAffecteesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: .ship, affecteeFits: affecteeFits)
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: .ship, affecteeFits: affecteeFits))
       case .owner_skillrq:
-        let value = self.getAffecteesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: .ship, affecteeFits: affecteeFits)
-        return Array(value).compactMap { $0 as? any BaseItemMixinProtocol }
+        return Array(getAffecteesOwnerSkillRequirement(affectorSpec: affectorSpec, affecteeFits: affecteeFits))
       default: return nil
       }
     }
   }
-  
-  func getAffectorSpecs(affecteeItem: any BaseItemMixinProtocol) -> Set<AffectorSpec>? {
-    var affectorSpecs = Set<AffectorSpec>()
-    var affectorStorage = self.affectorsItemActive
-    var key: AnyHashable = affecteeItem as! AnyHashable
-    
-    let value = affectorStorage.dictionary[key, default: Set<AffectorSpec>()]
-    
-    affectorSpecs.formUnion(value)
-    
-    guard let affecteeDomain = affecteeItem.modifierDomain else {
-      return nil
-    }
-    // Domain
-    affectorStorage = self.affectorsDomainGroup
-    let foo = affecteeDomain//(affecteeFit, affecteeDomain)
-    key = foo as AnyHashable
-    let default1 = Set<AffectorSpec>()
-    affectorSpecs.formUnion(affectorStorage.dictionary[key, default: default1] )
-    
-    // Domain and group
-    affectorStorage = self.affectorsDomainGroup
-    key = Key1(
-      affecteeDomain: affecteeDomain,
-      groupID: affecteeItem.itemType!.groupId
-    )/*(affecteeDomain, affecteeItem.itemType?.groupId) as! AnyHashable*/
-    affectorSpecs.formUnion(affectorStorage.dictionary[key, default: default1] )
-    
-    // Domain and skill requirement
-    affectorStorage = self.affectorsDomainSkillRequirement
-    guard let requiredSkills = affecteeItem.itemType?.requiredSkills else {
 
-      return nil
+  func getAffectorSpecs(affecteeItem: any BaseItemMixinProtocol) -> Set<AffectorSpec>? {
+    guard let concreteItem = affecteeItem as? BaseItemMixin else { return nil }
+    var affectorSpecs = Set<AffectorSpec>()
+
+    // Direct item affectors (active)
+    affectorSpecs.formUnion(affectorsItemActive.dictionary[concreteItem, default: []])
+
+    guard let affecteeDomain = affecteeItem.modifierDomain else { return nil }
+
+    // Domain affectors — keyed by (fit, domain)
+    if let affecteeFit = affecteeItem.fit {
+      let domainKey = FitDomainKey(fitID: affecteeFit.id, domain: affecteeDomain)
+      affectorSpecs.formUnion(affectorsDomain.dictionary[domainKey, default: []])
     }
-    
-    for affecteeStorageRequirementTypeId in requiredSkills {
-      let key = DomainSkillKey(
-        affecteeDomain: affecteeDomain,
-        affecteeSkillRequirementTypeId: affecteeStorageRequirementTypeId.value
-      )
-      //key = (affecteeFit, affecteeDomain, affecteeStorageRequirementTypeId) as! AnyHashable
-      affectorSpecs.formUnion(affectorStorage.dictionary[key, default: default1] )
+
+    // Domain and group affectors
+    if let groupId = affecteeItem.itemType?.groupId {
+      let groupKey = DomainGroupKey(affecteeDomain: affecteeDomain, groupID: groupId)
+      affectorSpecs.formUnion(affectorsDomainGroup.dictionary[groupKey, default: []])
     }
-    _ = affectorSpecs.map { ($0.modifier, $0.effect.effectId, $0.itemType.itemType?.name)}
+
+    // Domain and skill requirement affectors
+    guard let requiredSkills = affecteeItem.itemType?.requiredSkills else { return nil }
+    for skillReq in requiredSkills {
+      let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: skillReq.value)
+      affectorSpecs.formUnion(affectorsDomainSkillRequirement.dictionary[key, default: []])
+    }
+
     return affectorSpecs
   }
-  
+
+  // MARK: - Public: Register / Unregister Affectees
+
   /// Add passed affectee item to the register.
-  /// We track affectee items to efficiently update attributes when set of items influencing them changes.
   func registerAffecteeItem(affecteeItem: BaseItemMixin) {
     if affecteeItem.itemType?.name == "EM Shield Hardener II" {
       print("^^ registerAffecteeItem \(affecteeItem)")
     }
-   // self.affectees.insert(AffecteeInfo)
     self.affectees.insert(affecteeItem)
-    guard let affecteeFit = affecteeItem.fit else {
-      return
-    }
-    for (key, storage) in getAffecteeStorages(affecteeFit: affecteeFit, affecteeItem: affecteeItem) {
-      storage.addDataEntry(key: key, data: affecteeItem)
-    }
-    
-     // Process special affector specs separately. E.g., when item like ship
-     // is added, there might already be affector specs which should affect
-     // it, and in this method we activate such affector specs
+    guard let affecteeFit = affecteeItem.fit else { return }
+    addToAffecteeStorages(affecteeFit: affecteeFit, affecteeItem: affecteeItem)
     self.activateSpecialAffectorSpecs(affecteeFit: affecteeFit, affecteeItem: affecteeItem)
   }
-  
+
   /// Remove passed affectee item from the register.
   func unregisterAffecteeItem(affecteeItem: BaseItemMixin) {
     self.affectees.remove(affecteeItem)
-    guard let affecteeFit = affecteeItem.fit else {
-      return
-    }
-    for (key, storage) in self.getAffecteeStorages(affecteeFit: affecteeFit, affecteeItem: affecteeItem) {
-      storage.removeDataEntry(key: key, data: affecteeItem)
-    }
-    // Deactivate all special affector specs for item being unregistered/
+    guard let affecteeFit = affecteeItem.fit else { return }
+    removeFromAffecteeStorages(affecteeFit: affecteeFit, affecteeItem: affecteeItem)
     self.deactivateSpecialAffectorSpecs(affecteeFit: affecteeFit, affecteeItem: affecteeItem)
+  }
 
-  }
-  
+  // MARK: - Public: Register / Unregister Local Affectors
+
   /// Make the register aware of the local affector spec.
-  /// It makes it possible for the affector spec to modify other items within its fit.
   func registerLocalAffectorSpec(affectorSpec: AffectorSpec) {
-    guard let storages = self.getLocalAffectorStorages(affectorSpec: affectorSpec) else {
-      return
-    }
-    
-    for (key, storage) in storages {
-      storage.addDataEntry(key: key, data: affectorSpec)
-    }
+    applyToLocalAffectorStorages(affectorSpec: affectorSpec, add: true)
   }
-  
+
   /// Remove local affector spec from the register.
-  /// It makes it impossible for the affector spec to modify any items.
   func unregisterLocalAffectorSpec(affectorSpec: AffectorSpec) {
-    guard let storages = self.getLocalAffectorStorages(affectorSpec: affectorSpec) else {
-      print("++ RLAS no storages for \(affectorSpec)")
-      return
-    }
-    
-    for (key, storage) in storages {
-      storage.removeDataEntry(key: key, data: affectorSpec)
-    }
+    applyToLocalAffectorStorages(affectorSpec: affectorSpec, add: false)
   }
-  
+
+  // MARK: - Public: Register / Unregister Projected Affectors
+
   /// Make register aware that projected affector spec affects items.
-  /// Should be called every time projected effect with modifiers is applied onto any items.
   func registerProjectedAffectorSpec(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) {
-    let storages = self.getProjectedAffectorStorages(affectorSpec: affectorSpec, targetItems: targetItems)
-    
-    for (key, storage) in storages {
-      storage.addDataEntry(key: key, data: affectorSpec)
-    }
+    applyToProjectedAffectorStorages(affectorSpec: affectorSpec, targetItems: targetItems, add: true)
   }
-  
+
   /// Remove effect of affector spec from items.
-  /// Should be called every time projected effect with modifiers stops affecting any object.
   func unregisterProjectedAffector(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) {
-    let storages = self.getProjectedAffectorStorages(affectorSpec: affectorSpec, targetItems: targetItems)
-    
-    for (key, storage) in storages {
-      storage.removeDataEntry(key: key, data: affectorSpec)
-    }
+    applyToProjectedAffectorStorages(affectorSpec: affectorSpec, targetItems: targetItems, add: false)
   }
-  
+
+  // MARK: - Affectee Lookup Helpers
+
   func getLocalAffecteesSelf(affectorSpec: AffectorSpec) -> [any BaseItemMixinProtocol] {
     return [affectorSpec.itemType]
   }
-  
+
   func getLocalAffecteesCharacter(affectorSpec: AffectorSpec) -> [Character]? {
-    guard let affecteeFit = affectorSpec.itemType.fit else {
-      return nil
-    }
-    guard let affecteeCharacter = affecteeFit.character else {
-      return nil
-    }
-    
-    guard self.affectees.contains(affecteeCharacter) else {
-      return nil
-    }
-    
+    guard let affecteeFit = affectorSpec.itemType.fit,
+          let affecteeCharacter = affecteeFit.character,
+          self.affectees.contains(affecteeCharacter) else { return nil }
     return [affecteeCharacter]
   }
-  
+
   func getLocalAffecteesShip(affectorSpec: AffectorSpec) -> [Ship]? {
-    guard let affecteeFit = affectorSpec.itemType.fit else {
-      return nil
-    }
-    guard let affecteeShip = affecteeFit.ship else {
-      return nil
-    }
-    
-    guard self.affectees.contains(affecteeShip) else {
-      return nil
-    }
-    
+    guard let affecteeFit = affectorSpec.itemType.fit,
+          let affecteeShip = affecteeFit.ship,
+          self.affectees.contains(affecteeShip) else { return nil }
     return [affecteeShip]
   }
-  
+
   func getLocalAffecteesOther(affectorSpec: AffectorSpec) -> [any BaseItemMixinProtocol] {
-    // return [i for i in affector_spec.item._others if i in self.__affectees]
-    return Array(affectorSpec.itemType.others.filter({ self.affectees.contains($0)}))
+    return Array(affectorSpec.itemType.others.filter { self.affectees.contains($0) })
   }
-  
-  func getAffecteesDomain(affecteeDomain: ModDomain, affecteeFits: [Fit]) -> Set<AnyHashable> {
-    var affecteeItems: Set<AnyHashable> = []
-    let storage = self.affecteesDomain
-    for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeDomain) as! AnyHashable
-      affecteeItems.insert(storage.dictionary[key, default: []])
-    }
-    return affecteeItems
+
+  func getAffecteesDomain(affecteeDomain: ModDomain, affecteeFits: [Fit]) -> Set<BaseItemMixin> {
+    return affecteesDomain.dictionary[affecteeDomain, default: []]
   }
-  
-  func getAffecteesDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> Set<AnyHashable> {
-    let affecteeGroupId = affectorSpec.modifier.affecteeFilterExtraArg
-    var affecteeItems: Set<AnyHashable> = []
-    let storage = self.affecteesDomainGroup
-    for _ in affecteeFits {
-      // python has this as using the affectee fit as part of the key
-      let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: affecteeGroupId!)
-      //let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
-      affecteeItems.insert(storage.dictionary[key, default: []])
-    }
-    return affecteeItems
+
+  func getAffecteesDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> Set<BaseItemMixin> {
+    guard let groupId = affectorSpec.modifier.affecteeFilterExtraArg else { return [] }
+    let key = DomainGroupKey(affecteeDomain: affecteeDomain, groupID: groupId)
+    return affecteesDomainGroup.dictionary[key, default: []]
   }
-  
+
   func getAffecteesDomainSkillRequirement(
     affectorSpec: AffectorSpec,
     affecteeDomain: ModDomain,
     affecteeFits: [Fit]
-  ) -> Set<AnyHashable> {
-    var affecteeSourceRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
-    if affecteeSourceRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
-      // check this
-      affecteeSourceRequirementTypeId = affectorSpec.itemType.typeId
+  ) -> Set<BaseItemMixin> {
+    var skillTypeId = affectorSpec.modifier.affecteeFilterExtraArg
+    if skillTypeId == Int64(EosTypeId.current_self.rawValue) {
+      skillTypeId = affectorSpec.itemType.typeId
     }
-    var affecteeItems: Set<AnyHashable> = []
-    let storage = self.affecteesDomainSkillRequirement
-    
-    for _ in affecteeFits {
-      // python has this as using the affectee fit as part of the key
-      let key = DomainSkillKey(
-        affecteeDomain: affecteeDomain,
-        affecteeSkillRequirementTypeId: affecteeSourceRequirementTypeId!
-      )
-      //let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSourceRequirementTypeId) as! AnyHashable
-      affecteeItems.insert(storage.dictionary[key, default: []])
-    }
-    return affecteeItems
+    guard let skillTypeId else { return [] }
+    let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: skillTypeId)
+    return affecteesDomainSkillRequirement.dictionary[key, default: []]
   }
-  
-  func getAffectersOwnerSkillRequirement(
+
+  func getAffecteesOwnerSkillRequirement(
     affectorSpec: AffectorSpec,
-    affecteeDomain: ModDomain?,
     affecteeFits: [Fit]
-  ) -> Set<AnyHashable> {
-    var affecteeSourceRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
-    if affecteeSourceRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
-      // check this
-      affecteeSourceRequirementTypeId = affectorSpec.itemType.typeId
+  ) -> Set<BaseItemMixin> {
+    var skillTypeId = affectorSpec.modifier.affecteeFilterExtraArg
+    if skillTypeId == Int64(EosTypeId.current_self.rawValue) {
+      skillTypeId = affectorSpec.itemType.typeId
     }
-    
-    var affecteeItems: Set<AnyHashable> = []
-    let storage = self.affecteesOwnerSkillRequirement
-    
-    for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeSourceRequirementTypeId) as! AnyHashable
-      affecteeItems.insert(storage.dictionary[key, default: []])
+    guard let skillTypeId else { return [] }
+    var result = Set<BaseItemMixin>()
+    for fit in affecteeFits {
+      let key = FitTypeIdKey(fitID: fit.id, typeId: skillTypeId)
+      result.formUnion(affecteesOwnerSkillRequirement.dictionary[key, default: []])
     }
-    return affecteeItems
+    return result
   }
-  
 
-  /*
-   Return all places where passed affectee item should be stored.
+  // MARK: - Activate / Deactivate Special Affectors
 
-    Returns:
-        Iterable with multiple elements, where each element is tuple in
-        (key, affectee map) format.
-   */
-  func getAffecteeStorages(affecteeFit: Fit, affecteeItem: any BaseItemMixinProtocol) -> [(AnyHashable, KeyedStorage<BaseItemMixin>)] {
-    var storages: [(AnyHashable, KeyedStorage<BaseItemMixin>)] = []
-    guard let affecteeDomain = affecteeItem.modifierDomain else {
-      return []
-    }
-    // Domain
-    var key: AnyHashable = (affecteeDomain) as AnyHashable
-    var storage = self.affecteesDomain
-    storages.append((key, storage))
-    
-    // Domain and group
-    let affecteeGroupId = affecteeItem.itemType?.groupId
-    if let affecteeGroupId {
-      key = Key1(affecteeDomain: affecteeDomain, groupID: affecteeGroupId)
-      //key = (affecteeFit, affecteeDomain, affecteeGroupId) as! AnyHashable
-      storage = self.affecteesDomainGroup
-      storages.append((key, storage))
-    }
-    
-    // Domain and skill requirement
-    storage = self.affecteesDomainSkillRequirement
-//    for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [:] {
-//      
-//      key = Key1(affecteeDomain: affecteeDomain, groupID: affecteeSkillRequirementTypeId)
-//      storages.append((key, storage))
-//    }
-    // Owner-modifiable and skill requirement
-    if affecteeItem.ownerModifiable {
-      storage = self.affecteesOwnerSkillRequirement
-      for affecteeSkillRequirementTypeId in affecteeItem.itemType?.requiredSkills ?? [:] {
-        
-        //key = (affecteeFit, affecteeSkillRequirementTypeId) as! AnyHashable
-        let key = FitSkillKey(fitID: affecteeFit.id, skillRequirementTypeId: KeyValueKey(key: affecteeSkillRequirementTypeId.key, value: affecteeSkillRequirementTypeId.value)) as AnyHashable
-        storages.append((key, storage))
-      }
-    }
-    return storages
-
-  }
-  
-  /*
-   def __activate_special_affector_specs(self, affectee_fit, affectee_item):
-        """Activate special affector specs which should affect passed item."""
-        awaiting_to_activate = set()
-        for affector_spec in self.__affectors_item_awaiting.get(
-            affectee_fit, ()
-        ):
-            affectee_domain = affector_spec.modifier.affectee_domain
-            # Ship
-            if (
-                affectee_domain == ModDomain.ship and
-                isinstance(affectee_item, Ship)
-            ):
-                awaiting_to_activate.add(affector_spec)
-            # Character
-            elif (
-                affectee_domain == ModDomain.character and
-                isinstance(affectee_item, Character)
-            ):
-                awaiting_to_activate.add(affector_spec)
-            # Self
-            elif (
-                affectee_domain == ModDomain.self and
-                affectee_item is affector_spec.item
-            ):
-                awaiting_to_activate.add(affector_spec)
-        # Move awaiting affector specs from awaiting storage to active storage
-        if awaiting_to_activate:
-            self.__affectors_item_awaiting.rm_data_set(
-                affectee_fit, awaiting_to_activate)
-            self.__affectors_item_active.add_data_set(
-                affectee_item, awaiting_to_activate)
-        # Other
-        other_to_activate = set()
-        for affector_item, affector_specs in (
-            self.__affectors_item_other.items()
-        ):
-            if affectee_item in affector_item._others:
-                other_to_activate.update(affector_specs)
-        # Just add affector specs to active storage, 'other' affector specs
-        # should never be removed from 'other'-specific storage
-        if other_to_activate:
-            self.__affectors_item_active.add_data_set(
-                affectee_item, other_to_activate)
-   */
-  
   /// Activate special affector specs which should affect passed item.
   func activateSpecialAffectorSpecs(affecteeFit: Fit, affecteeItem: any BaseItemMixinProtocol) {
-    var awaitingToActivate: Set<AffectorSpec> = []
-    let key = affecteeFit.id
-    
-    /*
-     for affector_spec in self.__affectors_item_awaiting.get(
-         affectee_fit, ()
-     ):
-         affectee_domain = affector_spec.modifier.affectee_domain
-         # Ship
-         if (
-             affectee_domain == ModDomain.ship and
-             isinstance(affectee_item, Ship)
-         ):
-             awaiting_to_activate.add(affector_spec)
-         # Character
-         elif (
-             affectee_domain == ModDomain.character and
-             isinstance(affectee_item, Character)
-         ):
-             awaiting_to_activate.add(affector_spec)
-         # Self
-         elif (
-             affectee_domain == ModDomain.self and
-             affectee_item is affector_spec.item
-         ):
-             awaiting_to_activate.add(affector_spec)
-     */
-    
+    var awaitingToActivate = Set<AffectorSpec>()
+
     for affectorSpec in self.affectorsItemAwaiting.dictionary[affecteeFit.id, default: []] {
       let affecteeDomain = affectorSpec.modifier.affecteeDomain
-      if affecteeDomain == ModDomain.ship, affecteeItem is Ship {
+      if affecteeDomain == .ship, affecteeItem is Ship {
         awaitingToActivate.insert(affectorSpec)
-      } else if affecteeDomain == ModDomain.character, affecteeItem is Character {
+      } else if affecteeDomain == .character, affecteeItem is Character {
         awaitingToActivate.insert(affectorSpec)
-      } else if affecteeDomain == ModDomain.me {
+      } else if affecteeDomain == .me {
         print("++ CHECK HERE MAYBE ISSUE")
         awaitingToActivate.insert(affectorSpec)
       }
     }
-    
-    if !awaitingToActivate.isEmpty {
-      self.affectorsItemAwaiting.removeDataSet(key: key, dataSet: awaitingToActivate.map { $0 })
-      self.affectorsItemActive.addDataSet(key: key, dataSet: awaitingToActivate.map { $0 })
+
+    if !awaitingToActivate.isEmpty, let concreteItem = affecteeItem as? BaseItemMixin {
+      self.affectorsItemAwaiting.removeDataSet(key: affecteeFit.id, dataSet: Array(awaitingToActivate))
+      self.affectorsItemActive.addDataSet(key: concreteItem, dataSet: Array(awaitingToActivate))
     }
-    
-    // Other
-    var otherToActivate: Set<AffectorSpec> = []
-    
+
+    // Other: activate affector specs targeting this item via 'other' relationship
+    var otherToActivate = Set<AffectorSpec>()
     for (affectorItem, affectorSpecs) in self.affectorsItemOther.dictionary {
-      if let foo = affectorItem as? BaseItemMixin {
-        if foo.others.contains(where: { $0 === affecteeItem }) {
-          for value in affectorSpecs {
-            otherToActivate.insert(value)
-          }
-          
-        }
+      if affectorItem.others.contains(where: { $0 === affecteeItem }) {
+        otherToActivate.formUnion(affectorSpecs)
       }
     }
-    
-    if !otherToActivate.isEmpty {
-      self.affectorsItemActive.addDataSet(key: key, dataSet: otherToActivate.map { $0 })
+
+    if !otherToActivate.isEmpty, let concreteItem = affecteeItem as? BaseItemMixin {
+      self.affectorsItemActive.addDataSet(key: concreteItem, dataSet: Array(otherToActivate))
     }
   }
-  
+
   /// Deactivate special affector specs which affect passed item.
   func deactivateSpecialAffectorSpecs(affecteeFit: Fit, affecteeItem: BaseItemMixin) {
-    if self.affectorsItemActive.dictionary[affecteeItem] == nil {
-      return
+    guard let activeSpecs = self.affectorsItemActive.dictionary[affecteeItem] else { return }
+
+    let awaitableToDeactivate = activeSpecs.filter {
+      [ModDomain.ship, .character, .me].contains($0.modifier.affecteeDomain)
     }
-    var awaitableToDeactivate: Set<AffectorSpec> = []
-    
-    for affectorSpec in self.affectorsItemActive.dictionary[affecteeItem, default: []] {
-      if [ModDomain.ship, ModDomain.character, ModDomain.me].contains(affectorSpec.modifier.affecteeDomain) {
-        awaitableToDeactivate.insert(affectorSpec)
-      }
-    }
-    
+
     self.affectorsItemActive.dictionary.removeValue(forKey: affecteeItem)
-    
+
     if !awaitableToDeactivate.isEmpty {
-      self.affectorsItemAwaiting.addDataSet(key: affecteeFit as! AnyHashable, dataSet: Array(awaitableToDeactivate))
+      self.affectorsItemAwaiting.addDataSet(key: affecteeFit.id, dataSet: Array(awaitableToDeactivate))
     }
   }
 
-  /// Get Places where passed local affector spec should be stored.
-  func getLocalAffectorStorages(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
+  // MARK: - Domain Resolution
 
-    let affecteeFilter = affectorSpec.modifier.affecteeFilter
-    
-    
-    if affecteeFilter == ModAffecteeFilter.item {
-      let affecteeDomain = affectorSpec.modifier.affecteeDomain
-      switch affecteeDomain {
-      case .me: return getLocalAffectorStoragesSelf(affectorSpec: affectorSpec)
-      case .character: return getLocalAffectorStoragesCharacter(affectorSpec: affectorSpec)
-      case .ship: return getLocalAffectorStoragesShip(affectorSpec: affectorSpec)
-      case .other: return getLocalAffectorStoragesOther(affectorSpec: affectorSpec)
-      default: return nil
-      }
-    } else {
-      guard let affecteeDomain = self.resolveLocalDomain(affectorSpec: affectorSpec) else {
-        print("++ GLAS no affecteeDomain")
-        return nil
-      }
-      let affecteeFits = [affectorSpec.itemType.fit].compactMap { $0 }
-      switch affecteeFilter {
-      case .domain: return getAffectorStoragesDomain(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      case .domain_group: return getAffectorStoragesDomainGroup(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      case .domain_skillrq: return getAffectorStoragesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      case .owner_skillrq: return getAffectorStoragesOwnerSkillRequirements(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      default: return nil
-      }
-    }
-    
-  }
-  
   /// Convert relative domain into absolute for local affector spec.
-  /// Applicable only to en-masse modifications - that is, when modification affects multiple items in affectee domain.
   func resolveLocalDomain(affectorSpec: AffectorSpec) -> ModDomain? {
     let affectorItem = affectorSpec.itemType
-    let affecteeDomain = affectorSpec.modifier.affecteeDomain
-    switch affecteeDomain {
-    case .me :
-      if affectorItem is Ship {
-        return .ship
-      } else if affectorItem is Character {
-        return .character
-      } else {
-        return nil // throw?
-      }
-    case .character, .ship:
-      return affecteeDomain
-    default: return nil // throw?
-    }
-    /*
-      # Just return untouched domain for all other valid cases. Valid cases
-      # include 'globally' visible (within the fit scope) domains only. I.e.
-      # if item on fit refers this affectee domain, it should always refer the
-      # same affectee item regardless of position of source item.
-     */
-  }
-  
-  /// Get places where passed projected affector spec should be stored.
-  func getProjectedAffectorStorages(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
-    
-    let affecteeFilter = affectorSpec.modifier.affecteeFilter
-    //  # Modifier affects just targeted items directly
-    if affecteeFilter == .item {
-      var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
-      let storage = affectorsItemActive
-      
-      for targetItem in targetItems.compactMap({ $0 as? BaseItemMixin}) {
-        if self.affectees.contains(targetItem) {
-          let key: AnyHashable = targetItem as AnyHashable
-          storages.append((key, storage))
-        }
-      }
-      return storages
-    } else {
-      let affecteeDomain = ModDomain.ship
-      let affecteeFits = targetItems.compactMap({ $0 as? BaseItemMixin }).filter { $0 is Ship}.compactMap { $0.fit }
-      switch affecteeFilter {
-      case .domain: return getAffectorStoragesDomain(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      case .domain_group: return getAffectorStoragesDomainGroup(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      case .domain_skillrq: return getAffectorStoragesDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      case .owner_skillrq: return getAffectorStoragesOwnerSkillRequirements(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: affecteeFits)
-      default: return []
-      }
-    }
-  }
-  
-  func getLocalAffectorStoragesSelf(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
-    guard let affecteeItem = affectorSpec.itemType as? BaseItemMixin else {
-      print("++ GLAS-S not BaseItemMixin")
-      return nil
-    }
-    
-    let key: AnyHashable
-    let storage: KeyedStorage<AffectorSpec>
-    
-    if self.affectees.contains(affecteeItem) {
-      key = affecteeItem as AnyHashable
-      storage = self.affectorsItemActive
-    } else {
-      guard let fit = affecteeItem.fit else {
-        print("++ GLAS-S no fit for \(affecteeItem)")
-        return nil
-      }
-      key = fit as! AnyHashable
-      storage = self.affectorsItemAwaiting
-    }
-    return [(key, storage)]
-  }
-  
-  func getLocalAffectorStoragesCharacter(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
-    guard let affecteeFit = affectorSpec.itemType.fit else {
-      print("++ GLAS-C no affecteeFit")
-      return nil
-    }
-    guard let affecteeCharacter = affecteeFit.character else {
-      print("++ no affecteeCharacter")
-      return nil
-    }
-    
-    let key: AnyHashable
-    let storage: KeyedStorage<AffectorSpec>
-    
-    if self.affectees.contains(affecteeCharacter) {
-      key = affecteeCharacter as AnyHashable
-      storage = self.affectorsItemActive
-    } else {
-      key = affecteeFit as! AnyHashable
-      storage = self.affectorsItemAwaiting
-    }
-    return [(key, storage)]
-  }
-  
-  func getLocalAffectorStoragesShip(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)]? {
-    guard let affecteeFit = affectorSpec.itemType.fit else {
-      print("++ GLACS-S no affecteeFit")
-      return nil
-    }
-    guard let affecteeShip = affecteeFit.ship else {
-      print("++ no affecteeShip")
-      return nil
-    }
-    
-    let key: AnyHashable
-    let storage: KeyedStorage<AffectorSpec>
-    
-    if self.affectees.contains(affecteeShip) {
-      key = affecteeShip as AnyHashable
-      storage = self.affectorsItemActive
-    } else {
-      key = affecteeFit as! AnyHashable
-      storage = self.affectorsItemAwaiting
-    }
-    return [(key, storage)]
-  }
-  
-  func getLocalAffectorStoragesOther(affectorSpec: AffectorSpec) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
-    // Affectors with 'other' modifiers are always stored in their special place
-    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = [(affectorSpec.itemType as! AnyHashable, self.affectorsItemOther)]
-    
-    // And all those which have valid affectee item are also stored in storage for active direct affectors
-    let storage = self.affectorsItemActive
-    
-    for otherItem in affectorSpec.itemType.others {
-      if self.affectees.contains(otherItem) {
-        let key: AnyHashable = otherItem as AnyHashable
-        storages.append((key, storage))
-      }
-    }
-    return storages
-  }
-  
-
-  func getAffectorStoragesDomain(affectorSpec: AffectorSpec?, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
-    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
-    let storage = self.affectorsDomain
-    
-    for affecteeFit in affecteeFits {
-      let key: AnyHashable = (affecteeFit, affecteeDomain) as! AnyHashable
-      storages.append((key, storage))
-    }
-    return storages
-  }
-  
-  func getAffectorStoragesDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
-    let affecteeGroupId = affectorSpec.modifier.affecteeFilterExtraArg
-    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
-    let storage = self.affectorsDomainGroup
-    
-    for _ in affecteeFits {
-      let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: affecteeGroupId!)
-      storages.append((key, storage))
-    }
-    return storages
-  }
-  
-  func getAffectorStoragesDomainSkillRequirement(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
-    var affecteeSkillRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
-    if affecteeSkillRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
-      affecteeSkillRequirementTypeId = affectorSpec.itemType.typeId
-    }
-    
-    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
-    let storage = self.affectorsDomainSkillRequirement
-    
-    for _ in affecteeFits {
-      let key = DomainSkillKey(
-        affecteeDomain: affecteeDomain,
-        affecteeSkillRequirementTypeId: affecteeSkillRequirementTypeId!
-      )
-      //let key1: AnyHashable = (affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
-      storages.append((key, storage))
-    }
-    return storages
-  }
-  
-  func getAffectorStoragesOwnerSkillRequirements(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit]) -> [(AnyHashable, KeyedStorage<AffectorSpec>)] {
-    var affecteeSkillRequirementTypeId = affectorSpec.modifier.affecteeFilterExtraArg
-    if affecteeSkillRequirementTypeId == Int64(EosTypeId.current_self.rawValue) {
-      affecteeSkillRequirementTypeId = affectorSpec.itemType.typeId
-    }
-    
-    var storages: [(AnyHashable, KeyedStorage<AffectorSpec>)] = []
-    let storage = self.affectorsOwnerSkillRequirement
-    for _ in affecteeFits {
-      let key = DomainSkillKey(
-        affecteeDomain: affecteeDomain,
-        affecteeSkillRequirementTypeId: affecteeSkillRequirementTypeId!
-      )
-      //let key: AnyHashable = (affecteeFit, affecteeDomain, affecteeSkillRequirementTypeId) as! AnyHashable
-      storages.append((key, storage))
-    }
-    return storages
-  }
-  
-  /// Convert relative domain into absolute for local affector spec.
-  ///
-  /// Applicable only to en-masse modifications - that is, when modification affects multiple items in affectee domain.
-  func handleResolveDomain(affectorSpec: AffectorSpec) -> ModDomain? {
-
-    let affectorItem = affectorSpec.itemType
-    let affecteeDomain = affectorSpec.modifier.affecteeDomain
-    
-    switch affecteeDomain {
+    switch affectorSpec.modifier.affecteeDomain {
     case .me:
-      if affectorItem is Ship {
-        return .ship
-      } else if affectorItem is Character {
-        return .character
-      } else {
-        fatalError("UnexpectedDomainError(\(String(describing: affecteeDomain)))")
-      }
+      if affectorItem is Ship      { return .ship }
+      if affectorItem is Character { return .character }
+      return nil
     case .character, .ship:
-      return affecteeDomain
+      return affectorSpec.modifier.affecteeDomain
     default: return nil
     }
   }
-  
-  func handleAffectorSpecErrors(error: Any, affectorSpec: AffectorSpec) {
-    /*
-     """Handles exceptions related to affector spec.
 
-     Multiple register methods which get data based on passed affector spec
-     raise similar exceptions. To handle them in consistent fashion, it is
-     done from this method. If error cannot be handled by the method, it is
-     re-raised.
-     """
-     if isinstance(error, UnexpectedDomainError):
-         msg = (
-             'malformed modifier on item type {}: '
-             'unsupported affectee domain {}'
-         ).format(affector_spec.item._type_id, error.args[0])
-         logger.warning(msg)
-     elif isinstance(error, UnknownAffecteeFilterError):
-         msg = (
-             'malformed modifier on item type {}: invalid affectee filter {}'
-         ).format(affector_spec.item._type_id, error.args[0])
-         logger.warning(msg)
-     else:
-         raise error
-     */
+  func handleResolveDomain(affectorSpec: AffectorSpec) -> ModDomain? {
+    let affectorItem = affectorSpec.itemType
+    switch affectorSpec.modifier.affecteeDomain {
+    case .me:
+      if affectorItem is Ship      { return .ship }
+      if affectorItem is Character { return .character }
+      fatalError("UnexpectedDomainError(\(String(describing: affectorSpec.modifier.affecteeDomain)))")
+    case .character, .ship:
+      return affectorSpec.modifier.affecteeDomain
+    default: return nil
+    }
+  }
+
+  func handleAffectorSpecErrors(error: Any, affectorSpec: AffectorSpec) { }
+
+  // MARK: - Private: Affectee Storage Operations
+
+  private func addToAffecteeStorages(affecteeFit: Fit, affecteeItem: BaseItemMixin) {
+    guard let affecteeDomain = affecteeItem.modifierDomain else { return }
+
+    affecteesDomain.addDataEntry(key: affecteeDomain, data: affecteeItem)
+
+    if let groupId = affecteeItem.itemType?.groupId {
+      affecteesDomainGroup.addDataEntry(
+        key: DomainGroupKey(affecteeDomain: affecteeDomain, groupID: groupId),
+        data: affecteeItem
+      )
+    }
+
+    if affecteeItem.ownerModifiable {
+      for skillReq in affecteeItem.itemType?.requiredSkills ?? [:] {
+        affecteesOwnerSkillRequirement.addDataEntry(
+          key: FitTypeIdKey(fitID: affecteeFit.id, typeId: skillReq.key),
+          data: affecteeItem
+        )
+      }
+    }
+  }
+
+  private func removeFromAffecteeStorages(affecteeFit: Fit, affecteeItem: BaseItemMixin) {
+    guard let affecteeDomain = affecteeItem.modifierDomain else { return }
+
+    affecteesDomain.removeDataEntry(key: affecteeDomain, data: affecteeItem)
+
+    if let groupId = affecteeItem.itemType?.groupId {
+      affecteesDomainGroup.removeDataEntry(
+        key: DomainGroupKey(affecteeDomain: affecteeDomain, groupID: groupId),
+        data: affecteeItem
+      )
+    }
+
+    if affecteeItem.ownerModifiable {
+      for skillReq in affecteeItem.itemType?.requiredSkills ?? [:] {
+        affecteesOwnerSkillRequirement.removeDataEntry(
+          key: FitTypeIdKey(fitID: affecteeFit.id, typeId: skillReq.key),
+          data: affecteeItem
+        )
+      }
+    }
+  }
+
+  // MARK: - Private: Local Affector Storage Operations
+
+  private func applyToLocalAffectorStorages(affectorSpec: AffectorSpec, add: Bool) {
+    let affecteeFilter = affectorSpec.modifier.affecteeFilter
+
+    if affecteeFilter == .item {
+      switch affectorSpec.modifier.affecteeDomain {
+      case .me:        applyAffectorSelf(affectorSpec: affectorSpec, add: add)
+      case .character: applyAffectorCharacter(affectorSpec: affectorSpec, add: add)
+      case .ship:      applyAffectorShip(affectorSpec: affectorSpec, add: add)
+      case .other:     applyAffectorOther(affectorSpec: affectorSpec, add: add)
+      default:
+        if !add { print("++ RLAS no storages for \(affectorSpec)") }
+      }
+    } else {
+      guard let affecteeDomain = resolveLocalDomain(affectorSpec: affectorSpec) else {
+        if !add { print("++ GLAS no affecteeDomain") }
+        return
+      }
+      let fits = [affectorSpec.itemType.fit].compactMap { $0 }
+      switch affecteeFilter {
+      case .domain:
+        applyAffectorsDomain(affecteeDomain: affecteeDomain, affecteeFits: fits, spec: affectorSpec, add: add)
+      case .domain_group:
+        applyAffectorsDomainGroup(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits, add: add)
+      case .domain_skillrq:
+        applyAffectorsDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits, add: add)
+      case .owner_skillrq:
+        applyAffectorsOwnerSkillRequirements(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits, add: add)
+      default:
+        if !add { print("++ RLAS no storages for \(affectorSpec)") }
+      }
+    }
+  }
+
+  private func applyAffectorSelf(affectorSpec: AffectorSpec, add: Bool) {
+    guard let affecteeItem = affectorSpec.itemType as? BaseItemMixin else {
+      if !add { print("++ GLAS-S not BaseItemMixin") }
+      return
+    }
+    if self.affectees.contains(affecteeItem) {
+      if add { affectorsItemActive.addDataEntry(key: affecteeItem, data: affectorSpec) }
+      else   { affectorsItemActive.removeDataEntry(key: affecteeItem, data: affectorSpec) }
+    } else {
+      guard let fit = affecteeItem.fit else {
+        if !add { print("++ GLAS-S no fit for \(affecteeItem)") }
+        return
+      }
+      if add { affectorsItemAwaiting.addDataEntry(key: fit.id, data: affectorSpec) }
+      else   { affectorsItemAwaiting.removeDataEntry(key: fit.id, data: affectorSpec) }
+    }
+  }
+
+  private func applyAffectorCharacter(affectorSpec: AffectorSpec, add: Bool) {
+    guard let affecteeFit = affectorSpec.itemType.fit else {
+      if !add { print("++ GLAS-C no affecteeFit") }
+      return
+    }
+    guard let affecteeCharacter = affecteeFit.character else {
+      if !add { print("++ no affecteeCharacter") }
+      return
+    }
+    if self.affectees.contains(affecteeCharacter) {
+      if add { affectorsItemActive.addDataEntry(key: affecteeCharacter, data: affectorSpec) }
+      else   { affectorsItemActive.removeDataEntry(key: affecteeCharacter, data: affectorSpec) }
+    } else {
+      if add { affectorsItemAwaiting.addDataEntry(key: affecteeFit.id, data: affectorSpec) }
+      else   { affectorsItemAwaiting.removeDataEntry(key: affecteeFit.id, data: affectorSpec) }
+    }
+  }
+
+  private func applyAffectorShip(affectorSpec: AffectorSpec, add: Bool) {
+    guard let affecteeFit = affectorSpec.itemType.fit else {
+      if !add { print("++ GLACS-S no affecteeFit") }
+      return
+    }
+    guard let affecteeShip = affecteeFit.ship else {
+      if !add { print("++ no affecteeShip") }
+      return
+    }
+    if self.affectees.contains(affecteeShip) {
+      if add { affectorsItemActive.addDataEntry(key: affecteeShip, data: affectorSpec) }
+      else   { affectorsItemActive.removeDataEntry(key: affecteeShip, data: affectorSpec) }
+    } else {
+      if add { affectorsItemAwaiting.addDataEntry(key: affecteeFit.id, data: affectorSpec) }
+      else   { affectorsItemAwaiting.removeDataEntry(key: affecteeFit.id, data: affectorSpec) }
+    }
+  }
+
+  private func applyAffectorOther(affectorSpec: AffectorSpec, add: Bool) {
+    guard let affectorItem = affectorSpec.itemType as? BaseItemMixin else { return }
+    // 'other' affectors live in their special storage regardless of affectee state
+    if add { affectorsItemOther.addDataEntry(key: affectorItem, data: affectorSpec) }
+    else   { affectorsItemOther.removeDataEntry(key: affectorItem, data: affectorSpec) }
+
+    // Also touch active storage for already-tracked 'other' items
+    for otherItem in affectorSpec.itemType.others {
+      if self.affectees.contains(otherItem) {
+        if add { affectorsItemActive.addDataEntry(key: otherItem, data: affectorSpec) }
+        else   { affectorsItemActive.removeDataEntry(key: otherItem, data: affectorSpec) }
+      }
+    }
+  }
+
+  // MARK: - Private: En-Masse Affector Storage Operations
+
+  private func applyAffectorsDomain(affecteeDomain: ModDomain, affecteeFits: [Fit], spec: AffectorSpec, add: Bool) {
+    for fit in affecteeFits {
+      let key = FitDomainKey(fitID: fit.id, domain: affecteeDomain)
+      if add { affectorsDomain.addDataEntry(key: key, data: spec) }
+      else   { affectorsDomain.removeDataEntry(key: key, data: spec) }
+    }
+  }
+
+  private func applyAffectorsDomainGroup(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit], add: Bool) {
+    guard let groupId = affectorSpec.modifier.affecteeFilterExtraArg else { return }
+    let key = DomainGroupKey(affecteeDomain: affecteeDomain, groupID: groupId)
+    for _ in affecteeFits {
+      if add { affectorsDomainGroup.addDataEntry(key: key, data: affectorSpec) }
+      else   { affectorsDomainGroup.removeDataEntry(key: key, data: affectorSpec) }
+    }
+  }
+
+  private func applyAffectorsDomainSkillRequirement(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit], add: Bool) {
+    var skillTypeId = affectorSpec.modifier.affecteeFilterExtraArg
+    if skillTypeId == Int64(EosTypeId.current_self.rawValue) { skillTypeId = affectorSpec.itemType.typeId }
+    guard let skillTypeId else { return }
+    let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: skillTypeId)
+    for _ in affecteeFits {
+      if add { affectorsDomainSkillRequirement.addDataEntry(key: key, data: affectorSpec) }
+      else   { affectorsDomainSkillRequirement.removeDataEntry(key: key, data: affectorSpec) }
+    }
+  }
+
+  private func applyAffectorsOwnerSkillRequirements(affectorSpec: AffectorSpec, affecteeDomain: ModDomain, affecteeFits: [Fit], add: Bool) {
+    var skillTypeId = affectorSpec.modifier.affecteeFilterExtraArg
+    if skillTypeId == Int64(EosTypeId.current_self.rawValue) { skillTypeId = affectorSpec.itemType.typeId }
+    guard let skillTypeId else { return }
+    let key = DomainSkillKey(affecteeDomain: affecteeDomain, affecteeSkillRequirementTypeId: skillTypeId)
+    for _ in affecteeFits {
+      if add { affectorsOwnerSkillRequirement.addDataEntry(key: key, data: affectorSpec) }
+      else   { affectorsOwnerSkillRequirement.removeDataEntry(key: key, data: affectorSpec) }
+    }
+  }
+
+  // MARK: - Private: Projected Affector Storage Operations
+
+  private func applyToProjectedAffectorStorages(affectorSpec: AffectorSpec, targetItems: [any BaseItemMixinProtocol], add: Bool) {
+    let affecteeFilter = affectorSpec.modifier.affecteeFilter
+
+    if affecteeFilter == .item {
+      for targetItem in targetItems.compactMap({ $0 as? BaseItemMixin }) {
+        if self.affectees.contains(targetItem) {
+          if add { affectorsItemActive.addDataEntry(key: targetItem, data: affectorSpec) }
+          else   { affectorsItemActive.removeDataEntry(key: targetItem, data: affectorSpec) }
+        }
+      }
+    } else {
+      let affecteeDomain = ModDomain.ship
+      let fits = targetItems.compactMap { $0 as? BaseItemMixin }.filter { $0 is Ship }.compactMap { $0.fit }
+      switch affecteeFilter {
+      case .domain:
+        applyAffectorsDomain(affecteeDomain: affecteeDomain, affecteeFits: fits, spec: affectorSpec, add: add)
+      case .domain_group:
+        applyAffectorsDomainGroup(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits, add: add)
+      case .domain_skillrq:
+        applyAffectorsDomainSkillRequirement(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits, add: add)
+      case .owner_skillrq:
+        applyAffectorsOwnerSkillRequirements(affectorSpec: affectorSpec, affecteeDomain: affecteeDomain, affecteeFits: fits, add: add)
+      default: break
+      }
+    }
   }
 }
 
-// affecteeDomain, affecteeSkillRequirementTypeId
+// MARK: - Additional Key Structs
+
+/// Key for affectorsDomainSkillRequirement: domain + skillTypeId
 struct DomainSkillKey: Hashable {
   let affecteeDomain: ModDomain
   let affecteeSkillRequirementTypeId: Int64
-  
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(affecteeDomain)
-    hasher.combine(affecteeSkillRequirementTypeId)
-  }
 }
 
-struct FitSkillKey: Hashable {
-  let fitID: Int64
-  let skillRequirementTypeId: KeyValueKey
-  
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(fitID)
-    hasher.combine(skillRequirementTypeId)
-  }
-}
-
+/// General-purpose key for (Int64, Int64) pairs, e.g. (typeID, attributeID).
 struct KeyValueKey: Hashable {
   let key: Int64
   let value: Int64

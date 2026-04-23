@@ -42,7 +42,7 @@ public class MutableAttributeMap {
   
   /// Returns map which defines value caps.
   /// It includes attributes which cap something, and attributes being capped by them.
-  var capMap: KeyedStorage<Int64>?
+  var capMap: KeyedStorage<AttrId, Int64>?
 
 
   public var length: Int {

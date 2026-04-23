@@ -103,7 +103,6 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
   }
   
   public func subItems(item: T) -> [any BaseItemMixinProtocol] {
-    var index = 0
     var values = [any BaseItemMixinProtocol]()
     let iterResult = item.childItems(skipAutoItems: true)
     values = [item] + iterResult

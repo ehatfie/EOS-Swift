@@ -134,11 +134,11 @@ class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
   var affections: AffectionRegister? = nil  // AffectionRegister
   var projections: ProjectionRegister? = nil  // ProjectionRegister
   // Format: {projector: {modifiers}}
-  var warfareBuffs = KeyedStorage<AffectorSpec>()
+  var warfareBuffs = KeyedStorage<Projector, AffectorSpec>()
 
   // Container with affector specs which will receive messages
   // Format: {message type: set(affector specs)}
-  var subscribedAffectors = KeyedStorage<AffectorSpec>()
+  var subscribedAffectors = KeyedStorage<MessageTypeEnum, AffectorSpec>()
 
   init(solarSystem: SolarSystem) {
     self.solarSystem = solarSystem

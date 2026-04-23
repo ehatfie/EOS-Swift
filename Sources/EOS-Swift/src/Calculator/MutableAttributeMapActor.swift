@@ -25,7 +25,7 @@ public actor MutableAttributeMapActor {
 
     /// Returns map which defines value caps.
     /// It includes attributes which cap something, and attributes being capped by them.
-    var capMap: KeyedStorage<Int64>?
+    var capMap: KeyedStorage<AttrId, Int64>?
 
     var length: Int {
         return keys.count

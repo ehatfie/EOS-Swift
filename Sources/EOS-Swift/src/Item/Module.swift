@@ -185,11 +185,11 @@ public class Module:
   
   override func addAutoCharge(effectId: Int64, autoChargeTypeId: Int64) {
     if self.autocharges == nil {
-      self.autocharges = ItemDict<AutoCharge>(parent: self, containerOverride: self)
+      self.autocharges = ItemDict<Int64, AutoCharge>(parent: self, containerOverride: self)
     }
     
     self.autocharges?.setItem(
-      key: effectId as AnyHashable,
+      key: effectId,
       item: AutoCharge(typeId: autoChargeTypeId)
     )
   }

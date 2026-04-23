@@ -147,7 +147,7 @@ public class Effect: Hashable {
   func getCharge(item: any BaseItemMixinProtocol) -> Charge? {
     if self.getAutoChargeTypeId(item: item) != nil {
       print("!! not returning autocharge but should")
-      if let charge = item.autocharges?.getItem(key: self.effectId as AnyHashable) as? Charge {
+      if let charge = item.autocharges?.getItem(key: self.effectId) as? Charge {
         return charge
       } else {
         print("!! item wasnt a charge")
