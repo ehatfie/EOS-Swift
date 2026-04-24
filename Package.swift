@@ -17,6 +17,7 @@ let package = Package(
     ],
     dependencies: [
       .package(url: "https://github.com/jpsim/Yams.git", from: "6.0.1"),
+      .package(path: "../EveModelLibrary/")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,7 +25,8 @@ let package = Package(
         .target(
             name: "EOS-Swift",
             dependencies: [
-              .product(name: "Yams", package: "Yams")
+              .product(name: "Yams", package: "Yams"),
+              .product(name:"EveModelLibrary", package: "EveModelLibrary")
             ]
         ),
         .testTarget(

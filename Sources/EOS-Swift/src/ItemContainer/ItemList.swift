@@ -17,16 +17,16 @@
 
 public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHaving {
   typealias BaseItemMixin = T
-  weak var parent: (any MaybeFitHaving)? // ParentHaving??
+  //weak var parent: (any MaybeFitHaving)? // ParentHaving??
   var list: [T?] = []
   
   public var fit: Fit? {
-    return self.parent?.fit
+    return nil //self.parent?.fit
   }
   
   public init(parent: (any MaybeFitHaving)?) {
     //super.init(parent: parent)
-    self.parent = parent
+    //self.parent = parent
     self.list = []
   }
   
@@ -258,4 +258,128 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
     }
   }
   
+}
+
+
+public class ItemList2<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHaving {
+  public var fit: Fit? {
+    nil
+  }
+  
+  // Internal storage remains `[T?]` to support explicit empty slots
+  var list: [T?] = []
+  
+  // MARK: - Public Accessors
+  
+  /// All slots in the list, including empty (`nil`) entries.
+  public var rawItems: [T?] { list }
+  
+  /// Only populated slots, eliminating `nil` values.
+  public var items: [T] { list.compactMap { $0 } }
+
+  // MARK: - Lifecycle
+  
+  /// Inserts the item into the list. If the slot is out of bounds,
+  /// it pads the list with `nil` up to that index.
+  @MainActor
+  public func equip(item: any BaseItemMixinProtocol) {
+    guard self.checkClass(item: item as? T, allowNil: false) else {
+      print("!! equip failed class check on \(item.typeId)")
+      return
+    }
+    
+    let index: Int
+    if let existing = self.list.firstIndex(of: nil) {
+      index = existing
+      self.list[index] = item as? T
+    } else {
+      index = self.list.count
+      self.list.append(item as? T)
+    }
+    
+    do {
+      try self.handleItemAddition(item: item as! T, container: self)
+    } catch {
+      print("!! ItemList equip error: \(error)")
+      self.list.remove(at: index)
+      cleanup()
+    }
+  }
+  
+  // MARK: - Mutable Methods
+  
+  /// Appends an item to the end of the list.
+  @MainActor
+  public func append(item: any BaseItemMixinProtocol) {
+    guard self.checkClass(item: item as? T, allowNil: false) else {
+      return
+    }
+    
+    self.list.append(item as? T)
+    do {
+      try self.handleItemAddition(item: item as! T, container: self)
+    } catch {
+      print("!! ItemList append error: \(error)")
+      self.list.removeLast()
+    }
+  }
+  
+  /// Removes an item or `nil` from the container.
+  @MainActor
+  public func remove(_ value: (any BaseItemMixinProtocol)?) {
+    guard let item = value as? T else { return }
+    guard let index = self.list.firstIndex(of: item) else { return }
+    
+    self.handleItemRemoval(item)
+    self.list.remove(at: index)
+    cleanup()
+  }
+  
+  /// Clears all populated items and resets the container.
+  @MainActor
+  public func clear() {
+    for item in self.list.compactMap({ $0 }) {
+      self.handleItemRemoval(item)
+    }
+    self.list.removeAll()
+  }
+  
+  // MARK: - Utility Methods
+  
+  /// Pads the list with `nil` until the requested index becomes accessible.
+  private func allocate(index: Int) {
+    let count = self.list.count
+    guard index >= count else { return }
+    self.list.append(contentsOf: Array(repeating: nil, count: index - count + 1))
+  }
+  
+  /// Removes trailing `nil`s from the end of the list.
+  private func cleanup() {
+    while self.list.last == nil {
+      self.list.removeLast()
+    }
+  }
+}
+
+// MARK: - Collection Conformances
+
+extension ItemList2: Sequence, Collection {
+  public var startIndex: Int { 0 }
+  public var endIndex: Int { self.list.count }
+  
+  public func index(after i: Int) -> Int { i + 1 }
+  public func index(before i: Int) -> Int { i - 1 }
+  
+  public subscript(position: Int) -> T? {
+    get { list[position] }
+    set { list[position] = newValue }
+  }
+  
+  /// Iterates over all slots, including empty ones.
+  public func makeIterator() -> IndexingIterator<[T?]> {
+    list.makeIterator()
+  }
+  
+  /// Iterates only over populated slots.
+  public var populatedItems: [T] { list.compactMap { $0 } }
 }

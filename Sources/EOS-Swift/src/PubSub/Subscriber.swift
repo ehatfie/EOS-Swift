@@ -22,9 +22,11 @@
              return
          handler(self, msg)
  */
+/// Handler that receives a message and processes it
+public typealias MessageHandler = (any Message) -> Void
 public typealias CallbackHandler = () -> Void
-/// Base class for subscribers.
-public protocol BaseSubscriber {
+/// Base protocol for subscribers in the PubSub system.
+public protocol BaseSubscriber: AnyObject {
     /// Dictionary mapping message types to their handlers.
     var handlerMap: [MessageTypeEnum: CallbackHandler] { get }
 

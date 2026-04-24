@@ -18,10 +18,6 @@
      type_id: Identifier of item type which should serve as base for this
          item.
 
- Cooperative methods:
-     __init__
-     _child_item_iter
-
  */
 
 /*
@@ -41,7 +37,7 @@ public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var effectModeOverrides: [Int64: EffectMode]? { get set }
   var effectTargets: String? { get set }
   var attributes: MutableAttributeMap? { get set } // will be a custom dictionary type
-  var autocharges: ItemDict<AutoCharge>? { get set }
+  var autocharges: ItemDict<Int64, AutoCharge>? { get set }
   
   var attributes1: MutableAttributeMapActor? { get set }
   
@@ -298,7 +294,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   open var _state: StateI
   
   //public var attributes: [AttrId: Double] = [:]
-  public var autocharges: ItemDict<AutoCharge>? = nil
+  public var autocharges: ItemDict<Int64, AutoCharge>? = nil
   
   public var fit: Fit? {
     if let container = self.container as? MaybeFitHaving {

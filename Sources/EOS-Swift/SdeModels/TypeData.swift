@@ -37,6 +37,7 @@ public struct ThingName: Codable, Sendable {
   }
 }
 
+/*
 public struct TypeData: Codable, Sendable {
   public let capacity: Double?
   public let description: ThingName?
@@ -94,3 +95,4 @@ public struct TypeData: Codable, Sendable {
     self.volume = volume
   }
 }
+*/

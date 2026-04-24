@@ -7,6 +7,7 @@
 
 import Foundation
 import Yams
+import EveModelLibrary
 
 public let allowedGroups: Set<Int64> = [27, 77, 508, 89, 53, 55, 74, 372]
 
@@ -271,9 +272,8 @@ extension YamlDataHandler {
       print("NO MAPPING")
       return []
     }
-
     let keyValuePair = mapping.map { $0 }
-    //let start = Date()
+    
     let values = await withTaskGroup(
       of: [(Int64, T)].self,
       returning: [(Int64, T)].self
@@ -283,7 +283,7 @@ extension YamlDataHandler {
       taskGroup.addTask { [weak self] in
         return await self?.splitAndSortAsync(
           splits: splits,
-          some: keyValuePair,
+          data: keyValuePair,
           type: type
         ) ?? []
       }
@@ -294,22 +294,22 @@ extension YamlDataHandler {
 
       return returnValues
     }
-    //print("decodeNodeAsync() - splitAndSortAsync done \(Date().timeIntervalSince(start))")
+
     return values
   }
 
   func splitAndSortAsync<T: Decodable & Sendable>(
     splits: Int,
-    some: [Node.Mapping.Element],
+    data: [Node.Mapping.Element],
     type: T.Type
   ) async -> [(Int64, T)] {
-    let keyValueCount = some.count
-
-    let one = Array(some[0..<keyValueCount / 2])
-    let two = Array(some[keyValueCount / 2..<keyValueCount])
+    let keyValueCount = data.count
+    // we should verify that this doesnt lose any values
+    let top = Array(data[0..<keyValueCount / 2])
+    let bottom = Array(data[keyValueCount / 2..<keyValueCount])
 
     guard splits > 0 else {
-      return await decode(splits: 0, some: some, type: type)
+      return await decode(splits: 0, some: data, type: type)
     }
 
     if #available(macOS 10.15, *) {
@@ -322,14 +322,14 @@ extension YamlDataHandler {
         taskGroup.addTask {
           await self.splitAndSortAsync(
             splits: splits - 1,
-            some: one,
+            data: top,
             type: type
           )
         }
         taskGroup.addTask {
           await self.splitAndSortAsync(
             splits: splits - 1,
-            some: two,
+            data: bottom,
             type: type
           )
         }
@@ -345,8 +345,6 @@ extension YamlDataHandler {
       // Fallback on earlier versions
       return []
     }
-
-    //return await firstThing + secondThing
   }
 
   func decode<T: Decodable>(
@@ -370,19 +368,3 @@ extension YamlDataHandler {
     return returnValue
   }
 }
-
-/*
- func readYamlAsync2<T: Decodable>(for fileName: YamlFiles, type: T.Type, splits: Int = 3) async throws -> [(Int64, T)] {
-   guard let path = Bundle.main.path(forResource: fileName.rawValue, ofType: "yaml") else {
-     throw NSError(domain: "", code: 0)
-   }
-
-   let url = URL(fileURLWithPath: path)
-   let data = try Data(contentsOf: url)
-   let yaml = String(data: data, encoding: .utf8)!
-
-   let node = try Yams.compose(yaml: yaml)!
-
-   return await decodeNodeAsync(node: node, type: T.self, splits: splits)
- }
- */

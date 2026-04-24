@@ -16,19 +16,19 @@
          container_override (optional): When this argument is set, its value will
              be assigned as container to all items being added.
  */
-public class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
+public class ItemDict<K: Hashable, T: BaseItemMixinProtocol>: MaybeFitHaving {
   public var fit: Fit?
   weak var parent: (any MaybeFitHaving)?
   
   var itemSet: ItemSet<T>
-  var keyedItems: [AnyHashable: T] = [:]
+  var keyedItems: [K: T] = [:]
   
   init(parent: any MaybeFitHaving, containerOverride: Any?) {
     self.parent = parent
     self.itemSet = ItemSet<T>(parent: parent, containerOverride: containerOverride)
   }
   
-  func setItem(key: AnyHashable, item: T) {
+  func setItem(key: K, item: T) {
     if self.keyedItems[key] != nil {
       fatalError("Item with key \(key) already exists in this container.")
     }
@@ -36,7 +36,7 @@ public class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
     self.itemSet.add(item: item)
   }
   
-  func deleteItem(key: T) {
+  func deleteItem(key: K) {
     guard let item = self.keyedItems[key] else {
       return
     }
@@ -50,7 +50,7 @@ public class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
     self.keyedItems.removeAll()
   }
   
-  func getItem(key: AnyHashable, defaultValue: (any BaseItemMixinProtocol)? = nil) -> (any BaseItemMixinProtocol)? {
+  func getItem(key: K, defaultValue: (any BaseItemMixinProtocol)? = nil) -> (any BaseItemMixinProtocol)? {
     return self.keyedItems[key] ?? defaultValue ?? nil
   }
   
@@ -63,14 +63,14 @@ public class ItemDict<T: BaseItemMixinProtocol>: MaybeFitHaving {
     return Array(self.keyedItems.values)
   }
   
-  func contains(_ key: T) -> Bool {
+  func contains(_ key: K) -> Bool {
     return self.keyedItems[key] != nil
   }
   
   func length() -> Int {
     return self.keyedItems.count
   }
-  
+  // might not be necessary
   func iterator() -> AnyIterator<any BaseItemMixinProtocol> {
     let values = Array(self.keyedItems.values)
     var index: Int = 0

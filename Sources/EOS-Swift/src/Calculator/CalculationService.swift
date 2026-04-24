@@ -116,6 +116,8 @@ let WARFARE_BUFF_ATTRS: [Int64: Int64] = [
 
 
 class CalculationService: BaseSubscriber, BaseSubscriberProtocol {
+  //var handlerMap: [MessageTypeEnum : MessageHandler]
+  
   static func == (lhs: CalculationService, rhs: CalculationService) -> Bool {
     false
   }

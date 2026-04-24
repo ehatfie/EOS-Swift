@@ -5,6 +5,7 @@
 //  Created by Erik Hatfield on 9/24/25.
 //
 import Foundation
+import EveModelLibrary
 
 class EveObjectBuilder: @unchecked Sendable {
 
@@ -238,7 +239,7 @@ class EveObjectBuilder: @unchecked Sendable {
         switch affecteeFilter {
         case .owner_skillrq, .domain_skillrq:
           affecteeFilterExtraArg = value.skillTypeID
-        case .domain_group: affecteeFilterExtraArg = value.groupId
+        case .domain_group: affecteeFilterExtraArg = Int64(value.groupID)
         default: affecteeFilterExtraArg = nil
         }
 

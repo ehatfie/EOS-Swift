@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/21/25.
 //
 
-public struct DogmaEffectData: Codable, Sendable {
+struct DogmaEffectData1: Codable, Sendable {
   public let descriptionID: ThingName?
   public let disallowAutoRepeat: Bool
   public let displayNameID: ThingName?
@@ -123,18 +123,18 @@ public struct ModifierData: Codable, Sendable {
   }
 }
 
-public struct TypeDogmaData: Codable, Sendable {
-  public let dogmaAttributes: [DogmaAttributeInfo]
-  public let dogmaEffects: [DogmaEffectInfo]
-
-  public init(
-    dogmaAttributes: [DogmaAttributeInfo],
-    dogmaEffects: [DogmaEffectInfo] = []
-  ) {
-    self.dogmaAttributes = dogmaAttributes
-    self.dogmaEffects = dogmaEffects
-  }
-}
+//public struct TypeDogmaData: Codable, Sendable {
+//  public let dogmaAttributes: [DogmaAttributeInfo]
+//  public let dogmaEffects: [DogmaEffectInfo]
+//
+//  public init(
+//    dogmaAttributes: [DogmaAttributeInfo],
+//    dogmaEffects: [DogmaEffectInfo] = []
+//  ) {
+//    self.dogmaAttributes = dogmaAttributes
+//    self.dogmaEffects = dogmaEffects
+//  }
+//}
 
 public struct TypeDogmaDataOuter: Codable, Sendable {
   public let dogmaAttributes: [DogmaAttributeInfo]

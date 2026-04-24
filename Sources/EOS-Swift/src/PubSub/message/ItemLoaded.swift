@@ -81,7 +81,7 @@ public struct EffectsUnapplied: ItemMessage {
 
 public struct EffectApplied: ItemMessage {
   public var fit: Fit? = nil
-  public let messageType: MessageTypeEnum = .EffectsUnapplied
+  public let messageType: MessageTypeEnum = .EffectsApplied
   public let item: any BaseItemMixinProtocol
   
   public let effectId: Int64

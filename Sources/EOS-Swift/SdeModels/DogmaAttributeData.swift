@@ -5,7 +5,7 @@
 //  Created by Erik Hatfield on 9/21/25.
 //
 
-public struct DogmaAttributeData: Codable, Sendable {
+private struct DogmaAttributeData: Codable, Sendable {
   public let attributeID: Int64
   public let categoryID: Int64?
   public let chargeRechargeTimeID: Int64?

@@ -6,6 +6,7 @@
 //
 import Foundation
 import Yams
+import EveModelLibrary
 
 enum YamlFiles: String {
   case categoryIDs = "categoryIDs"
@@ -233,7 +234,7 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol,
         switch affecteeFilter {
         case .owner_skillrq, .domain_skillrq:
           affecteeFilterExtraArg = value.skillTypeID
-        case .domain_group: affecteeFilterExtraArg = value.groupId
+        case .domain_group: affecteeFilterExtraArg = Int64(value.groupID)
         default: affecteeFilterExtraArg = nil
         }
 

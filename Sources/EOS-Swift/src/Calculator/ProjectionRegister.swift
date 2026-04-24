@@ -114,6 +114,7 @@ class ProjectionRegister {
   func unregisterSolsysItem(solsysItem: Ship) {
     print("PR - unregisterSolsysItem()")
     // Move items back to carrierless; full Projector reconstruction requires
+    
     // tracking effects per item which is not currently done here.
     self.carrierProjectors.dictionary.removeValue(forKey: solsysItem)
   }
