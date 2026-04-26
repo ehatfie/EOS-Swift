@@ -114,7 +114,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     // Add fit to solar syhstem
     if solarSystem is DefaultImpl {
       print("++ use default solarSystem")
-      let value = SolarSystem(source: SourceManager())
+      let value = SolarSystem(source: SourceManager.shared)
       self.solarSystem = value
       self.solarSystem?.fit = self
     }

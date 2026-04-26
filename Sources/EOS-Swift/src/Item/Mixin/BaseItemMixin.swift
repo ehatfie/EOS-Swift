@@ -384,6 +384,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   
   var typeEffects: [Int64: Effect] {
     print("!! typeEffects default implementation")
+    return self.itemType?.effects ?? [:]
     // return self.type.effects
     /*
      effects = {}
@@ -399,7 +400,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
 //      
 //    }
     
-    return [:]//returnValues
+//    return [:]//returnValues
   }
   
   var typeDefaultEffect: Effect? {

@@ -210,10 +210,10 @@ public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
       for (requiredSkill, requiredSkillLevel) in expectedAtrributes {
         // this should be a dict
         guard
-          let attr1 = dogmaAttributes.first(where: {
+          let attr1 = dogmaAttributes?.first(where: {
             $0.attributeID == requiredSkill.rawValue
           }),
-          let attr2 = dogmaAttributes.first(where: {
+          let attr2 = dogmaAttributes?.first(where: {
             $0.attributeID == requiredSkillLevel.rawValue
           })
         else { break }

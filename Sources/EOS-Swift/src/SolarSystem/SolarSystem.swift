@@ -59,7 +59,7 @@ public class SolarSystem: MaybeFitHaving {
 
 public class SourceManager: @unchecked Sendable {
   @MainActor
-  static var defaultValue: Source? {
+  public static var defaultValue: Source? {
     SourceManager.shared.defaultSource
   }
   @MainActor public static var shared: SourceManager = SourceManager()
@@ -103,6 +103,13 @@ public class SourceManager: @unchecked Sendable {
     let types = eveObjects.2
     let buffTemplates = eveObjects.3
     
+    /*
+     [Attribute],
+     [Effect],
+     [ItemType],
+     [BuffTemplate]
+     */
+    
     cacheHandler.updateCache(
       types: types,
       attributes: attributes,
@@ -113,6 +120,7 @@ public class SourceManager: @unchecked Sendable {
     
     //Finally, add record to list of sources
     let source = Source(alias: alias, cacheHandler: cacheHandler)
+    print("++ source alias \(alias) source \(source)")
     self.sources[alias] = source
     if makeDefault {
       self.defaultSource = source
@@ -132,8 +140,8 @@ public class SourceManager: @unchecked Sendable {
   }
 }
 
-struct Source: Equatable, Sendable {
-  static func == (lhs: Source, rhs: Source) -> Bool {
+public struct Source: Equatable, Sendable {
+  public static func == (lhs: Source, rhs: Source) -> Bool {
     return lhs.alias == rhs.alias
   }
 

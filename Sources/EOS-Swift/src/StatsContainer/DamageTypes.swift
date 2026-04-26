@@ -18,6 +18,18 @@ protocol DamageTypeContainer {
   func description() -> String
 }
 
+protocol DamageTypeContainer2 {
+  var em: Double { get }
+  var thermal: Double { get }
+  var kinetic: Double { get }
+  var explosive: Double { get }
+
+  func makeIterator() -> [Double]
+  static func == (lhs: Self, rhs: Self) -> Bool
+  func hash(into hasher: inout Hasher)
+  func description() -> String
+}
+
 /// Container for damage data stats.
 public class DamageTypes: DamageTypeContainer, Hashable {
   public var em: Double
@@ -69,7 +81,7 @@ public class DamageTypes: DamageTypeContainer, Hashable {
 }
 
 public class DamageTypesTotal: DamageTypes {
-  var total: Double {
+  public var total: Double {
     return self.em + self.thermal + self.kinetic + self.explosive
   }
 
@@ -87,6 +99,15 @@ public class DamageTypesTotal: DamageTypes {
 }
 
 public class DamageStats: DamageTypesTotal {
+  static var empty: DamageStats {
+    DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)
+  }
+
+  // should only be called by above
+  private override init(em: Double, thermal: Double, kinetic: Double, explosive: Double) {
+    super.init(em: em, thermal: thermal, kinetic: kinetic, explosive: explosive)
+  }
+  
   init?(
     em: Double,
     thermal: Double,
@@ -109,7 +130,8 @@ public class DamageStats: DamageTypesTotal {
     super.init(em: em, thermal: thermal, kinetic: kinetic, explosive: explosive)
   }
   
-  // I think the idea with this is any parent class that implements DamageStats should be able to use this combined function to create a new object of the class that calls it
+  // I think the idea with this is any parent class that implements DamageStats should be able to use this combined
+  // function to create a new object of the class that calls it
   static func combined(
     _ stats: [any DamageTypeContainer],
     targetResists: (any DamageTypeContainer)? = nil
@@ -137,15 +159,14 @@ public class DamageStats: DamageTypesTotal {
     }
     
     return DamageStats(em: em, thermal: therm, kinetic: kin, explosive: explosive)
-//    return DamageStats(
-//      em: stats.reduce(0) { $0 + $1.em },
-//      thermal: stats.reduce(0) { $0 + $1.thermal },
-//      kinetic: stats.reduce(0) { $0 + $1.kinetic },
   }
 }
 
 
 public class DamageProfile: DamageTypes {
+  public static var omni: DamageProfile {
+    DamageProfile(0.25, thermal: 0.25, kinetic: 0.25, explosive: 0.25)!
+  }
   init?(_ em: Double, thermal: Double, kinetic: Double, explosive: Double) {
     guard em >= 0, thermal >= 0, kinetic >= 0, explosive >= 0,
       em + thermal + kinetic + explosive > 0
