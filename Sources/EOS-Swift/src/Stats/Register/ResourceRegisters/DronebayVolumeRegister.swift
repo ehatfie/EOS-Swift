@@ -18,9 +18,7 @@ public class DronebayVolumeRegister: BaseResourceRegisterProtocol {
     var returnValue: Double = 0.0
     
     for item in self.resourceUsers {
-      if let item = item as? any BaseItemMixinProtocol {
-        returnValue += item.attributes![AttrId.volume.rawValue, default: 0.0]
-      }
+      returnValue += item.attributes![AttrId.volume.rawValue, default: 0.0]
     }
     
     return returnValue
@@ -30,9 +28,9 @@ public class DronebayVolumeRegister: BaseResourceRegisterProtocol {
     return self.fit?.ship?.attributes![AttrId.drone_capacity.rawValue] ?? 0.0
   }
   
-  public var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<BaseItemMixin> = []
   
-  public var users: Set<AnyHashable> {
+  public var users: Set<BaseItemMixin> {
     self.resourceUsers
   }
   
@@ -48,7 +46,7 @@ public class DronebayVolumeRegister: BaseResourceRegisterProtocol {
     guard message.item is Drone, message.item.typeAttributes.keys.contains(AttrId.volume.rawValue) else {
       return
     }
-    self.resourceUsers.insert(message.item as! AnyHashable)
+    self.resourceUsers.insert(message.item as! BaseItemMixin)
   }
   
   public func handleItemUnloaded(message: ItemUnloaded) {
@@ -56,7 +54,7 @@ public class DronebayVolumeRegister: BaseResourceRegisterProtocol {
       return
     }
     
-    self.resourceUsers.remove(message.item as! AnyHashable)
+    self.resourceUsers.remove(message.item as! BaseItemMixin)
   }
 
   public func handleEffectsStarted(message: EffectsStarted) { }

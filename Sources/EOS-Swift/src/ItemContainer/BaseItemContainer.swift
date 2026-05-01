@@ -25,7 +25,7 @@ extension ItemContainerBaseProtocol where ExpectedType: BaseItemMixinProtocol {
     guard item.container == nil else {
       fatalError("Item already assigned to another container")
     }
-    
+    print("++ ITCBP - handleItemEdition()")
     item.container = self
     
     //print("handleItemAddition \()")
@@ -84,6 +84,8 @@ public class ItemContainerBase<T: BaseItemMixinProtocol>: ItemContainerBaseProto
     }
     print("++ handleItemAddition \(item.typeId) \(String(describing: item.itemType?.name))")
     item.container = container
+    print("++ handleItemAddition \(item.typeId) \(String(describing: item.container))")
+    item.load()
     print("++ item.container \(item.typeId) set \(String(describing: item.container))")
     //print("handleItemAddition \()")
     guard let fit = item.fit else {

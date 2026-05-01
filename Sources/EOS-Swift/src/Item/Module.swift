@@ -33,8 +33,14 @@ public class Module:
   EffectStatsMixinProtocol,
   BaseTargetableMixinProtocol,
   SingleTargetableMixinProtocol,
+  ItemContainerBaseProtocol,
   ModuleProtocol
 {
+  public func subItems(item: BaseItemMixin) -> [any BaseItemMixinProtocol] {
+    print("!! moduleSubItems")
+    return []
+  }
+  
   public typealias ExpectedType = BaseItemMixin
   
   public func checkClass(item: (any BaseItemMixinProtocol)?, allowNil: Bool) -> Bool {

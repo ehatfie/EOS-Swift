@@ -5,6 +5,7 @@
 //  Created by Erik Hatfield on 9/5/25.
 //
 
+import SwiftUI
 
 
 public class MockFleet {
@@ -26,7 +27,7 @@ protocol DefaultHaving {
 }
 
 
-
+@Observable
 public class Fit: FitMessageBroker<MockSubscriber> {
   public var id: Int64 = 0
   public var solarSystem: SolarSystem?
@@ -44,6 +45,8 @@ public class Fit: FitMessageBroker<MockSubscriber> {
     }
     
   }// Access point for ship.
+  
+  
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
   public var modules: ModuleRacks!
   var rigs: ItemSet<Rig>! //  Set for rigs.

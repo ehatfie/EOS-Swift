@@ -8,6 +8,8 @@
 // Maybe should be a Struct?
 /// Container for all module racks.
 /// Each rack is actually list container for module items.
+import SwiftUI
+@Observable
 public class ModuleRacks {
   
   public let high: ItemList<ModuleHigh>

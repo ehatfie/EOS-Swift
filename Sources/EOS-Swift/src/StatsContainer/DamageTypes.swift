@@ -154,8 +154,6 @@ public class DamageStats: DamageTypesTotal {
       therm *= 1 - targetResists.thermal
       kin *= 1 - targetResists.kinetic
       explosive *= 1 - targetResists.explosive
-      
-      
     }
     
     return DamageStats(em: em, thermal: therm, kinetic: kin, explosive: explosive)

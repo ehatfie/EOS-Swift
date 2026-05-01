@@ -9,7 +9,20 @@ import Foundation
 import Yams
 import EveModelLibrary
 
+public let allowedCatagories: Set<Int64> = [6, 7, 8,]
 public let allowedGroups: Set<Int64> = [27, 77, 508, 89, 53, 55, 74, 372]
+public let allowedMarketGroups: Set<Int64> = [11, 9, 955, 24, 157, 1111, 1112]
+/*
+ let allowedMarketGroups: Set<Int64> = [
+   11,
+   9,
+   955,
+   24,
+   157,
+   1111,
+   1112,
+ ]
+ */
 
 public class YamlDataHandler: DataHandlerProtocol, @unchecked Sendable {
 

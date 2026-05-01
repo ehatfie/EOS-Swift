@@ -57,6 +57,7 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
     reload: Bool,
     targetResists: ResistProfile?
   ) -> DamageStats {
+    print("++ DamageDealerRegister.getDps()")
     var dpsValues: [DamageStats] = []
     for item in self.ddIterator(itemFilter: itemFilter) {
       print("++ dd item \(item.itemType!.name)")
@@ -65,7 +66,8 @@ public class DamageDealerRegister: BaseStatsRegisterProtocol {
       }
     }
     let combined = DamageStats.combined(dpsValues)
-    print("++ getDPS \(dpsValues.count) values combined to \(String(describing: combined?.em)) \(combined?.kinetic ?? -1) \(combined?.thermal ?? -1) \(combined?.explosive ?? -1)")
+    let foo = dpsValues.map { $0.total }
+    print("++ getDPS \(dpsValues.count) \(foo) values combined to \(String(describing: combined?.em)) \(combined?.kinetic ?? -1) \(combined?.thermal ?? -1) \(combined?.explosive ?? -1)")
     return combined ?? DamageStats(em: 0, thermal: 0, kinetic: 0, explosive: 0)!
   }
 

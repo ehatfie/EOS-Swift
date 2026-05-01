@@ -9,7 +9,7 @@
 public protocol BaseResourceRegisterProtocol: BaseStatsRegisterProtocol {
   var used: Double { get }
   var output: Double { get }
-  var users: Set<AnyHashable> { get } // any BaseItemMixinProtocol ??
+  var users: Set<BaseItemMixin> { get } // any BaseItemMixinProtocol ??
 }
 
 // TODO: Move

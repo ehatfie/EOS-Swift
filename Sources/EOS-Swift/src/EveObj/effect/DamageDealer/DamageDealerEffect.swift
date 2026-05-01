@@ -59,7 +59,7 @@ public class DamageDealerEffect: Effect {
     }
     
     let volley = self.getVolley(for: item)
-    guard let averageTime: Double = cycleParameters.0?.averageTime ?? cycleParameters.1?.getTime() else {
+    guard let averageTime: Double = cycleParameters.0?.averageTime ?? cycleParameters.1?.averageTime() else {
       print("!! getDPS no cycle time")
       return .empty
     }

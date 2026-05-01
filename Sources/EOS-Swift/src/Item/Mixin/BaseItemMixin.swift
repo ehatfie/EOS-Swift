@@ -297,10 +297,28 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   public var autocharges: ItemDict<Int64, AutoCharge>? = nil
   
   public var fit: Fit? {
+    // this caused an issue because container isnt being updated
     if let container = self.container as? MaybeFitHaving {
       return container.fit
+    } else if let container = self.container as? Module {
+      print("++ not right container \(self.container)")
+    } else {
+      print("++ not right container \(self.container) \(self.container as? MaybeFitHaving)")
     }
     print("-- \(self.typeId) container \(String(describing: container))")
+    return nil
+  }
+  
+  public func getFit() -> Fit? {
+    print("++ getFit \(self.container)")
+    if let container = self.container as? MaybeFitHaving {
+      print("++ maybeFithaving")
+      return container.fit
+    } else if let container = self.container as? Module {
+      print("++ not right container2 \(self.container)")
+    } else {
+      print("++ not right container1 \(self.container) \(self.container as? MaybeFitHaving)")
+    }
     return nil
   }
   
@@ -437,10 +455,10 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
 
   /// Load item's source-specific data.
   public func load() {
-    print("++ loadFor \(self.typeId)")
-    let fit = self.fit
+    print("++ loadFor \(self.typeId) \(self.container)")
+    let fit = self.getFit()
     guard let cacheHandler = fit?.solarSystem?.source?.cacheHandler else {
-      print("++ no cacheHandler for \(self.typeId) fit: \(String(describing: fit)) solarSystem: \(String(describing: fit?.solarSystem)) source: \(String(describing: fit?.solarSystem?.source)) \(String(describing: fit?.solarSystem?.source?.cacheHandler))")
+      print("++ no cacheHandler for \(self.typeId) container: \(self.container) fit: \(String(describing: fit)) solarSystem: \(String(describing: fit?.solarSystem)) source: \(String(describing: fit?.solarSystem?.source)) \(String(describing: fit?.solarSystem?.source?.cacheHandler))")
       return
     }
     guard let result = cacheHandler.getType(typeId: self.typeId) else {

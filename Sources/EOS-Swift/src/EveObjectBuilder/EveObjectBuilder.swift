@@ -51,8 +51,9 @@ class EveObjectBuilder: @unchecked Sendable {
     // let typeFighterAbils = await dataHandler.getTypeFighterAbils()
     
     // need to update the DogmaTypeAttributes with mock data from the types
-    
-    
+    let gotIds = Set(dogmaTypeAttributes.map { $0.typeID })
+    let expected = dogmaTypeAttributes.compactMap { $0.typeID == 32311 ? $0 : nil }
+    print("++ got expected \(expected.count) \(expected) from \(gotIds.count)")
     let attrIds: Set<Int64> = [
       AttrId.radius.rawValue,
       AttrId.mass.rawValue,
@@ -195,9 +196,12 @@ class EveObjectBuilder: @unchecked Sendable {
     for row in dogmaTypeAttributes {
       var attributesForType = typesAttributes[row.typeID, default: [:]]
       attributesForType[row.attributeID] = Double(row.value)
-//      if row.attributeID == 272 {
-//        print("++ attribute value \(row.value)")
-//      }
+      if row.typeID == 32311 {
+        print("++ attribute for thing \(row.attributeID)")
+      }
+      if row.attributeID == 48 {
+        print("++ attribute value \(row.value)")
+      }
       typesAttributes[row.typeID] = attributesForType
     }
 
@@ -357,6 +361,7 @@ class EveObjectBuilder: @unchecked Sendable {
       let effects = typesEffects[typeID, default: []]
       if typeID == 2929 {
         print("&& loaded effects for \(typeID): \(effects)")
+        print("&& type info \(row.name)")
       }
       var ourEffectMap: [Int64: Effect] = [:]
       

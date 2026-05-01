@@ -12,21 +12,21 @@
 /// Params
 ///    parent: Object, to which this container is attached.
 ///    item_class: Class of items this container is allowed to contain.
+import SwiftUI
 
-
-
+@Observable
 public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitHaving {
   typealias BaseItemMixin = T
-  //weak var parent: (any MaybeFitHaving)? // ParentHaving??
+  weak var parent: (any MaybeFitHaving)? // ParentHaving??
   var list: [T?] = []
   
   public var fit: Fit? {
-    return nil //self.parent?.fit
+    self.parent?.fit
   }
   
   public init(parent: (any MaybeFitHaving)?) {
     //super.init(parent: parent)
-    //self.parent = parent
+    self.parent = parent
     self.list = []
   }
   

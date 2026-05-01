@@ -34,6 +34,15 @@ class CycleInfo {
   func getTime() -> Double {
     return (activeTime + inactiveTime) * quantity
   }
+  
+  func averageTime() -> Double {
+    /*
+     def average_time(self):
+         """Get average time between cycles."""
+         return self.active_time + self.inactive_time
+     */
+    self.activeTime + self.inactiveTime
+  }
 }
 
 /*
@@ -59,6 +68,7 @@ class CycleSequence {
   }
   
   var averageTime: Double {
+    print("++ averageTyme \(self.getTime()) / \(self.getCycleQuantity())")
     return self.getTime() / self.getCycleQuantity()
   }
   

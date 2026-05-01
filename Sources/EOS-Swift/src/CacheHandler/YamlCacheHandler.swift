@@ -60,6 +60,9 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol,
   }
 
   nonisolated public func getAttribute(attributeId: Int64) -> Attribute? {
+    print("++ getAttributeId: \(attributeId) \(AttrId(rawValue: attributeId))")
+    let foo = attributeStore[attributeId]
+    print("++ getAttributeId: \(attributeId) \(AttrId(rawValue: attributeId)) val \(foo)")
     return attributeStore[attributeId]
   }
 
@@ -107,6 +110,8 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol,
       effects: effects,
       buffTemplates: buffTemplates
     )
+    
+    print("++ memory cache updated typeStore: \(typeStore.count)")
   }
 
   func loadPersistantCache() async {
@@ -162,9 +167,9 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol,
     buffTemplates: [BuffTemplate],
   ) {
     for row in types {
-      if row.typeId == 2897 {
+      if row.typeId == 32311{
         //print(":: updateMemoryCache2 \(row.typeId) has effects \(row.effects.map{ $0.value.effectId })")
-        print(":: updateMemoryCache2 \(row.typeId) has attributes \(String(describing: row.attributes[54]))")
+        print(":: updateMemoryCache2 \(row.typeId) has attributes \(String(describing: row.attributes))")
       }
       typeStore[row.typeId] = row
     }
@@ -200,7 +205,7 @@ public class YamlCacheHandler: BaseCacheHandlerProtocol,
   }
 
   func updateTypeStore(types: [(Int64, TypeData)]) {
-    
+    print("!! updateTypeStore not implemented")
     for type in types {
 //      let typeId = type.0
 //      let typeData = type.1

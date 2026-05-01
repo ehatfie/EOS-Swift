@@ -18,9 +18,7 @@ public class DroneBandwidthRegister: BaseResourceRegisterProtocol {
   public var used: Double {
     var returnValue: Double = 0.0
     for item in self.resourceUsers {
-      if let item = item as? any BaseItemMixinProtocol {
-        returnValue += item.attributes![AttrId.drone_bandwidth_used.rawValue, default: 0.0]
-      }
+      returnValue += item.attributes![AttrId.drone_bandwidth_used.rawValue, default: 0.0]
     }
     return returnValue
   }
@@ -29,9 +27,9 @@ public class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     return self.fit?.ship?.attributes![AttrId.drone_bandwidth.rawValue] ?? 0.0
   }
   
-  public var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<BaseItemMixin> = []
   
-  public var users: Set<AnyHashable> {
+  public var users: Set<BaseItemMixin> {
     self.resourceUsers
   }
   
@@ -51,7 +49,7 @@ public class DroneBandwidthRegister: BaseResourceRegisterProtocol {
     else {
       return
     }
-    self.resourceUsers.insert(message.item as! AnyHashable)
+    self.resourceUsers.insert(message.item as! BaseItemMixin)
   }
   
   public func handleStatesDeactivatedLoaded(message: StatesDeactivatedLoaded) {
@@ -61,7 +59,7 @@ public class DroneBandwidthRegister: BaseResourceRegisterProtocol {
       return
     }
     
-    self.resourceUsers.remove(message.item as! AnyHashable)
+    self.resourceUsers.remove(message.item as! BaseItemMixin)
   }
   
   public func notify(message: any Message) {

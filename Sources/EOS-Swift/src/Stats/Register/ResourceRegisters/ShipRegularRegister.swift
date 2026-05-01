@@ -12,7 +12,7 @@ public protocol ShipRegularResourceRegisterProtocol: BaseResourceRegisterProtoco
   var useAttrId: AttrId { get }
   var usedI: Double { get }
   
-  var resourceUsers: Set<AnyHashable> { get set }
+  var resourceUsers: Set<BaseItemMixin> { get set }
 }
 
 extension ShipRegularResourceRegisterProtocol {
@@ -20,11 +20,7 @@ extension ShipRegularResourceRegisterProtocol {
     //print("++ ShipRegularResourceRegisterProtocol used")
     var returnValue: Double = 0.0
     for item in self.resourceUsers {
-      guard let foo = item as? any BaseItemMixinProtocol else {
-        continue
-      }
-      
-      returnValue += foo.attributes![self.useAttrId.rawValue, default: 0.0]
+      returnValue += item.attributes![self.useAttrId.rawValue, default: 0.0]
     }
     return returnValue
   }
@@ -40,7 +36,7 @@ extension ShipRegularResourceRegisterProtocol {
     return val
   }
   
-  public var users: Set<AnyHashable> {
+  public var users: Set<BaseItemMixin> {
     return self.resourceUsers
   }
 }
@@ -67,7 +63,7 @@ public class CalibrationRegister: ShipRegularResourceRegisterProtocol {
   public var useEffectId: EffectId = .rig_slot
   public var useAttrId: AttrId = .upgrade_cost
   
-  public var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<BaseItemMixin> = []
   
   weak public var fit: Fit?
   
@@ -84,12 +80,12 @@ public class CalibrationRegister: ShipRegularResourceRegisterProtocol {
     guard foo && bar else {
       return
     }
-    self.resourceUsers.insert(message.item as! AnyHashable)
+    self.resourceUsers.insert(message.item as! BaseItemMixin)
   }
   
   public func handleEffectsStopped(message: EffectsStopped) {
     if message.effectIds.contains(self.useEffectId.rawValue) {
-      self.resourceUsers.remove(message.item as! AnyHashable)
+      self.resourceUsers.remove(message.item as! BaseItemMixin)
     }
   }
 }
@@ -107,7 +103,7 @@ public class CPURegister: RoundedShipRegularResourceRegisterProtocol {
   public var useEffectId: EffectId = .online
   public var useAttrId: AttrId = .cpu
   
-  public var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<BaseItemMixin> = []
   
   weak public var fit: Fit?
   
@@ -124,14 +120,14 @@ public class CPURegister: RoundedShipRegularResourceRegisterProtocol {
     guard isOnline && bar else {
       return
     }
-    self.resourceUsers.insert(message.item as! AnyHashable)
+    self.resourceUsers.insert(message.item as! BaseItemMixin)
     print("++ ShipRegularRegister handleEffectsStarted resource users \(resourceUsers.count)")
   }
   
   public func handleEffectsStopped(message: EffectsStopped) {
     
     if message.effectIds.contains(self.useEffectId.rawValue) {
-      self.resourceUsers.remove(message.item as! AnyHashable)
+      self.resourceUsers.remove(message.item as! BaseItemMixin)
     }
   }
 }
@@ -149,7 +145,7 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
   public var useEffectId: EffectId = .online
   public var useAttrId: AttrId = .power
   
-  public var resourceUsers: Set<AnyHashable> = []
+  public var resourceUsers: Set<BaseItemMixin> = []
 
   weak public var fit: Fit?
   
@@ -166,12 +162,12 @@ public class PowergridRegister: RoundedShipRegularResourceRegisterProtocol {
       return
     }
     
-    self.resourceUsers.insert(message.item as! AnyHashable)
+    self.resourceUsers.insert(message.item as! BaseItemMixin)
   }
   
   public func handleEffectsStopped(message: EffectsStopped) {
     if message.effectIds.contains(self.useEffectId.rawValue) {
-      self.resourceUsers.remove(message.item as! AnyHashable)
+      self.resourceUsers.remove(message.item as! BaseItemMixin)
     }
   }
 }
