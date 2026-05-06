@@ -5,9 +5,9 @@
 //  Created by Erik Hatfield on 9/9/25.
 //
 
-class Rig: ImmutableStateMixin {
+public class Rig: ImmutableStateMixin {
 
-  init(typeId: Int64) {
+  public init(typeId: Int64) {
     super.init(typeId: typeId, state: .offline)
     modifierDomain = .ship
     ownerModifiable = false

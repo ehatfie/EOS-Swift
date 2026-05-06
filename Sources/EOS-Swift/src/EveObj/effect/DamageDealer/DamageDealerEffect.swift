@@ -70,7 +70,7 @@ public class DamageDealerEffect: Effect {
       kinetic: volley.kinetic,
       explosive: volley.explosive,
       mult: 1 / averageTime
-    )!
+    ) ?? .empty
   }
   
   open func getAppliedVolley(item: any BaseItemMixinProtocol, targetData: [String: Any], reload: Bool) -> DamageStats? {

@@ -4,7 +4,9 @@
 //
 //  Created by Erik Hatfield on 9/10/25.
 //
+import SwiftUI
 
+@Observable
 public class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   public static func == (lhs: ShieldRepairerRegister, rhs: ShieldRepairerRegister) -> Bool {
     ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
@@ -21,7 +23,7 @@ public class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   public var handlerMap: [Int64: CallbackHandler]
   
   public var localRepairers: [Int64 : RepairerData] = [:]
-  public var localRep: Set<RepairerData> = []
+  public var localRep: Set<RepairerData<LocalShieldRepairEffect>> = []
   
   public init(fit: Fit? = nil) {
     self.fit = fit
@@ -47,7 +49,8 @@ public class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   ) -> Double {
     guard let item = item else { return 0.0 }
     var rps: Double = 0.0
-    for (_, value) in self.localRepairers {
+    print("&& getRPS \(self.localRep.count)")
+    for value in self.localRep {
       let repItem = value.item
       let repEffect = value.effect
       //
@@ -76,11 +79,17 @@ public class ShieldRepairerRegister: BaseRepairRegisterProtocol {
   }
   
   public func handleEffectsStarted(message: EffectsStarted) {
+    print("&& handleEffectStarted")
     let itemEffects = message.item.typeEffects
     for effectId in message.effectIds {
       if let effect = itemEffects[effectId] as? LocalShieldRepairEffect {
-        let repairerData = RepairerData(item: message.item, effect: effect)
+        let repairerData = RepairerData<LocalShieldRepairEffect>(item: message.item, effect: effect)
         self.localRep.insert(repairerData)
+        
+      } else if let effect = itemEffects[effectId] {
+        
+      } else {
+        print("&& no effect for \(message.item.itemType?.name) for \(effectId) in \(itemEffects)")
       }
     }
   }

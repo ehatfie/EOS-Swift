@@ -53,7 +53,7 @@ class EveObjectBuilder: @unchecked Sendable {
     // need to update the DogmaTypeAttributes with mock data from the types
     let gotIds = Set(dogmaTypeAttributes.map { $0.typeID })
     let expected = dogmaTypeAttributes.compactMap { $0.typeID == 32311 ? $0 : nil }
-    print("++ got expected \(expected.count) \(expected) from \(gotIds.count)")
+    
     let attrIds: Set<Int64> = [
       AttrId.radius.rawValue,
       AttrId.mass.rawValue,
@@ -196,12 +196,12 @@ class EveObjectBuilder: @unchecked Sendable {
     for row in dogmaTypeAttributes {
       var attributesForType = typesAttributes[row.typeID, default: [:]]
       attributesForType[row.attributeID] = Double(row.value)
-      if row.typeID == 32311 {
-        print("++ attribute for thing \(row.attributeID)")
-      }
-      if row.attributeID == 48 {
-        print("++ attribute value \(row.value)")
-      }
+//      if row.typeID == 32311 {
+//        print("++ attribute for thing \(row.attributeID)")
+//      }
+//      if row.attributeID == 48 {
+//        print("++ attribute value \(row.value)")
+//      }
       typesAttributes[row.typeID] = attributesForType
     }
 
@@ -288,6 +288,25 @@ class EveObjectBuilder: @unchecked Sendable {
 
         effects.append(
           ProjectileFiredEffect(
+            effectId: effectData.effectID,
+            categoryID: EffectCategoryId(rawValue: effectData.effectCategory),
+            isOffensive: effectData.isOffensive,
+            isAssistance: effectData.isAssistance,
+            durationAttributeID: effectData.durationAttributeID,
+            dischargeAttributeID: effectData.dischargeAttributeID,
+            rangeAttributeID: effectData.rangeAttributeID,
+            falloffAttributeID: effectData.falloffAttributeID,
+            trackingSpeedAttributeID: effectData.trackingSpeedAttributeID,
+            fittingUseUsageChanceAttributeID: effectData
+              .fittingUsageChanceAttributeID,
+            resistanceAttributeID: effectData.resistanceAttributeID,
+            buildStatus: .none,
+            modifiers: modifiers ?? []
+          )
+        )
+      case .shield_boosting:
+        effects.append (
+          ShieldBoosting(
             effectId: effectData.effectID,
             categoryID: EffectCategoryId(rawValue: effectData.effectCategory),
             isOffensive: effectData.isOffensive,

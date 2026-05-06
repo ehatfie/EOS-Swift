@@ -81,8 +81,8 @@ public struct TypeDogmaAttributeDataOuter: Codable, Sendable {
 }
 
 public struct TypeDogmaAttributeData: Codable, Sendable {
-  let attributeID: Int64
-  let value: Double
+  public let attributeID: Int64
+  public let value: Double
   
   public init(attributeID: Int64, value: Double) {
     self.attributeID = attributeID

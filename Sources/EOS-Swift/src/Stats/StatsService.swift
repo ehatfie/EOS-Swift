@@ -118,6 +118,7 @@ extension StatServiceValuesProtocol {
   }
   
   public func getShieldRps(damageProfile: DamageProfile, reload: Bool) -> Double {
+    print("&& getShieldRPS")
     if damageProfile is DefaultImpl {
       let dmgProfile = self.fit?.defaultIncomingDamage
       //return 0.0
@@ -206,6 +207,7 @@ extension StatServiceValuesProtocol {
   }
 }
 
+@Observable
 public class StatService: StatsServiceProtocol {
   weak public var fit: Fit? = nil
   
@@ -225,7 +227,7 @@ public class StatService: StatsServiceProtocol {
   // var figherSquadsLight: FighterSquadLightRegister
   // var fighterSquadsHeavy: FighterSquadHeavyRegister
   
-  init(fit: Fit) {
+  public init(fit: Fit) {
     self.fit = fit
     
     self.ddRegister = DamageDealerRegister(fit: fit)

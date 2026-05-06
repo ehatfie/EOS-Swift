@@ -49,7 +49,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
   public var modules: ModuleRacks!
-  var rigs: ItemSet<Rig>! //  Set for rigs.
+  public var rigs: ItemSet<Rig>! //  Set for rigs.
   var drones: String? // Set for drones.
   var fighters: String? // Set for fighter squads.
   var character: Character? // Access point for character.

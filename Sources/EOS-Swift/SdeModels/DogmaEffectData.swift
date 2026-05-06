@@ -4,6 +4,7 @@
 //
 //  Created by Erik Hatfield on 9/21/25.
 //
+import EveModelLibrary
 
 struct DogmaEffectData1: Codable, Sendable {
   public let descriptionID: ThingName?
@@ -149,15 +150,15 @@ public struct TypeDogmaDataOuter: Codable, Sendable {
   }
 }
 
-public struct DogmaAttributeInfo: Codable, Sendable {
-  public let attributeID: Int64
-  public let value: Double
-
-  public init(attributeID: Int64, value: Double) {
-    self.attributeID = attributeID
-    self.value = value
-  }
-}
+//struct DogmaAttributeInfo: Codable, Sendable {
+//  let attributeID: Int64
+//  let value: Double
+//
+//  init(attributeID: Int64, value: Double) {
+//    self.attributeID = attributeID
+//    self.value = value
+//  }
+//}
 
 public struct DogmaEffectInfo: Codable, Sendable {
   public let effectID: Int64

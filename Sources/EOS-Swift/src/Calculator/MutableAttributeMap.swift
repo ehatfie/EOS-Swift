@@ -80,6 +80,7 @@ public class MutableAttributeMap {
 
   init(item: any BaseItemMixinProtocol) {
     self.item = item
+    
     self.modifiedAttributes = [:]
   }
   
@@ -117,6 +118,7 @@ public class MutableAttributeMap {
     }
 
     guard let value = self.modifiedAttributes[attributeId] else {
+      print("^^ no value in \(modifiedAttributes) for \(attributeId)")
       do {
         let value = try self.calculate(attributeId: attributeId)
         print("++ getValue returning calculated value \(String(describing: value))")
@@ -248,7 +250,7 @@ extension MutableAttributeMap {
   ///   - `BaseValueError`: If base value for attribute being calculated cannot be found.
   
   func calculate(attributeId: Int64) throws -> Double? {
-    let logStuff: Bool = attributeId == AttrId.capacity.rawValue
+    let logStuff: Bool = false //attributeId == AttrId.cpu_output.rawValue
     
     if logStuff {
       print("++ calculate \(attributeId)")

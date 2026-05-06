@@ -107,6 +107,7 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
   /// Publish single message.
   // inout?
   func publish(message: any Message) {
+    print("@@ publish messageType \(message.messageType)")
     var m = message
     m.fit = fit
     for subscriber in self.subscribers[message.messageType] ?? [] {
@@ -120,6 +121,7 @@ public class FitMessageBroker<SubscriberType: BaseSubscriberProtocol>: MaybeFitH
   /// Publish multiple messages.
   func publishBulk(messages: [any Message]) {
     for message in messages {
+      print("@@ publish messageType \(message.messageType)")
       var m = message
       m.fit = self.fit
       for subscriber in self.subscribers[message.messageType] ?? [] {

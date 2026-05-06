@@ -4,6 +4,7 @@
 //
 //  Created by Erik Hatfield on 9/9/25.
 //
+import SwiftUI
 
 protocol EffectStatsMixinProtocol:
   DefaultEffectProxyMixinProtocol,
@@ -28,6 +29,7 @@ protocol ModuleProtocol:
   func childItems(skipAutoItems: Bool) -> [any BaseItemMixinProtocol]
 }
 
+@Observable
 public class Module:
   MutableStateMixin,
   EffectStatsMixinProtocol,
@@ -145,8 +147,6 @@ public class Module:
     self.modifierDomain = .ship
   }
   
-
-  
   func safeGetFromDefeff(key: String) -> Double? {
     let defaultEffect = self.typeDefaultEffect
     if let effect = defaultEffect {
@@ -202,14 +202,17 @@ public class Module:
 
 }
 
+@Observable
 public class ModuleHigh: Module {
   
 }
 
+@Observable
 public class ModuleMid: Module {
 
 }
 
+@Observable
 public class ModuleLow: Module {
 
 }

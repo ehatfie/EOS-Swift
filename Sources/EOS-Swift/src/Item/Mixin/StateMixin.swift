@@ -6,6 +6,8 @@
 //
 //
 
+import SwiftUI
+
 protocol MutableStateMixinProtocol: BaseItemMixinProtocol {
   var state: StateI { get set }
 }
@@ -44,10 +46,11 @@ public class ImmutableStateMixin: BaseItemMixin {
   }
 }
 
+@Observable
 public class MutableStateMixin: BaseItemMixin {
-  public override var _state: StateI {
+  public var state: StateI {
     get {
-      super._state
+      self._state
     }
     set {
       let oldState = self._state
@@ -59,7 +62,7 @@ public class MutableStateMixin: BaseItemMixin {
       if let fit = super.fit {
         // update via messages?
         var messages = [any Message]()
-
+        
         let stateUpdateMessages = MessageHelper.getItemStateUpdateMessages(
           item: self,
           oldState: oldState,
@@ -74,15 +77,54 @@ public class MutableStateMixin: BaseItemMixin {
             newState: newValue
           )
           messages.append(contentsOf: otherUpdateMessages)
-//            if let foo = childItem as? ContainerStateMixin {
-//              
-//            }
+          //            if let foo = childItem as? ContainerStateMixin {
+          //
+          //            }
         }
         
         fit.publishBulk(messages: messages)
       }
     }
   }
+  
+//  public override var _state: StateI {
+//    get {
+//      super._state
+//    }
+//    set {
+//      let oldState = self._state
+//      if newValue == oldState {
+//        return
+//      }
+//      
+//      super._state = newValue
+//      if let fit = super.fit {
+//        // update via messages?
+//        var messages = [any Message]()
+//
+//        let stateUpdateMessages = MessageHelper.getItemStateUpdateMessages(
+//          item: self,
+//          oldState: oldState,
+//          newState: newValue
+//        )
+//        messages.append(contentsOf: stateUpdateMessages)
+//        let iterator = self.childItems(skipAutoItems: false)
+//        for childItem in iterator where childItem is ContainerStateMixin{
+//          let otherUpdateMessages = MessageHelper.getItemStateUpdateMessages(
+//            item: childItem as! ContainerStateMixin,
+//            oldState: oldState,
+//            newState: newValue
+//          )
+//          messages.append(contentsOf: otherUpdateMessages)
+////            if let foo = childItem as? ContainerStateMixin {
+////              
+////            }
+//        }
+//        
+//        fit.publishBulk(messages: messages)
+//      }
+//    }
+//  }
 }
 
 

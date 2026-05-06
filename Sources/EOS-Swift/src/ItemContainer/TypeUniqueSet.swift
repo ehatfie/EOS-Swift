@@ -35,7 +35,7 @@ public class TypeUniqueSet<T: BaseItemMixinProtocol>: ItemSet<T> {
     self.remove(item: item)
   }
   
-  override func clear() {
+  override public func clear() {
     super.clear()
     self.typeIdMap.removeAll()
   }

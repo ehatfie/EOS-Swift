@@ -25,6 +25,7 @@
  */
 
 import Foundation
+import SwiftUI
 
 public protocol BaseItemMixinProtocol: AnyObject, Hashable, MaybeFitHaving {
   var id: UUID { get }
@@ -274,6 +275,7 @@ extension BaseItemMixinProtocol {
   
 }
 
+@Observable
 open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   public var attributes1: MutableAttributeMapActor?
   
@@ -291,7 +293,7 @@ open class BaseItemMixin: BaseItemMixinProtocol, Hashable {
   public var effectModeOverrides: [Int64: EffectMode]? = nil
   public var effectTargets: String? = nil
   
-  open var _state: StateI
+  public var _state: StateI
   
   //public var attributes: [AttrId: Double] = [:]
   public var autocharges: ItemDict<Int64, AutoCharge>? = nil
