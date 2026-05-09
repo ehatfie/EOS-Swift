@@ -46,7 +46,9 @@ public class ItemSet<T: BaseItemMixinProtocol>: ItemContainerBase<T>, FitRelated
   
   public func remove(item: T) {
     let containerToUse = containerOverride ?? self
-    try? self.handleItemAddition(item: item, container: containerToUse as! ItemContainerBase<BaseItemMixin>)
+    
+    self.handleItemRemoval(item)
+    //try? self.handleItemAddition(item: item, container: containerToUse as! ItemContainerBase<BaseItemMixin>)
     
     set.remove(item)
   }

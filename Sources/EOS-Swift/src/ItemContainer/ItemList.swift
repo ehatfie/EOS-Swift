@@ -147,7 +147,7 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
   /// Also clean container's tail if it's filled with Nones.
   /// Parameters:-
   ///   value: Thing to remove. Can be item, None or integer index.
-  func remove(value: Any?) {
+  public func remove(value: Any?) {
     let index: Int?
     let item: T?
     
@@ -168,6 +168,24 @@ public class ItemList<T: BaseItemMixinProtocol>: ItemContainerBase<T>, MaybeFitH
       return
     }
     self.list.remove(at: actualIndex)
+    self.cleanup()
+  }
+  
+  public func remove(index: Int) {
+//    if let indexValue = value as? Int {
+//      index = indexValue
+//      item = self.list[indexValue]
+//    } else if let itemValue = value as? (T) {
+//      item = itemValue
+//      index = self.list.firstIndex(of: item)
+//    } else {
+//      return
+//    }
+    let item = self.list.remove(at: index)
+    if let actualItem = item {
+      self.handleItemRemoval(actualItem)
+    }
+
     self.cleanup()
   }
   

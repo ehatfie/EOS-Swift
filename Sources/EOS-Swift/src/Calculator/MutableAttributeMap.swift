@@ -49,7 +49,7 @@ public class MutableAttributeMap {
     return keys.count
   }
 
-  var keys: [Int64] {
+  public var keys: [Int64] {
     /*
      # Return union of attributes from base, modified and override dictionary
      return set(chain(
@@ -84,7 +84,7 @@ public class MutableAttributeMap {
     self.modifiedAttributes = [:]
   }
   
-  subscript(_ attributeId: Int64, default defaultValue: @autoclosure () -> Double) -> Double {
+  public subscript(_ attributeId: Int64, default defaultValue: @autoclosure () -> Double) -> Double {
       get {
           // Return an appropriate subscript value here.
         return self.getValue(attributeId: attributeId) ?? defaultValue()
@@ -94,7 +94,7 @@ public class MutableAttributeMap {
       }
   }
   
-  subscript(_ attributeId: Int64) -> Double? {
+  public subscript(_ attributeId: Int64) -> Double? {
       get {
           // Return an appropriate subscript value here.
         return self.getValue(attributeId: attributeId)

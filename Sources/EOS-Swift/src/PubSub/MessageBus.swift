@@ -95,7 +95,7 @@ public final class MessageBus {
     /// Publish a single message immediately
     public func publish(_ message: any Message) {
         let messageType = type(of: message).messageType
-        
+      print("@@ publish messageType \(messageType)")
         guard let subscriberIds = messageTypeIndex[messageType] else {
             return
         }

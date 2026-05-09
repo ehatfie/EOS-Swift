@@ -49,7 +49,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
   
   var stance: Stance? // Access point for ship stance, also known as tactical mode.
   public var modules: ModuleRacks!
-  public var rigs: ItemSet<Rig>! //  Set for rigs.
+  public var rigs: ItemList<Rig>! //  Set for rigs.
   var drones: String? // Set for drones.
   var fighters: String? // Set for fighter squads.
   var character: Character? // Access point for character.
@@ -94,7 +94,7 @@ public class Fit: FitMessageBroker<MockSubscriber> {
       mid: ItemList(parent: self),
       low: ItemList(parent: self)
     )
-    self.rigs = ItemSet<Rig>(parent: self, containerOverride: nil)
+    self.rigs = ItemList<Rig>(parent: self)
     // self.drones = ItemSet<Drone>(parent: self, containerOverride: nil)
     // self.fighters = ItemSet<FighterSquad>(parent: self, containerOverride: nil)
     
@@ -202,11 +202,16 @@ public class Fit: FitMessageBroker<MockSubscriber> {
       return [item] + children
     }.flatMap { $0 }
     
-    let rigs = fit!.rigs.iterator().map { item -> [any BaseItemMixinProtocol] in
-      let children = item.childItems(skipAutoItems: skipAutoitems)
+    let rigs = fit!.rigs.iterator().compactMap { item -> [(any BaseItemMixinProtocol)?] in
+      let children = item?.childItems(skipAutoItems: skipAutoitems) ?? []
+      
       return [item] + children
-    }.flatMap { $0 }
-
+    }
+      .flatMap { value in
+        let foo = value.compactMap { $0 }
+        return foo
+      }
+    
     let values: [any BaseItemMixinProtocol] = optionalValues.compactMap { $0 } + skills + implants + boosters + subsystems + modules + rigs //TODO: + drones + fighters
     
     var index: Int = 0
